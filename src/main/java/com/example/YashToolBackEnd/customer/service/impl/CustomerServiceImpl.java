@@ -1,4 +1,4 @@
-package com.example.YashToolBackEnd.customer.service;
+package com.example.YashToolBackEnd.customer.service.impl;
 
 import com.example.YashToolBackEnd.common.exception.BusinessException;
 import com.example.YashToolBackEnd.common.exception.ResourceNotFoundException;
@@ -6,6 +6,7 @@ import com.example.YashToolBackEnd.customer.dto.CustomerRequest;
 import com.example.YashToolBackEnd.customer.dto.CustomerResponse;
 import com.example.YashToolBackEnd.customer.entity.Customer;
 import com.example.YashToolBackEnd.customer.repository.CustomerRepository;
+import com.example.YashToolBackEnd.customer.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

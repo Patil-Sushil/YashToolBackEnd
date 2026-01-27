@@ -26,7 +26,7 @@ public class CustomerController {
     }
 
     // Update an existing customer by id
-    @PutMapping("/{customerId}")
+    @PatchMapping("/{customerId}")
     public CustomerResponse updateCustomer(
             @PathVariable("customerId") Long customerId,
             @Valid @RequestBody CustomerRequest request) {

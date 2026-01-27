@@ -26,7 +26,7 @@ public class Customer extends AuditableEntity {
         @Column(name="company_name",nullable = false)
         private String companyName;
 
-        @Column(name = "customer_name", nullable = false) // ✅ correct
+        @Column(name = "customer_name", nullable = false)
         private String customerName;
 
         @Column(name="legal_entity",nullable = false)
