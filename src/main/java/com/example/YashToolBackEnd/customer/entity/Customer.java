@@ -1,11 +1,10 @@
 package com.example.YashToolBackEnd.customer.entity;
 
-import com.example.YashToolBackEnd.common.base.AuditableEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import com.example.YashToolBackEnd.common.base.BaseEntity;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -21,7 +20,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Customer extends AuditableEntity {
+public class Customer extends BaseEntity {
+
+
+
+        @Column(name = "is_deleted", nullable = false)
+        private Boolean isDeleted = false;
 
         @Column(name="company_name",nullable = false)
         private String companyName;

@@ -1,6 +1,5 @@
 package com.example.YashToolBackEnd.master.coating.entity;
 
-import com.example.YashToolBackEnd.common.base.BaseEntity;
 import com.example.YashToolBackEnd.common.enums.CoatingType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +11,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Coating extends BaseEntity {
+public class Coating {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false,unique = false)
     private String name;

@@ -23,10 +23,10 @@ public class UserManagementController {
 
     @PostMapping("/create-user")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> createUser(@Valid @RequestBody UserRegistrationRequest request) {
-        authService.createUser(request);
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserRegistrationRequest request) {
+        UserResponse createdUser = authService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(true, "User created successfully", null));
+                .body(new ApiResponse<>(true, "User created successfully", createdUser));
     }
 
     @GetMapping

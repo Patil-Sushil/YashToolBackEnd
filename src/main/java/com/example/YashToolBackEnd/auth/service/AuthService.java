@@ -12,7 +12,7 @@ public interface AuthService {
 
     LoginResponse login(LoginRequest request);
 
-    void createUser(UserRegistrationRequest request);
+    UserResponse createUser(UserRegistrationRequest request);
 
     void changePassword(ChangePasswordRequest request);
 

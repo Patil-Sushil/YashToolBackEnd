@@ -5,12 +5,13 @@ import com.example.YashToolBackEnd.enquiry.dto.response.EnquiryResponse;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface EnquiryService {
     @Transactional
     EnquiryResponse createEnquiry(CreateEnquiryRequest request);
 
-    EnquiryResponse getById(Long enquiryId);
+    EnquiryResponse getById(UUID enquiryId);
 
     List<EnquiryResponse> getAllEnquiries();
 }

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -57,7 +58,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     // Updates an existing customer (only if not deleted).
     @Override
-    public CustomerResponse updateCustomer(Long customerId, CustomerRequest request) {
+    public CustomerResponse updateCustomer(UUID customerId, CustomerRequest request) {
         // Fetch customer by ID and ensure it's not soft-deleted
         Customer customer = customerRepository.findById(customerId)
                 .filter(c-> !c.getIsDeleted())
@@ -81,7 +82,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     // Retrieves a customer by ID (only if not deleted).
     @Override
-    public CustomerResponse getCustomerById(Long customerId) {
+    public CustomerResponse getCustomerById(UUID customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .filter(c-> !c.getIsDeleted())
                 .orElseThrow(()-> new ResourceNotFoundException("customer not found"));

@@ -3,11 +3,13 @@ package com.example.YashToolBackEnd.customer.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @Builder
 public class CustomerResponse {
 
-    private Long id;
+    private UUID id;
     private String companyName;
     private String customerName;
     private String legalEntity;

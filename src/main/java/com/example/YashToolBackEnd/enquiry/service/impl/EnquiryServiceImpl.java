@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +72,7 @@ public class EnquiryServiceImpl implements EnquiryService {
     }
 
     @Override
-    public EnquiryResponse getById(Long enquiryId) {
+    public EnquiryResponse getById(UUID enquiryId) {
 
         Enquiry enquiry = enquiryRepository.findById(enquiryId)
                 .orElseThrow(() ->

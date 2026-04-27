@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -32,7 +33,7 @@ public class CustomerController {
     @PatchMapping("/{customerId}")
     @PreAuthorize("hasAnyRole('ADMIN','SALES')")
     public ResponseEntity<ApiResponse<CustomerResponse>> updateCustomer(
-            @PathVariable("customerId") Long customerId,
+            @PathVariable("customerId") UUID customerId,
             @Valid @RequestBody CustomerRequest request) {
         return ResponseEntity.ok(new ApiResponse<>(true, "Customer updated successfully",
                 customerService.updateCustomer(customerId, request)));
@@ -41,7 +42,7 @@ public class CustomerController {
     // Get a single customer by id
     @GetMapping("/{customerId}")
     public ResponseEntity<ApiResponse<CustomerResponse>> getCustomer(
-            @PathVariable("customerId") Long customerId) {
+            @PathVariable("customerId") UUID customerId) {
         return ResponseEntity.ok(new ApiResponse<>(true, "Customer retrieved successfully",
                 customerService.getCustomerById(customerId)));
     }

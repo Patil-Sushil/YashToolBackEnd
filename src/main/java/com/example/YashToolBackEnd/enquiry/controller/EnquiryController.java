@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/enquiries")
@@ -28,7 +29,7 @@ public class EnquiryController {
 
     // Get enquiry by ID
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<EnquiryResponse>> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<EnquiryResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(new ApiResponse<>(true, "Enquiry retrieved successfully", enquiryService.getById(id)));
     }
 

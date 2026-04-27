@@ -4,14 +4,15 @@ import com.example.YashToolBackEnd.customer.dto.CustomerRequest;
 import com.example.YashToolBackEnd.customer.dto.CustomerResponse;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CustomerService {
 
     CustomerResponse createCustomer(CustomerRequest customerRequest);
 
-    CustomerResponse updateCustomer(Long customerId, CustomerRequest request);
+    CustomerResponse updateCustomer(UUID customerId, CustomerRequest request);
 
-    CustomerResponse getCustomerById(Long customerId );
+    CustomerResponse getCustomerById(UUID customerId );
 
     List<CustomerResponse> getAllCustomers();
 }

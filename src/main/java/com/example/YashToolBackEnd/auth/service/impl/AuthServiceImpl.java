@@ -66,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void createUser(UserRegistrationRequest request) {
+    public UserResponse createUser(UserRegistrationRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException("Email already exists");
@@ -90,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
         user.setRoles(Set.of(role));
 
         userRepository.save(user);
+        return null;
     }
 
 
