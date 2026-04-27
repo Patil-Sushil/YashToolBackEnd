@@ -30,8 +30,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: orthrox1422@gmail.com
-    password: oulh fwgb hvsc uhir
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -40,7 +40,7 @@ spring:
           enable: true
 
 jwt:
-  secret: Q0tQeXJmOW9Jb2ZxV2F5cFhUeG5sQzFkQkZpQzZ3c0ZxS0p4cA==
+  secret: ${JWT_SECRET:Q0tQeXJmOW9Jb2ZxV2F5cFhUeG5sQzFkQkZpQzZ3c0ZxS0p4cA==}
   expiration: 604800000
   refresh-expiration: 604800000
 
@@ -52,6 +52,6 @@ app:
 
 logging:
   level:
-    org.flywaydb: DEBUG
-    org.springframework.security: DEBUG
-    com.example.YashToolBackEnd: DEBUG
+    org.flywaydb: INFO
+    org.springframework.security: INFO
+    com.example.YashToolBackEnd: INFO

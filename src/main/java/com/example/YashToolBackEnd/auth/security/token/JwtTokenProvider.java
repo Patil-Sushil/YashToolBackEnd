@@ -50,6 +50,7 @@ public class JwtTokenProvider {
                 .subject(user.getUsername())
                 .claim("userId", user.getId().toString())   // store UUID as String
                 .claim("roles", roles)
+                .claim("enabled", user.isEnabled())
                 .issuer("foundry-erp")
                 .issuedAt(now)
                 .expiration(expiryDate)
@@ -58,11 +59,16 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
-        Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token);
-        return true;
+        try {
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException ex) {
+            log.warn("Invalid JWT token: {}", ex.getMessage());
+            return false;
+        }
     }
 
     public CustomUserDetails getUserDetailsFromToken(String token) {
@@ -76,6 +82,7 @@ public class JwtTokenProvider {
         UUID userId = UUID.fromString(claims.get("userId", String.class));
         String email = claims.getSubject();
         List<String> roles = claims.get("roles", List.class);
+        Boolean enabled = claims.get("enabled", Boolean.class);
 
         List<GrantedAuthority> authorities = roles.stream()
                 .map(role -> (GrantedAuthority) () -> role)
@@ -85,6 +92,7 @@ public class JwtTokenProvider {
                 .id(userId)
                 .email(email)
                 .password(null)
+                .enabled(enabled == null || enabled)
                 .authorities(authorities)
                 .build();
     }

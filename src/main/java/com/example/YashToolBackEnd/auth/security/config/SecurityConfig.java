@@ -3,11 +3,13 @@ package com.example.YashToolBackEnd.auth.security.config;
 
 
 import com.example.YashToolBackEnd.auth.security.filter.JwtAuthenticationFilter;
+import com.example.YashToolBackEnd.auth.security.handler.JwtAccessDeniedHandler;
 import com.example.YashToolBackEnd.auth.security.handler.JwtAuthenticationEntryPoint;
 import com.example.YashToolBackEnd.auth.security.token.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -35,6 +37,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
+    private final JwtAccessDeniedHandler accessDeniedHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -42,14 +45,15 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandler))
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint(unauthorizedHandler)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
 
                         // Public
                         .requestMatchers(
-                                "/api/auth/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -57,6 +61,7 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/error"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 
                         // ========================================
                         // GST REPORTS - CA ROLE (EXCLUSIVE ACCESS)
@@ -74,8 +79,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // Sales
-                        .requestMatchers("/api/enquiry/**", "/api/quotation/**")
+                        .requestMatchers("/api/enquiries/**", "/api/quotation/**")
                         .hasAnyRole("ADMIN", "SALES")
+
+                        // Customers: only ADMIN and SALES can create/update, read allowed to authenticated users
+                        .requestMatchers(HttpMethod.POST, "/api/customers/**").hasAnyRole("ADMIN", "SALES")
+                        .requestMatchers(HttpMethod.PATCH, "/api/customers/**").hasAnyRole("ADMIN", "SALES")
+                        .requestMatchers(HttpMethod.GET, "/api/customers/**").authenticated()
+
+                        // Masters: write restricted to ADMIN/STORE, read allowed to authenticated users
+                        .requestMatchers(HttpMethod.POST, "/api/masters/**").hasAnyRole("ADMIN", "STORE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/masters/**").hasAnyRole("ADMIN", "STORE")
+                        .requestMatchers(HttpMethod.GET, "/api/masters/**").authenticated()
 
                         // Production
                         .requestMatchers("/api/production/**")
@@ -129,11 +144,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
