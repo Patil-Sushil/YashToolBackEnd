@@ -48,7 +48,8 @@ public class CustomerServiceImpl implements CustomerService {
                 .billingAddress(request.getBillingAddress())
                 .deliveryAddress(request.getDeliveryAddress())
                 .gstNumber(request.getGstNumber())
-                .status("ACTIVE") // Default status
+                .status("ACTIVE")// Default status
+                .isDeleted(false)
                 .build();
 
         // Save the new customer and return the response DTO

@@ -4,8 +4,6 @@ import com.example.YashToolBackEnd.common.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(
         name = "customers",
@@ -22,41 +20,37 @@ import java.util.UUID;
 @Builder
 public class Customer extends BaseEntity {
 
-
-
+        @Builder.Default                                    // ← ADD THIS
         @Column(name = "is_deleted", nullable = false)
         private Boolean isDeleted = false;
 
-        @Column(name="company_name",nullable = false)
+        @Column(name = "company_name", nullable = false)
         private String companyName;
 
         @Column(name = "customer_name", nullable = false)
         private String customerName;
 
-        @Column(name="legal_entity",nullable = false)
+        @Column(name = "legal_entity", nullable = false)
         private String legalEntity;
 
-        @Column(name = "business_type",nullable = false)
+        @Column(name = "business_type", nullable = false)
         private String businessType;
 
-        @Column(nullable = false,length = 15)
+        @Column(nullable = false, length = 15)
         private String mobileNumber;
 
-        @Column(nullable = false,length = 50)
+        @Column(nullable = false, length = 50)
         private String email;
 
-        @Column(name = "billing_address",nullable = false)
+        @Column(name = "billing_address", nullable = false)
         private String billingAddress;
 
-        @Column(name = "delivery_address",nullable = false)
+        @Column(name = "delivery_address", nullable = false)
         private String deliveryAddress;
 
         @Column(length = 20)
         private String gstNumber;
 
         @Column(nullable = false)
-        private String status; // ACTIVE / INACTIVE
-
-
-
+        private String status;
 }
