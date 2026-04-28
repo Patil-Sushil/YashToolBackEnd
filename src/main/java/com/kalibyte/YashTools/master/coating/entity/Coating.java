@@ -1,0 +1,34 @@
+package com.kalibyte.YashTools.master.coating.entity;
+
+import com.kalibyte.YashTools.common.enums.CoatingType;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "coatings")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Coating {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false,unique = false)
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "coating_type", nullable = false)
+    private CoatingType coatingType;
+
+    @Column(nullable = false)
+    private Double rate;
+
+    @Column(nullable = false)
+    private Boolean active;
+
+
+}
