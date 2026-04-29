@@ -9,6 +9,7 @@ import com.kalibyte.YashTools.customer.repository.CustomerRepository;
 import com.kalibyte.YashTools.customer.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +29,7 @@ public class CustomerServiceImpl implements CustomerService {
     // Mobile number must be unique among active (isDeleted=false) customers
     // Email must be unique among active (isDeleted=false) customers
     @Override
+    @Transactional
     public CustomerResponse createCustomer(CustomerRequest request) {
 
         // Check if mobile already exists for an active customer
@@ -59,6 +61,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     // Updates an existing customer (only if not deleted).
     @Override
+    @Transactional
     public CustomerResponse updateCustomer(UUID customerId, CustomerRequest request) {
         // Fetch customer by ID and ensure it's not soft-deleted
         Customer customer = customerRepository.findById(customerId)
@@ -83,6 +86,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     // Retrieves a customer by ID (only if not deleted).
     @Override
+    @Transactional(readOnly = true)
     public CustomerResponse getCustomerById(UUID customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .filter(c-> !c.getIsDeleted())
@@ -95,6 +99,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     // Retrieves all customers that are not soft-deleted.
     @Override
+    @Transactional(readOnly = true)
     public List<CustomerResponse> getAllCustomers() {
         return customerRepository.findAllByIsDeletedFalse()
                 .stream()

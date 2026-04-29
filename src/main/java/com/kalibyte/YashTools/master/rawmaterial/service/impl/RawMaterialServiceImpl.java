@@ -8,6 +8,7 @@ import com.kalibyte.YashTools.master.rawmaterial.repository.RawMaterialRepositor
 import com.kalibyte.YashTools.master.rawmaterial.service.RawMaterialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,12 +20,14 @@ public class RawMaterialServiceImpl implements RawMaterialService {
 
 
     @Override
+    @Transactional
     public RawMaterialResponse create(RawMaterialRequest request) {
         RawMaterial material = RawMaterialMapper.toEntity(request);
         return RawMaterialMapper.toResponse(repository.save(material));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RawMaterialResponse> getAllActive() {
         return repository.findAll()
                 .stream()
@@ -34,6 +37,7 @@ public class RawMaterialServiceImpl implements RawMaterialService {
     }
 
     @Override
+    @Transactional
     public void deactivate(Long id) {
         RawMaterial material = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Raw Material not found with id: " + id));

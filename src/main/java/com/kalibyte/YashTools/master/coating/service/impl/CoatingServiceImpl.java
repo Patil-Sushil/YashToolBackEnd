@@ -10,6 +10,7 @@ import com.kalibyte.YashTools.master.coating.repository.CoatingRepository;
 import com.kalibyte.YashTools.master.coating.service.CoatingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,12 +21,14 @@ public class CoatingServiceImpl implements CoatingService {
     private final CoatingRepository repository;
 
     @Override
+    @Transactional
     public CoatingResponse create(CoatingRequest request) {
         Coating coating = CoatingMapper.toEntity(request);
         return CoatingMapper.toResponse(repository.save(coating));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CoatingResponse> getAllActive() {
         return repository.findAll()
                 .stream()
@@ -35,6 +38,7 @@ public class CoatingServiceImpl implements CoatingService {
     }
 
     @Override
+    @Transactional
     public void deactivate(Long id) {
         Coating coating = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Coating not found"));

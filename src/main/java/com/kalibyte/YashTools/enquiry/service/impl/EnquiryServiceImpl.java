@@ -9,7 +9,6 @@ import com.kalibyte.YashTools.customer.entity.Customer;
 import com.kalibyte.YashTools.customer.repository.CustomerRepository;
 import com.kalibyte.YashTools.enquiry.dto.request.CreateEnquiryRequest;
 import com.kalibyte.YashTools.enquiry.dto.request.EnquiryItemRequest;
-import com.kalibyte.YashTools.enquiry.entity.*;
 import com.kalibyte.YashTools.enquiry.dto.response.EnquiryResponse;
 import com.kalibyte.YashTools.enquiry.entity.*;
 import com.kalibyte.YashTools.enquiry.mapper.EnquiryMapper;
@@ -20,9 +19,9 @@ import com.kalibyte.YashTools.master.coating.entity.Coating;
 import com.kalibyte.YashTools.master.coating.repository.CoatingRepository;
 import com.kalibyte.YashTools.master.rawmaterial.entity.RawMaterial;
 import com.kalibyte.YashTools.master.rawmaterial.repository.RawMaterialRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -73,6 +72,7 @@ public class EnquiryServiceImpl implements EnquiryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EnquiryResponse getById(UUID enquiryId) {
 
         Enquiry enquiry = enquiryRepository.findById(enquiryId)
@@ -84,6 +84,7 @@ public class EnquiryServiceImpl implements EnquiryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EnquiryResponse> getAllEnquiries() {
 
         return enquiryRepository.findAll()
