@@ -1,25 +1,23 @@
-// java
 package com.kalibyte.YashTools.master.coating.mapper;
 
 import com.kalibyte.YashTools.master.coating.dto.CoatingRequest;
 import com.kalibyte.YashTools.master.coating.dto.CoatingResponse;
 import com.kalibyte.YashTools.master.coating.entity.Coating;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public class CoatingMapper {
-    public static Coating toEntity(CoatingRequest request) {
-        return Coating.builder()
-                .name(request.getName())
-                .rate(request.getRate())
-                .active(true)
-                .build();
-    }
+import java.util.List;
 
-    public static CoatingResponse toResponse(Coating coating) {
-        return CoatingResponse.builder()
-                .id(coating.getId())
-                .name(coating.getName())
-                .rate(coating.getRate() == null ? null : String.valueOf(coating.getRate()))
-                .active(coating.getActive())
-                .build();
-    }
+@Mapper(componentModel = "spring", builder = @org.mapstruct.Builder(disableBuilder = true))
+public interface CoatingMapper {
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "active", constant = "true")
+    Coating toEntity(CoatingRequest request);
+
+    @Mapping(target = "rate", expression = "java(coating.getRate() == null ? null : String.valueOf(coating.getRate()))")
+    CoatingResponse toResponse(Coating coating);
+
+    @Mapping(target = "rate", expression = "java(coating.getRate() == null ? null : String.valueOf(coating.getRate()))")
+    List<CoatingResponse> toResponseList(List<Coating> coatings);
 }

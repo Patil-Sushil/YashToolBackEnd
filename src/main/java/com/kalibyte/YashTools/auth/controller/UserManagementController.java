@@ -4,9 +4,9 @@ import com.kalibyte.YashTools.auth.dto.UserRegistrationRequest;
 import com.kalibyte.YashTools.auth.dto.UserResponse;
 import com.kalibyte.YashTools.auth.service.AuthService;
 import com.kalibyte.YashTools.common.response.ApiResponse;
+import com.kalibyte.YashTools.common.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,19 +26,17 @@ public class UserManagementController {
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserRegistrationRequest request) {
         UserResponse createdUser = authService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(true, "User created successfully", createdUser));
+                .body(ApiResponse.success("User created successfully", createdUser));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         return ResponseEntity.ok(
-                new ApiResponse<>(true,
-                        "Users retrieved successfully",
-                        authService.getAllUsers(page, size))
+                ApiResponse.success("Users retrieved successfully", authService.getAllUsers(page, size))
         );
     }
 
@@ -47,9 +45,7 @@ public class UserManagementController {
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable UUID id) {
 
         return ResponseEntity.ok(
-                new ApiResponse<>(true,
-                        "User retrieved successfully",
-                        authService.getUserById(id))
+                ApiResponse.success("User retrieved successfully", authService.getUserById(id))
         );
     }
 
@@ -60,9 +56,7 @@ public class UserManagementController {
         authService.deleteUser(id);
 
         return ResponseEntity.ok(
-                new ApiResponse<>(true,
-                        "User deleted successfully",
-                        null)
+                ApiResponse.success("User deleted successfully", null)
         );
     }
 
@@ -74,7 +68,7 @@ public class UserManagementController {
         authService.disableUser(id);
 
         return ResponseEntity.ok(
-                new ApiResponse<>(true, "User disabled successfully", null)
+                ApiResponse.success("User disabled successfully", null)
         );
     }
 
@@ -86,7 +80,7 @@ public class UserManagementController {
         authService.enableUser(id);
 
         return ResponseEntity.ok(
-                new ApiResponse<>(true, "User enable successfully", null)
+                ApiResponse.success("User enable successfully", null)
         );
     }
 

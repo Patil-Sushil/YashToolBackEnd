@@ -15,4 +15,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     Optional<Customer> findByEmailAndIsDeletedFalse(String email);
 
     List<Customer> findAllByIsDeletedFalse();
+
+    org.springframework.data.domain.Page<Customer> findAllByIsDeletedFalse(org.springframework.data.domain.Pageable pageable);
 }

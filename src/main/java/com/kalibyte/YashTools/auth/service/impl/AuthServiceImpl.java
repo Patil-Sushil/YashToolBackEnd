@@ -3,12 +3,15 @@ package com.kalibyte.YashTools.auth.service.impl;
 import com.kalibyte.YashTools.auth.dto.*;
 import com.kalibyte.YashTools.auth.entity.Role;
 import com.kalibyte.YashTools.auth.entity.User;
+import com.kalibyte.YashTools.auth.mapper.AuthMapper;
 import com.kalibyte.YashTools.auth.repository.RoleRepository;
 import com.kalibyte.YashTools.auth.repository.UserRepository;
 import com.kalibyte.YashTools.auth.security.token.CustomUserDetails;
 import com.kalibyte.YashTools.auth.security.token.JwtTokenProvider;
 import com.kalibyte.YashTools.auth.service.AuthService;
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.exception.BusinessException;
+import com.kalibyte.YashTools.common.response.PageResponse;
 import com.kalibyte.YashTools.common.util.PasswordValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthMapper authMapper;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -68,6 +72,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @LoggableAction("CREATE_USER")
     public UserResponse createUser(UserRegistrationRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -83,20 +88,16 @@ public class AuthServiceImpl implements AuthService {
         var role = roleRepository.findByName(request.getRole())
                 .orElseThrow(() -> new BusinessException("Invalid role"));
 
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPhone(request.getPhone());
+        User user = authMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEnabled(true);
         user.setRoles(Set.of(role));
 
-        userRepository.save(user);
-        return null;
+        return authMapper.toResponse(userRepository.save(user));
     }
 
 
     @Override
+    @LoggableAction("CHANGE_PASSWORD")
     public void changePassword(ChangePasswordRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -146,20 +147,12 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("User not found"));
 
-        return UserResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .enabled(user.isEnabled())
-                .roles(user.getRoles().stream()
-                        .map(role -> role.getName().name())
-                        .toList())
-                .build();
+        return authMapper.toResponse(user);
     }
 
     // Prevent users from deleting their own accounts
     @Override
+    @LoggableAction("DELETE_USER")
     public void deleteUser(UUID id) {
 
         CustomUserDetails currentUser =
@@ -177,6 +170,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @LoggableAction("DISABLE_USER")
     public void disableUser(UUID id) {
 
         User user = userRepository.findById(id)
@@ -187,6 +181,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @LoggableAction("ENABLE_USER")
     public void enableUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("User not found"));
@@ -197,20 +192,11 @@ public class AuthServiceImpl implements AuthService {
 
     // Implement pagination for user listing
     @Override
-    public Page<UserResponse> getAllUsers(int page, int size) {
+    public PageResponse<UserResponse> getAllUsers(int page, int size) {
 
         Page<User> users = userRepository.findAll(PageRequest.of(page, size));
 
-        return users.map(user -> UserResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .enabled(user.isEnabled())
-                .roles(user.getRoles().stream()
-                        .map(role -> role.getName().name())
-                        .toList())
-                .build());
+        return PageResponse.from(users, authMapper::toResponse);
     }
 }
 

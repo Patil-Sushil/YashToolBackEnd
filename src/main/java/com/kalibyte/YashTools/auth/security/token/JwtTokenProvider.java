@@ -51,7 +51,7 @@ public class JwtTokenProvider {
                 .claim("userId", user.getId().toString())   // store UUID as String
                 .claim("roles", roles)
                 .claim("enabled", user.isEnabled())
-                .issuer("foundry-erp")
+                .issuer("yashtool-erp")
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key, Jwts.SIG.HS256)

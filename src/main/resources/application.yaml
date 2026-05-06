@@ -3,12 +3,12 @@ server:
 
 spring:
   application:
-    name: FoundryApplication
+    name: YashTools
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://192.168.11.41:5432/YashTool?useSSL=false}
-    username: ${SPRING_DATASOURCE_USERNAME:devuser}
-    password: ${SPRING_DATASOURCE_PASSWORD:devpassword}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -28,8 +28,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${SPRING_MAIL_USERNAME:}
-    password: ${SPRING_MAIL_PASSWORD:}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -38,18 +38,20 @@ spring:
           enable: true
 
 jwt:
-  secret: ${JWT_SECRET:Q0tQeXJmOW9Jb2ZxV2F5cFhUeG5sQzFkQkZpQzZ3c0ZxS0p4cA==}
-  expiration: 604800000
+  secret: ${JWT_SECRET}
+  expiration: 3600000
   refresh-expiration: 604800000
 
 app:
   company-state: ${COMPANY_STATE:Maharashtra}
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS}
   default-admin:
-    email: admin@foundry.com
-    password: Admin@123
+    email: admin@yashtools.com
+    password: ${DEFAULT_ADMIN_PASSWORD}
 
 logging:
   level:
     org.flywaydb: INFO
     org.springframework.security: INFO
-    com.example.YashToolBackEnd: INFO
+    com.kalibyte.YashTools: INFO

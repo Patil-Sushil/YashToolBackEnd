@@ -1,5 +1,6 @@
 package com.kalibyte.YashTools.enquiry.service.impl;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.enums.EnquiryStatus;
 import com.kalibyte.YashTools.common.exception.BusinessException;
 import com.kalibyte.YashTools.common.exception.BusinessValidationException;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class EnquiryServiceImpl implements EnquiryService {
 
     private final EnquiryRepository enquiryRepository;
@@ -35,9 +35,20 @@ public class EnquiryServiceImpl implements EnquiryService {
     private final EnquiryValidationService validationService;
     private final RawMaterialRepository rawMaterialRepository;
     private final CoatingRepository coatingRepository;
+    private final EnquiryMapper enquiryMapper;
+
+    public EnquiryServiceImpl(EnquiryRepository enquiryRepository, CustomerRepository customerRepository, EnquiryValidationService validationService, RawMaterialRepository rawMaterialRepository, CoatingRepository coatingRepository, EnquiryMapper enquiryMapper) {
+        this.enquiryRepository = enquiryRepository;
+        this.customerRepository = customerRepository;
+        this.validationService = validationService;
+        this.rawMaterialRepository = rawMaterialRepository;
+        this.coatingRepository = coatingRepository;
+        this.enquiryMapper = enquiryMapper;
+    }
 
     @Override
     @Transactional
+    @LoggableAction("CREATE_ENQUIRY")
     public EnquiryResponse createEnquiry(CreateEnquiryRequest request) {
 
 
@@ -48,9 +59,9 @@ public class EnquiryServiceImpl implements EnquiryService {
                         new ResourceNotFoundException("Customer not found"));
 
 
-           // Map DTO → Entity (NO master injection here)
+           // Map DTO → Entity using MapStruct
 
-        Enquiry enquiry = EnquiryMapper.toEntity(request, customer);
+        Enquiry enquiry = enquiryMapper.toEntity(request, customer);
         enquiry.setEnquiryNo(NumberGeneratorUtil.generate("ENQ"));
         enquiry.setStatus(EnquiryStatus.CREATED);
 
@@ -68,7 +79,7 @@ public class EnquiryServiceImpl implements EnquiryService {
            // Save atomically
 
         Enquiry saved = enquiryRepository.save(enquiry);
-        return EnquiryMapper.toResponse(saved);
+        return enquiryMapper.toResponse(saved);
     }
 
     @Override
@@ -80,7 +91,7 @@ public class EnquiryServiceImpl implements EnquiryService {
                         new ResourceNotFoundException(
                                 "Enquiry not found with id: " + enquiryId));
 
-        return EnquiryMapper.toResponse(enquiry);
+        return enquiryMapper.toResponse(enquiry);
     }
 
     @Override
@@ -89,7 +100,7 @@ public class EnquiryServiceImpl implements EnquiryService {
 
         return enquiryRepository.findAll()
                 .stream()
-                .map(EnquiryMapper::toResponse)
+                .map(enquiryMapper::toResponse)
                 .toList();
     }
 

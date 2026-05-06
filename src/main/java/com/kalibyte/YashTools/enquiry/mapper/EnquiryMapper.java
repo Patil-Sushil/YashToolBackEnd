@@ -1,231 +1,80 @@
 package com.kalibyte.YashTools.enquiry.mapper;
 
 import com.kalibyte.YashTools.customer.entity.Customer;
-import com.kalibyte.YashTools.enquiry.dto.response.*;
-import com.kalibyte.YashTools.enquiry.entity.*;
 import com.kalibyte.YashTools.enquiry.dto.request.*;
 import com.kalibyte.YashTools.enquiry.dto.response.*;
 import com.kalibyte.YashTools.enquiry.entity.*;
+import org.mapstruct.Context;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Mapper(componentModel = "spring", builder = @org.mapstruct.Builder(disableBuilder = true))
+public interface EnquiryMapper {
 
-public class EnquiryMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "enquiryNo", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "customer", source = "customer")
+    @Mapping(target = "remarks", source = "request.remarks")
+    @Mapping(target = "isUrgent", source = "request.isUrgent", defaultValue = "false")
+    @Mapping(target = "items", source = "request.items")
+    Enquiry toEntity(CreateEnquiryRequest request, Customer customer);
 
-    /* =====================================================
-       REQUEST → ENTITY
-       ===================================================== */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "enquiry", ignore = true)
+    @Mapping(target = "newToolSpecs", source = "newToolSpecs")
+    @Mapping(target = "resharpeningSpecs", source = "resharpeningSpecs")
+    @Mapping(target = "reformingSpecs", source = "reformingSpecs")
+    EnquiryItem toItemEntity(EnquiryItemRequest request);
 
-    public static Enquiry toEntity(CreateEnquiryRequest request, Customer customer) {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "enquiryItem", ignore = true)
+    @Mapping(target = "rawMaterial", ignore = true)
+    @Mapping(target = "coating", ignore = true)
+    @Mapping(target = "hasCoating", source = "hasCoating")
+    NewToolSpecs toNewToolSpecs(NewToolSpecsRequest request);
 
-        Enquiry enquiry = new Enquiry();
-        enquiry.setCustomer(customer);
-        enquiry.setRemarks(request.getRemarks());
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "enquiryItem", ignore = true)
+    @Mapping(target = "coating", ignore = true)
+    @Mapping(target = "hasCoating", source = "hasCoating")
+    ResharpeningSpecs toResharpeningSpecs(ResharpeningSpecsRequest request);
 
-        // ✅ NEW: Urgent flag (default = false)
-        enquiry.setIsUrgent(Boolean.TRUE.equals(request.getIsUrgent()));
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "enquiryItem", ignore = true)
+    @Mapping(target = "coating", ignore = true)
+    @Mapping(target = "hasCoating", source = "hasCoating")
+    ReformingSpecs toReformingSpecs(ReformingSpecsRequest request);
 
-        if (request.getItems() != null && !request.getItems().isEmpty()) {
-            enquiry.setItems(
-                    request.getItems()
-                            .stream()
-                            .map(itemDto -> toItemEntity(itemDto, enquiry))
-                            .collect(Collectors.toList())
-            );
+    @Mapping(target = "enquiryId", source = "id")
+    @Mapping(target = "customerName", source = "customer.companyName")
+    EnquiryResponse toResponse(Enquiry enquiry);
+
+    @Mapping(target = "itemId", source = "id")
+    EnquiryItemResponse toItemResponse(EnquiryItem item);
+
+    @Mapping(target = "coatingName", source = "coating.name")
+    @Mapping(target = "rawMaterialName", source = "rawMaterial.name")
+    NewToolSpecsResponse toNewToolSpecsResponse(NewToolSpecs specs);
+
+    @Mapping(target = "coatingName", source = "coating.name")
+    ResharpeningSpecsResponse toResharpeningSpecsResponse(ResharpeningSpecs specs);
+
+    @Mapping(target = "coatingName", source = "coating.name")
+    ReformingSpecsResponse toReformingSpecsResponse(ReformingSpecs specs);
+
+    @org.mapstruct.AfterMapping
+    default void linkItems(@org.mapstruct.MappingTarget Enquiry enquiry) {
+        if (enquiry.getItems() != null) {
+            enquiry.getItems().forEach(item -> {
+                item.setEnquiry(enquiry);
+                if (item.getNewToolSpecs() != null) item.getNewToolSpecs().setEnquiryItem(item);
+                if (item.getResharpeningSpecs() != null) item.getResharpeningSpecs().setEnquiryItem(item);
+                if (item.getReformingSpecs() != null) item.getReformingSpecs().setEnquiryItem(item);
+            });
         }
-
-        return enquiry;
-    }
-
-    private static EnquiryItem toItemEntity(
-            EnquiryItemRequest dto,
-            Enquiry enquiry) {
-
-        EnquiryItem item = new EnquiryItem();
-
-        // -------- Common fields --------
-        item.setEnquiry(enquiry);           // 🔑 JPA parent reference
-        item.setOrderType(dto.getOrderType());
-        item.setToolName(dto.getToolName());
-        item.setIsTrial(dto.getIsTrial());
-        item.setQuantity(dto.getQuantity());
-        item.setRemarks(dto.getRemarks());
-
-        // -------- Order-type specific specs --------
-        switch (dto.getOrderType()) {
-
-            case NEW_TOOL -> {
-                NewToolSpecs specs =
-                        toNewToolSpecs(dto.getNewToolSpecs(), item);
-                item.setNewToolSpecs(specs);
-            }
-
-            case RESHARPENING -> {
-                ResharpeningSpecs specs =
-                        toResharpeningSpecs(dto.getResharpeningSpecs(), item);
-                item.setResharpeningSpecs(specs);
-            }
-
-            case REFORMING -> {
-                ReformingSpecs specs =
-                        toReformingSpecs(dto.getReformingSpecs(), item);
-                item.setReformingSpecs(specs);
-            }
-        }
-
-        return item;
-    }
-
-    private static NewToolSpecs toNewToolSpecs(
-            NewToolSpecsRequest dto,
-            EnquiryItem item) {
-
-        if (dto == null) return null;
-
-        NewToolSpecs specs = new NewToolSpecs();
-        specs.setEnquiryItem(item);          // 🔑 FK link
-        specs.setHasCoating(dto.getHasCoating());
-        specs.setDiameter(dto.getDiameter());
-        specs.setFluteLength(dto.getFluteLength());
-        specs.setShankDiameter(dto.getShankDiameter());
-        specs.setOverallLength(dto.getOverallLength());
-
-        // NOTE:
-        // coating & rawMaterial are injected in Service layer
-
-        return specs;
-    }
-
-    private static ResharpeningSpecs toResharpeningSpecs(
-            ResharpeningSpecsRequest dto,
-            EnquiryItem item) {
-
-        if (dto == null) return null;
-
-        ResharpeningSpecs specs = new ResharpeningSpecs();
-        specs.setEnquiryItem(item);
-        specs.setResharpeningType(dto.getResharpeningType());
-        specs.setHasCoating(dto.getHasCoating());
-
-        return specs;
-    }
-
-    private static ReformingSpecs toReformingSpecs(
-            ReformingSpecsRequest dto,
-            EnquiryItem item) {
-
-        if (dto == null) return null;
-
-        ReformingSpecs specs = new ReformingSpecs();
-        specs.setEnquiryItem(item);
-        specs.setHasCoating(dto.getHasCoating());
-        specs.setFluteLength(dto.getFluteLength());
-
-        return specs;
-    }
-
-    /* =====================================================
-       ENTITY → RESPONSE
-       ===================================================== */
-
-    public static EnquiryResponse toResponse(Enquiry enquiry) {
-
-        return EnquiryResponse.builder()
-                .enquiryId(enquiry.getId())
-                .enquiryNo(enquiry.getEnquiryNo())
-                .status(enquiry.getStatus().name())
-                .isUrgent(enquiry.getIsUrgent())      // ✅ NEW
-                .customerName(
-                        enquiry.getCustomer() != null
-                                ? enquiry.getCustomer().getCompanyName()
-                                : null
-                )
-                .items(toItemResponseList(enquiry.getItems()))
-                .build();
-    }
-
-    private static List<EnquiryItemResponse> toItemResponseList(
-            List<EnquiryItem> items) {
-
-        if (items == null || items.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return items.stream()
-                .map(item -> EnquiryItemResponse.builder()
-                        .itemId(item.getId())
-                        .orderType(item.getOrderType().name())
-                        .toolName(item.getToolName())
-                        .isTrial(item.getIsTrial())
-                        .quantity(item.getQuantity())
-                        .remarks(item.getRemarks())
-                        .newToolSpecs(
-                                toNewToolSpecsResponse(item.getNewToolSpecs()))
-                        .resharpeningSpecs(
-                                toResharpeningSpecsResponse(
-                                        item.getResharpeningSpecs()))
-                        .reformingSpecs(
-                                toReformingSpecsResponse(
-                                        item.getReformingSpecs()))
-                        .build())
-                .collect(Collectors.toList());
-    }
-
-    private static NewToolSpecsResponse toNewToolSpecsResponse(
-            NewToolSpecs specs) {
-
-        if (specs == null) return null;
-
-        return NewToolSpecsResponse.builder()
-                .hasCoating(specs.getHasCoating())
-                .coatingName(
-                        specs.getCoating() != null
-                                ? specs.getCoating().getName()
-                                : null
-                )
-                .rawMaterialName(
-                        specs.getRawMaterial() != null
-                                ? specs.getRawMaterial().getName()
-                                : null
-                )
-                .diameter(specs.getDiameter())
-                .fluteLength(specs.getFluteLength())
-                .shankDiameter(specs.getShankDiameter())
-                .overallLength(specs.getOverallLength())
-                .build();
-    }
-
-    private static ResharpeningSpecsResponse toResharpeningSpecsResponse(
-            ResharpeningSpecs specs) {
-
-        if (specs == null) return null;
-
-        return ResharpeningSpecsResponse.builder()
-                .resharpeningType(specs.getResharpeningType())
-                .hasCoating(specs.getHasCoating())
-                .coatingName(
-                        specs.getCoating() != null
-                                ? specs.getCoating().getName()
-                                : null
-                )
-                .build();
-    }
-
-    private static ReformingSpecsResponse toReformingSpecsResponse(
-            ReformingSpecs specs) {
-
-        if (specs == null) return null;
-
-        return ReformingSpecsResponse.builder()
-                .hasCoating(specs.getHasCoating())
-                .coatingName(
-                        specs.getCoating() != null
-                                ? specs.getCoating().getName()
-                                : null
-                )
-                .fluteLength(specs.getFluteLength())
-                .build();
     }
 }

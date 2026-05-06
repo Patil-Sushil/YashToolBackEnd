@@ -20,7 +20,7 @@ public class EnquiryValidationService {
 
         // 2. Check if any item is marked as a Trial
         boolean hasTrial = enquiry.getItems().stream()
-                .map(EnquiryItem::getIsTrial) // Assumes field is 'isTrail' (Note: typo in your code? Should it be 'isTrial'?)
+                .map(EnquiryItem::getIsTrial)
                 .filter(Objects::nonNull)
                 .anyMatch(Boolean::booleanValue);
 

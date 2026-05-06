@@ -15,26 +15,27 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class CoatingServiceImpl implements CoatingService {
 
     private final CoatingRepository repository;
+    private final CoatingMapper coatingMapper;
+
+    public CoatingServiceImpl(CoatingRepository repository, CoatingMapper coatingMapper) {
+        this.repository = repository;
+        this.coatingMapper = coatingMapper;
+    }
 
     @Override
     @Transactional
     public CoatingResponse create(CoatingRequest request) {
-        Coating coating = CoatingMapper.toEntity(request);
-        return CoatingMapper.toResponse(repository.save(coating));
+        Coating coating = coatingMapper.toEntity(request);
+        return coatingMapper.toResponse(repository.save(coating));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoatingResponse> getAllActive() {
-        return repository.findAll()
-                .stream()
-                .filter(Coating::getActive)
-                .map(CoatingMapper::toResponse)
-                .toList();
+        return coatingMapper.toResponseList(repository.findByActiveTrue());
     }
 
     @Override

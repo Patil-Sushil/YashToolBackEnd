@@ -1,5 +1,6 @@
 package com.kalibyte.YashTools.customer.service;
 
+import com.kalibyte.YashTools.common.response.PageResponse;
 import com.kalibyte.YashTools.customer.dto.CustomerRequest;
 import com.kalibyte.YashTools.customer.dto.CustomerResponse;
 
@@ -15,4 +16,6 @@ public interface CustomerService {
     CustomerResponse getCustomerById(UUID customerId );
 
     List<CustomerResponse> getAllCustomers();
+
+    PageResponse<CustomerResponse> getAllCustomers(int page, int size);
 }

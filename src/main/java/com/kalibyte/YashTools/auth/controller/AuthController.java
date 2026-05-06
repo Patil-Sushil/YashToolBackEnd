@@ -24,7 +24,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.login(loginRequest);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Login successful", response));
+        return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
 
     @PostMapping("/change-password")
@@ -34,7 +34,7 @@ public class AuthController {
         authService.changePassword(request);
 
         return ResponseEntity.ok(
-                new ApiResponse<>(true, "Password changed successfully", null)
+                ApiResponse.success("Password changed successfully", null)
         );
     }
 }

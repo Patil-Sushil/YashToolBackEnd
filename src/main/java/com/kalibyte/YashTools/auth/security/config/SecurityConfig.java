@@ -1,4 +1,4 @@
-// src/main/java/com/kalibyte/foundry/auth/security/config/SecurityConfig.java
+// src/main/java/com/kalibyte/YashTools/auth/security/config/SecurityConfig.java
 package com.kalibyte.YashTools.auth.security.config;
 
 
@@ -40,6 +40,9 @@ public class SecurityConfig {
     private final JwtAccessDeniedHandler accessDeniedHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
+    private List<String> allowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -69,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/gst/**")
                         .hasAnyRole("CA", "ADMIN")
 
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                         // Reports
                         .requestMatchers("/api/reports/**")
@@ -144,7 +147,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:5173"));
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));

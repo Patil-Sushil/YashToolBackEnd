@@ -28,5 +28,5 @@ public interface AuthService {
 
     void enableUser(UUID id);
 
-    Page<UserResponse> getAllUsers(int page, int size);
+    com.kalibyte.YashTools.common.response.PageResponse<UserResponse> getAllUsers(int page, int size);
 }

@@ -13,27 +13,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class RawMaterialServiceImpl implements RawMaterialService {
 
     private final RawMaterialRepository repository;
+    private final RawMaterialMapper rawMaterialMapper;
+
+    public RawMaterialServiceImpl(RawMaterialRepository repository, RawMaterialMapper rawMaterialMapper) {
+        this.repository = repository;
+        this.rawMaterialMapper = rawMaterialMapper;
+    }
 
 
     @Override
     @Transactional
     public RawMaterialResponse create(RawMaterialRequest request) {
-        RawMaterial material = RawMaterialMapper.toEntity(request);
-        return RawMaterialMapper.toResponse(repository.save(material));
+        RawMaterial material = rawMaterialMapper.toEntity(request);
+        return rawMaterialMapper.toResponse(repository.save(material));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RawMaterialResponse> getAllActive() {
-        return repository.findAll()
-                .stream()
-                .filter(RawMaterial::getActive)
-                .map(RawMaterialMapper::toResponse)
-                .toList();
+        return rawMaterialMapper.toResponseList(repository.findByActiveTrue());
     }
 
     @Override

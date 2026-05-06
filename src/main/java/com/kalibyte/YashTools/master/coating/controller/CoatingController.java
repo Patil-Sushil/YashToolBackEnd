@@ -15,20 +15,23 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/masters/coatings")
-@RequiredArgsConstructor
 public class CoatingController {
     private final CoatingService service;
+
+    public CoatingController(CoatingService service) {
+        this.service = service;
+    }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
     public ResponseEntity<ApiResponse<CoatingResponse>> create(@Valid @RequestBody CoatingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(true, "Coating created successfully", service.create(request)));
+                .body(ApiResponse.success("Coating created successfully", service.create(request)));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<CoatingResponse>>> getAll() {
-        return ResponseEntity.ok(new ApiResponse<>(true, "Coatings retrieved successfully", service.getAllActive()));
+        return ResponseEntity.ok(ApiResponse.success("Coatings retrieved successfully", service.getAllActive()));
 
     }
 
@@ -36,6 +39,6 @@ public class CoatingController {
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
     public ResponseEntity<ApiResponse<Void>> deactivate(@PathVariable Long id) {
         service.deactivate(id);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Coating deactivated successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Coating deactivated successfully", null));
     }
 }
