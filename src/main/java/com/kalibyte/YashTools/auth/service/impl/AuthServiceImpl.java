@@ -9,6 +9,7 @@ import com.kalibyte.YashTools.auth.repository.UserRepository;
 import com.kalibyte.YashTools.auth.security.token.CustomUserDetails;
 import com.kalibyte.YashTools.auth.security.token.JwtTokenProvider;
 import com.kalibyte.YashTools.auth.service.AuthService;
+import com.kalibyte.YashTools.auth.service.RefreshTokenService;
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.exception.BusinessException;
 import com.kalibyte.YashTools.common.response.PageResponse;
@@ -41,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthMapper authMapper;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -54,9 +56,12 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = tokenProvider.generateToken(authentication);
-
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new BusinessException("User not found"));
+
+        String jwt = tokenProvider.generateToken(userDetails);
+        var refreshToken = refreshTokenService.createRefreshToken(user);
 
         List<String> roles = userDetails.getAuthorities()
                 .stream()
@@ -65,10 +70,32 @@ public class AuthServiceImpl implements AuthService {
 
         return LoginResponse.builder()
                 .token(jwt)
+                .refreshToken(refreshToken.getToken())
                 .id(userDetails.getId())
                 .email(userDetails.getEmail())
                 .roles(roles)
                 .build();
+    }
+
+    @Override
+    public TokenRefreshResponse refreshToken(TokenRefreshRequest request) {
+        var oldRefreshToken = refreshTokenService.findByToken(request.getRefreshToken());
+        var newRefreshToken = refreshTokenService.rotateToken(oldRefreshToken);
+        User user = newRefreshToken.getUser();
+
+        CustomUserDetails userDetails = CustomUserDetails.create(user);
+
+        String token = tokenProvider.generateToken(userDetails);
+
+        return TokenRefreshResponse.builder()
+                .accessToken(token)
+                .refreshToken(newRefreshToken.getToken())
+                .build();
+    }
+
+    @Override
+    public void logout(LogoutRequest request) {
+        refreshTokenService.revokeToken(request.getRefreshToken());
     }
 
     @Override
@@ -129,6 +156,7 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+        refreshTokenService.deleteByUserId(user);
     }
 
     @Override

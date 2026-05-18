@@ -59,5 +59,6 @@ public class CustomerRequest {
     @JsonAlias({"gst_number", "gstnumber", "gst"})
     private String gstNumber;
 
+    @Builder.Default
     private CustomerStatus status = CustomerStatus.ACTIVE;
-}
+    }

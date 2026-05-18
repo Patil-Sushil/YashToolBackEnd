@@ -1,6 +1,9 @@
 package com.kalibyte.YashTools.common.exception;
 
 import com.kalibyte.YashTools.common.response.ApiResponse;
+import com.kalibyte.YashTools.labors.attendance.exceptions.DuplicateAttendance;
+import com.kalibyte.YashTools.labors.labor.exception.LaborException;
+import com.kalibyte.YashTools.labors.payout.exception.PayoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,5 +89,26 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception occurred", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.failure("An internal server error occurred. Please contact support."));
+    }
+
+    @ExceptionHandler(LaborException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLaborException(LaborException ex) {
+        log.warn("Labor exception: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.failure(ex.getMessage()));
+    }
+
+    @ExceptionHandler(PayoutException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePayoutException(PayoutException ex) {
+        log.warn("Payout exception: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.failure(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateAttendance.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateAttendance(DuplicateAttendance ex) {
+        log.warn("Duplicate attendance: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.failure(ex.getMessage()));
     }
 }

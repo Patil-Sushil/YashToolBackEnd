@@ -12,6 +12,10 @@ public interface AuthService {
 
     LoginResponse login(LoginRequest request);
 
+    TokenRefreshResponse refreshToken(TokenRefreshRequest request);
+
+    void logout(LogoutRequest request);
+
     UserResponse createUser(UserRegistrationRequest request);
 
     void changePassword(ChangePasswordRequest request);

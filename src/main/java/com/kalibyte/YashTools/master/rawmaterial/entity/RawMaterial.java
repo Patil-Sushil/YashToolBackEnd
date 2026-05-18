@@ -26,6 +26,7 @@ public class RawMaterial {
     @Column(nullable = false)
     private Double rate;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
 }
