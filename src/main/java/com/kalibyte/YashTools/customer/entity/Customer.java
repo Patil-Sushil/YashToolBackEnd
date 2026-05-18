@@ -13,6 +13,7 @@ import lombok.*;
         }
 )
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
 @NoArgsConstructor

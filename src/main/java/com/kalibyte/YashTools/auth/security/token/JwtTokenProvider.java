@@ -38,11 +38,16 @@ public class JwtTokenProvider {
         CustomUserDetails user =
                 (CustomUserDetails) authentication.getPrincipal();
 
+        return generateToken(user);
+    }
+
+    public String generateToken(CustomUserDetails user) {
+
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
-	    assert user != null;
-	    List<String> roles = user.getAuthorities().stream()
+        assert user != null;
+        List<String> roles = user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
@@ -81,6 +86,7 @@ public class JwtTokenProvider {
 
         UUID userId = UUID.fromString(claims.get("userId", String.class));
         String email = claims.getSubject();
+        @SuppressWarnings("unchecked")
         List<String> roles = claims.get("roles", List.class);
         Boolean enabled = claims.get("enabled", Boolean.class);
 

@@ -26,6 +26,7 @@
 		<lombok.version>1.18.46</lombok.version>
 		<flyway.version>12.5.0</flyway.version>
 		<springdoc.version>3.0.3</springdoc.version>
+		<poi.version>5.5.1</poi.version>
 	</properties>
 
 	<dependencies>
@@ -142,6 +143,13 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
+		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi.version}</version>
+			<scope>compile</scope>
 		</dependency>
 
 

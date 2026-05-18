@@ -64,7 +64,10 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/error"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login",
+                                "/api/auth/refresh",
+                                "/api/auth/logout")
+                        .permitAll()
 
                         // ========================================
                         // GST REPORTS - CA ROLE (EXCLUSIVE ACCESS)
