@@ -22,5 +22,6 @@ public class UserResponse {
     private String phone;
     private boolean enabled;
     private List<String> roles;
+    private String companyCode;
 }
 

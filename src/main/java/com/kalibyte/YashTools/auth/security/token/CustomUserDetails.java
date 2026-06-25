@@ -30,6 +30,8 @@ public class CustomUserDetails implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
+    private String companyCode;
+
     public static CustomUserDetails create(User user) {
 
 
@@ -44,7 +46,8 @@ public class CustomUserDetails implements UserDetails {
                 user.getEmail(),
                 user.getPassword(),
                 user.isEnabled(),
-                authorities
+                authorities,
+                user.getCompanyCode()
         );
     }
 

@@ -74,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
                 .id(userDetails.getId())
                 .email(userDetails.getEmail())
                 .roles(roles)
+                .companyCode(user.getCompanyCode())
                 .build();
     }
 
@@ -118,6 +119,11 @@ public class AuthServiceImpl implements AuthService {
         User user = authMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRoles(Set.of(role));
+        if (user.getCompanyCode() == null || user.getCompanyCode().trim().isEmpty()) {
+            user.setCompanyCode("YT");
+        } else {
+            user.setCompanyCode(user.getCompanyCode().trim().toUpperCase());
+        }
 
         return authMapper.toResponse(userRepository.save(user));
     }

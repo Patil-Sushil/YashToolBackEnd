@@ -1,4 +1,4 @@
-package com.kalibyte.YashTools.common.enums;
+package com.kalibyte.YashTools.customer.entity.enums;
 
 public enum CustomerStatus {
     ACTIVE("Active"),

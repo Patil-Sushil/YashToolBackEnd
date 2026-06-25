@@ -1,15 +1,15 @@
 package com.kalibyte.YashTools.common.util;
 
-
+import com.kalibyte.YashTools.common.multi_company.CompanyContextHolder;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // Generates human readable unique numbers for various entities
-//Examples:
-// *  ENQ-2025-0001
-// *  QT-2025-0001
-// *  WO-2025-0001
+// Examples:
+// *  YT-ENQ-2025-0001
+// *  YT-QT-2025-0001
+// *  YT-WO-2025-0001
 public final class NumberGeneratorUtil {
     private static final AtomicInteger SEQUENCE = new AtomicInteger(0);
 
@@ -20,15 +20,14 @@ public final class NumberGeneratorUtil {
         // prevent instantiation
     }
 
-    public static String generate(String prefix) {
-
+    public static String generate(String typePrefix) {
+        String companyPrefix = CompanyContextHolder.getCompanyCode();
+        if (companyPrefix == null || companyPrefix.trim().isEmpty()) {
+            companyPrefix = "YT";
+        }
         int next = SEQUENCE.incrementAndGet();
-
         String year = LocalDate.now().format(YEAR_FORMAT);
-
-        return String.format("%s-%s-%04d", prefix, year, next);
-
-
+        return String.format("%s-%s-%s-%04d", companyPrefix, typePrefix, year, next);
     }
 
     /**

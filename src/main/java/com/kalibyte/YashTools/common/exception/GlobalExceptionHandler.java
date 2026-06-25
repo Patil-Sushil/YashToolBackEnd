@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -110,5 +111,22 @@ public class GlobalExceptionHandler {
         log.warn("Duplicate attendance: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiResponse.failure(ex.getMessage()));
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMultipartException(MultipartException ex) {
+        log.error("Multipart exception occurred", ex);
+
+        String message = "File upload error. ";
+        if (ex.getMessage().contains("Current request is not a multipart request")) {
+            message += "Please ensure you're sending the request as 'form-data' with a file parameter named 'file'.";
+        } else if (ex.getMessage().contains("Maximum upload size exceeded")) {
+            message += "File size exceeds the maximum allowed limit.";
+        } else {
+            message += ex.getMessage();
+        }
+
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.failure(message));
     }
 }

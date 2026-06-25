@@ -56,6 +56,7 @@ public class JwtTokenProvider {
                 .claim("userId", user.getId().toString())   // store UUID as String
                 .claim("roles", roles)
                 .claim("enabled", user.isEnabled())
+                .claim("companyCode", user.getCompanyCode())
                 .issuer("yashtool-erp")
                 .issuedAt(now)
                 .expiration(expiryDate)
@@ -89,6 +90,7 @@ public class JwtTokenProvider {
         @SuppressWarnings("unchecked")
         List<String> roles = claims.get("roles", List.class);
         Boolean enabled = claims.get("enabled", Boolean.class);
+        String companyCode = claims.get("companyCode", String.class);
 
         List<GrantedAuthority> authorities = roles.stream()
                 .map(role -> (GrantedAuthority) () -> role)
@@ -100,6 +102,7 @@ public class JwtTokenProvider {
                 .password(null)
                 .enabled(enabled == null || enabled)
                 .authorities(authorities)
+                .companyCode(companyCode != null ? companyCode : "YT")
                 .build();
     }
 }

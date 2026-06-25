@@ -1,17 +1,19 @@
 package com.kalibyte.YashTools.customer.entity;
 
-import com.kalibyte.YashTools.common.base.BaseEntity;
+import com.kalibyte.YashTools.common.multi_company.BaseCompanyEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
 
 @Entity
 @Table(
         name = "customers",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = "mobile_number"),
-                @UniqueConstraint(columnNames = "email")
+                @UniqueConstraint(columnNames = {"company_id", "mobile_number"}),
+                @UniqueConstraint(columnNames = {"company_id", "email"})
         }
 )
+@Filter(name = "companyFilter", condition = "company_id = :companyId")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Getter
@@ -19,9 +21,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Customer extends BaseEntity {
+public class Customer extends BaseCompanyEntity {
 
-        @Builder.Default                                    // ← ADD THIS
+        @Builder.Default
         @Column(name = "is_deleted", nullable = false)
         private Boolean isDeleted = false;
 

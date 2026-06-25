@@ -1,23 +1,24 @@
 package com.kalibyte.YashTools.enquiry.dto.response;
 
+import com.kalibyte.YashTools.common.enums.OrderType;
+import lombok.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class EnquiryItemResponse {
-    private Long itemId;
-    private String orderType;
+
+    private UUID itemId;
+    private OrderType orderType;
     private String toolName;
-    private Boolean isTrial;
     private Integer quantity;
+    private Boolean trial;
     private String remarks;
+    private String drawingReference;
     private NewToolSpecsResponse newToolSpecs;
-    private ResharpeningSpecsResponse resharpeningSpecs;
     private ReformingSpecsResponse reformingSpecs;
+    private ResharpeningSpecsResponse resharpeningSpecs;
 }

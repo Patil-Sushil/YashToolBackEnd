@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
+@ConditionalOnProperty(prefix = "app.bootstrap", name = "enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
 @Slf4j
 @Order(2)
@@ -54,6 +56,7 @@ public class AdminBootstrap implements CommandLineRunner {
         admin.setPassword(passwordEncoder.encode(adminPassword));
         admin.setPhone(adminPhone);
         admin.setEnabled(true);
+        admin.setCompanyCode("YT");
         admin.setRoles(Set.of(adminRole));
 
         userRepository.save(admin);

@@ -1,25 +1,43 @@
 package com.kalibyte.YashTools.enquiry.dto.request;
 
+import com.kalibyte.YashTools.common.enums.CoatingType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+/**
+ * Request DTO for reforming specifications
+ *
+ * @author YashTools Dev Team
+ * @version 2.0
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ReformingSpecsRequest {
-    // Where coating is required after reforming
-    @NotNull
-    private Boolean hasCoating;
 
-    //Optional coating master ID
+    /**
+     * Coating requirement flag
+     */
+    @NotNull(message = "Coating requirement must be specified")
+    @Builder.Default
+    private Boolean coatingRequired = false;
 
-    private Long coatingId;
+    /**
+     * Specific coating type (required if coatingRequired = true)
+     */
+    private CoatingType coatingType;
 
-    // only flute length is required for reforming
-    @NotNull
-    @Positive
+    /**
+     * Target flute length in mm
+     */
+    @NotNull(message = "Flute length is required")
+    @Positive(message = "Flute length must be positive")
     private Double fluteLength;
+
+    /**
+     * Additional technical notes
+     */
+    private String technicalNotes;
 }

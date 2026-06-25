@@ -1,6 +1,5 @@
 package com.kalibyte.YashTools.auth.security.handler;
 
-import com.kalibyte.YashTools.common.response.ApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,10 +18,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        log.error("Unauthorized error at URI: {}. Message - {}", request.getRequestURI(), authException.getMessage());
+        log.warn("Unauthorized request to {}", request.getRequestURI());
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        ApiResponse<Void> body = new ApiResponse<>(false, "Unauthorized", null);
-        response.getWriter().write("{\"success\":" + body.isSuccess() + ",\"message\":\"" + body.getMessage() + "\",\"data\":null}");
+        response.getWriter().write("{\"success\":false,\"message\":\"Unauthorized\",\"data\":null}");
     }
 }

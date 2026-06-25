@@ -1,22 +1,42 @@
 package com.kalibyte.YashTools.enquiry.dto.request;
 
+import com.kalibyte.YashTools.common.enums.CoatingType;
 import com.kalibyte.YashTools.common.enums.ResharpeningType;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+/**
+ * Request DTO for resharpening specifications
+ *
+ * @author YashTools Dev Team
+ * @version 2.0
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ResharpeningSpecsRequest {
-    // Applicable only for End mill
+
+    /**
+     * Level of resharpening service
+     */
+    @NotNull(message = "Resharpening type is required")
     private ResharpeningType resharpeningType;
 
-    // Where the coating is required after resharpening
-    @NotNull
-    private Boolean hasCoating;
+    /**
+     * Coating requirement flag
+     */
+    @NotNull(message = "Coating requirement must be specified")
+    @Builder.Default
+    private Boolean coatingRequired = false;
 
-    // Optional coating master ID
-    private Long coatingId;
+    /**
+     * Specific coating type (required if coatingRequired = true)
+     */
+    private CoatingType coatingType;
+
+    /**
+     * Additional technical notes
+     */
+    private String technicalNotes;
 }

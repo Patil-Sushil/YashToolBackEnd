@@ -10,6 +10,7 @@ import com.kalibyte.YashTools.customer.entity.Customer;
 import com.kalibyte.YashTools.customer.mapper.CustomerMapper;
 import com.kalibyte.YashTools.customer.repository.CustomerRepository;
 import com.kalibyte.YashTools.customer.service.CustomerService;
+import com.kalibyte.YashTools.company.entity.Company;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +25,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
+    private final com.kalibyte.YashTools.company.repository.CompanyRepository companyRepository;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, CustomerMapper customerMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, CustomerMapper customerMapper, com.kalibyte.YashTools.company.repository.CompanyRepository companyRepository) {
         this.customerRepository = customerRepository;
         this.customerMapper = customerMapper;
+        this.companyRepository = companyRepository;
     }
 
     // Creates a new customer.
@@ -47,6 +50,26 @@ public class CustomerServiceImpl implements CustomerService {
 
         // Build the Customer entity from request DTO using MapStruct
         Customer customer = customerMapper.toEntity(request);
+
+        // Resolve company if companyCode is specified
+        if (request.getCompanyCode() != null && !request.getCompanyCode().trim().isEmpty()) {
+            Company company = companyRepository.findByCode(request.getCompanyCode().trim().toUpperCase())
+                    .orElseThrow(() -> new ResourceNotFoundException("Company not found with code: " + request.getCompanyCode()));
+            customer.setCompany(company);
+        } else {
+            // Fallback to active company context
+            UUID activeCompanyId = com.kalibyte.YashTools.common.multi_company.CompanyContextHolder.getCompanyId();
+            if (activeCompanyId != null) {
+                Company company = companyRepository.findById(activeCompanyId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Active company not found with ID: " + activeCompanyId));
+                customer.setCompany(company);
+            } else {
+                // Fallback to default YT
+                Company defaultCompany = companyRepository.findByCode("YT")
+                        .orElseThrow(() -> new IllegalStateException("Default company (YT) not found"));
+                customer.setCompany(defaultCompany);
+            }
+        }
 
         // Save the new customer and return the response DTO
         return customerMapper.toResponse(customerRepository.save(customer));

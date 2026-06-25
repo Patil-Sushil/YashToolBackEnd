@@ -1,6 +1,5 @@
 package com.kalibyte.YashTools.auth.security.handler;
 
-import com.kalibyte.YashTools.common.response.ApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,11 +18,9 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        log.warn("Access denied at URI: {}. Message - {}", request.getRequestURI(), accessDeniedException.getMessage());
+        log.warn("Access denied at URI: {}", request.getRequestURI());
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        ApiResponse<Void> body = new ApiResponse<>(false, "Forbidden", null);
-        response.getWriter().write("{\"success\":" + body.isSuccess() + ",\"message\":\"" + body.getMessage() + "\",\"data\":null}");
+        response.getWriter().write("{\"success\":false,\"message\":\"Forbidden\",\"data\":null}");
     }
 }
-

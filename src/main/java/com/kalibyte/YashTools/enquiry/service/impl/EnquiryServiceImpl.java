@@ -1,199 +1,198 @@
 package com.kalibyte.YashTools.enquiry.service.impl;
 
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
-import com.kalibyte.YashTools.common.enums.EnquiryStatus;
 import com.kalibyte.YashTools.common.exception.BusinessException;
-import com.kalibyte.YashTools.common.exception.BusinessValidationException;
 import com.kalibyte.YashTools.common.exception.ResourceNotFoundException;
-import com.kalibyte.YashTools.common.util.NumberGeneratorUtil;
 import com.kalibyte.YashTools.customer.entity.Customer;
 import com.kalibyte.YashTools.customer.repository.CustomerRepository;
 import com.kalibyte.YashTools.enquiry.dto.request.CreateEnquiryRequest;
-import com.kalibyte.YashTools.enquiry.dto.request.EnquiryItemRequest;
+import com.kalibyte.YashTools.enquiry.dto.request.UpdateEnquiryStatusRequest;
 import com.kalibyte.YashTools.enquiry.dto.response.EnquiryResponse;
-import com.kalibyte.YashTools.enquiry.entity.*;
+import com.kalibyte.YashTools.enquiry.entity.Enquiry;
+import com.kalibyte.YashTools.enquiry.entity.enums.EnquiryStatus;
 import com.kalibyte.YashTools.enquiry.mapper.EnquiryMapper;
 import com.kalibyte.YashTools.enquiry.repository.EnquiryRepository;
 import com.kalibyte.YashTools.enquiry.service.EnquiryService;
-import com.kalibyte.YashTools.enquiry.service.EnquiryValidationService;
-import com.kalibyte.YashTools.master.coating.entity.Coating;
-import com.kalibyte.YashTools.master.coating.repository.CoatingRepository;
-import com.kalibyte.YashTools.master.rawmaterial.entity.RawMaterial;
-import com.kalibyte.YashTools.master.rawmaterial.repository.RawMaterialRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EnquiryServiceImpl implements EnquiryService {
 
     private final EnquiryRepository enquiryRepository;
     private final CustomerRepository customerRepository;
     private final EnquiryValidationService validationService;
-    private final RawMaterialRepository rawMaterialRepository;
-    private final CoatingRepository coatingRepository;
     private final EnquiryMapper enquiryMapper;
-
-    public EnquiryServiceImpl(EnquiryRepository enquiryRepository, CustomerRepository customerRepository, EnquiryValidationService validationService, RawMaterialRepository rawMaterialRepository, CoatingRepository coatingRepository, EnquiryMapper enquiryMapper) {
-        this.enquiryRepository = enquiryRepository;
-        this.customerRepository = customerRepository;
-        this.validationService = validationService;
-        this.rawMaterialRepository = rawMaterialRepository;
-        this.coatingRepository = coatingRepository;
-        this.enquiryMapper = enquiryMapper;
-    }
 
     @Override
     @Transactional
     @LoggableAction("CREATE_ENQUIRY")
     public EnquiryResponse createEnquiry(CreateEnquiryRequest request) {
-
-
-           // Fetch Customer (read-only)
-
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Customer not found"));
-
-
-           // Map DTO → Entity using MapStruct
+                        new ResourceNotFoundException(
+                                "Customer not found with id: " + request.getCustomerId()
+                        )
+                );
 
         Enquiry enquiry = enquiryMapper.toEntity(request, customer);
-        enquiry.setEnquiryNo(NumberGeneratorUtil.generate("ENQ"));
+        
+        // Automatically associate the Enquiry with the Customer's company
+        if (customer.getCompany() != null) {
+            enquiry.setCompany(customer.getCompany());
+        }
+        
+        enquiry.setEnquiryNo(generateEnquiryNumber(customer.getCompany() != null ? customer.getCompany().getCode() : "YT"));
         enquiry.setStatus(EnquiryStatus.CREATED);
-
-
-           // Inject Master Entities (CRITICAL STEP)
-
-        injectMasterData(enquiry, request);
-
-
-           // Validate Business Rules (AFTER injection)
 
         validationService.validate(enquiry);
 
-
-           // Save atomically
-
-        Enquiry saved = enquiryRepository.save(enquiry);
-        return enquiryMapper.toResponse(saved);
+        Enquiry savedEnquiry = enquiryRepository.save(enquiry);
+        return enquiryMapper.toResponse(savedEnquiry);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public EnquiryResponse getById(UUID enquiryId) {
-
         Enquiry enquiry = enquiryRepository.findById(enquiryId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Enquiry not found with id: " + enquiryId));
-
+                                "Enquiry not found with id: " + enquiryId
+                        )
+                );
         return enquiryMapper.toResponse(enquiry);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EnquiryResponse> getAllEnquiries() {
-
         return enquiryRepository.findAll()
                 .stream()
                 .map(enquiryMapper::toResponse)
                 .toList();
     }
 
+    @Override
+    public List<EnquiryResponse> getEnquiriesByCustomer(UUID customerId) {
+        if (!customerRepository.existsById(customerId)) {
+            throw new ResourceNotFoundException(
+                    "Customer not found with ID: " + customerId
+            );
+        }
+        return enquiryRepository.findByCustomerId(customerId)
+                .stream()
+                .map(enquiryMapper::toResponse)
+                .toList();
+    }
 
-    // MASTER ENTITY INJECTION LOGIC
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    @LoggableAction("UPDATE_ENQUIRY_STATUS")
+    public EnquiryResponse updateEnquiryStatus(UUID enquiryId, UpdateEnquiryStatusRequest request) {
+        log.info("Updating status for enquiry ID: {} to {}", enquiryId, request.getStatus());
 
-    private void injectMasterData(Enquiry enquiry, CreateEnquiryRequest request) {
+        Enquiry enquiry = enquiryRepository.findById(enquiryId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Enquiry not found with ID: " + enquiryId
+                ));
 
-        for (int i = 0; i < enquiry.getItems().size(); i++) {
+        // Validate status transition business rules
+        validateStatusTransition(enquiry.getStatus(), request.getStatus());
 
-            EnquiryItem item = enquiry.getItems().get(i);
-            EnquiryItemRequest itemReq = request.getItems().get(i);
+        enquiry.setStatus(request.getStatus());
 
-            switch (item.getOrderType()) {
+        // Append status change remarks if provided
+        if (request.getRemarks() != null && !request.getRemarks().isBlank()) {
+            String existingRemarks = enquiry.getItems().isEmpty() ? null : enquiry.getItems().get(0).getRemarks();
+            String updatedRemarks = existingRemarks != null
+                    ? existingRemarks + " | STATUS CHANGE [" + request.getStatus() + "]: " + request.getRemarks()
+                    : "STATUS CHANGE [" + request.getStatus() + "]: " + request.getRemarks();
 
-                case NEW_TOOL -> {
-                    NewToolSpecs specs = item.getNewToolSpecs();
-                    if (specs == null) {
-                        throw new BusinessException(
-                                "New tool specs missing");
-                    }
+            if (!enquiry.getItems().isEmpty()) {
+                enquiry.getItems().get(0).setRemarks(updatedRemarks);
+            }
+        }
 
-                    //  Raw Material (MANDATORY)
-                    Long rawMaterialId =
-                            itemReq.getNewToolSpecs().getRawMaterialId();
+        Enquiry savedEnquiry = enquiryRepository.save(enquiry);
 
-                    RawMaterial rawMaterial =
-                            rawMaterialRepository.findById(rawMaterialId)
-                                    .orElseThrow(() ->
-                                            new BusinessException(
-                                                    "Invalid raw material"));
+        log.info("Enquiry {} status updated successfully to {}", savedEnquiry.getEnquiryNo(), savedEnquiry.getStatus());
 
-                    specs.setRawMaterial(rawMaterial);
+        return enquiryMapper.toResponse(savedEnquiry);
+    }
 
-                    //  Coating (CONDITIONAL)
-                    if (Boolean.TRUE.equals(specs.getHasCoating())) {
+    /**
+     * Validate business rules for status transitions
+     */
+    private void validateStatusTransition(EnquiryStatus currentStatus, EnquiryStatus newStatus) {
+        if (currentStatus == EnquiryStatus.CLOSED) {
+            throw new BusinessException(
+                    "Cannot update status of a closed enquiry. Please create a new enquiry."
+            );
+        }
 
-                        Long coatingId =
-                                itemReq.getNewToolSpecs().getCoatingId();
+        if (currentStatus == newStatus) {
+            throw new BusinessException(
+                    "New status must be different from current status."
+            );
+        }
 
-                        if (coatingId == null) {
-                            throw new BusinessValidationException(
-                                    "Coating is mandatory when hasCoating=true");
-                        }
+        // Define allowed transitions
+        boolean isValidTransition = switch (currentStatus) {
+            case CREATED -> newStatus == EnquiryStatus.UNDER_REVIEW ||
+                    newStatus == EnquiryStatus.QUOTED ||
+                    newStatus == EnquiryStatus.CLOSED;
 
-                        Coating coating =
-                                coatingRepository.findById(coatingId)
-                                        .orElseThrow(() ->
-                                                new BusinessValidationException(
-                                                        "Invalid coating"));
+            case UNDER_REVIEW -> newStatus == EnquiryStatus.QUOTED ||
+                    newStatus == EnquiryStatus.CLOSED;
 
-                        specs.setCoating(coating);
-                    }
-                }
+            case QUOTED -> newStatus == EnquiryStatus.ACCEPTED ||
+                    newStatus == EnquiryStatus.CLOSED;
 
-                case RESHARPENING -> {
-                    ResharpeningSpecs specs = item.getResharpeningSpecs();
+            case ACCEPTED -> newStatus == EnquiryStatus.CLOSED;
 
-                    if (specs != null &&
-                            Boolean.TRUE.equals(specs.getHasCoating())) {
+            default -> false;
+        };
 
-                        Long coatingId =
-                                itemReq.getResharpeningSpecs().getCoatingId();
+        if (!isValidTransition) {
+            throw new BusinessException(
+                    String.format("Invalid status transition from %s to %s", currentStatus, newStatus)
+            );
+        }
+    }
 
-                        Coating coating =
-                                coatingRepository.findById(coatingId)
-                                        .orElseThrow(() ->
-                                                new BusinessException(
-                                                        "Invalid coating"));
+    private String generateEnquiryNumber(String companyCode) {
+        int year = LocalDate.now().getYear();
+        Optional<Enquiry> lastEnquiry = enquiryRepository.findTopByOrderByCreatedAtDesc();
+        long nextNumber = 1;
 
-                        specs.setCoating(coating);
-                    }
-                }
-
-                case REFORMING -> {
-                    ReformingSpecs specs = item.getReformingSpecs();
-
-                    if (specs != null &&
-                            Boolean.TRUE.equals(specs.getHasCoating())) {
-
-                        Long coatingId =
-                                itemReq.getReformingSpecs().getCoatingId();
-
-                        Coating coating =
-                                coatingRepository.findById(coatingId)
-                                        .orElseThrow(() ->
-                                                new BusinessException(
-                                                        "Invalid coating"));
-
-                        specs.setCoating(coating);
-                    }
+        if (lastEnquiry.isPresent()) {
+            String lastNumber = lastEnquiry.get().getEnquiryNo();
+            String[] parts = lastNumber.split("-");
+            if (parts.length >= 3) {
+                try {
+                    nextNumber = Long.parseLong(parts[parts.length - 1]) + 1;
+                } catch (NumberFormatException e) {
+                    // Keep 1 if parsing fails
                 }
             }
         }
+
+        String companyPrefix = companyCode;
+        if (companyPrefix == null || companyPrefix.trim().isEmpty()) {
+            companyPrefix = "YT";
+        }
+
+        return String.format("%s-ENQ-%d-%04d", companyPrefix, year, nextNumber);
     }
 }

@@ -1,6 +1,6 @@
 package com.kalibyte.YashTools.customer.dto;
 
-import com.kalibyte.YashTools.common.enums.CustomerStatus;
+import com.kalibyte.YashTools.customer.entity.enums.CustomerStatus;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
@@ -59,6 +59,10 @@ public class CustomerRequest {
     @JsonAlias({"gst_number", "gstnumber", "gst"})
     private String gstNumber;
 
+    @JsonProperty("companyCode")
+    @JsonAlias({"company_code", "companycode"})
+    private String companyCode;
+
     @Builder.Default
     private CustomerStatus status = CustomerStatus.ACTIVE;
-    }
+}

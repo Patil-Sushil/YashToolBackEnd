@@ -1,0 +1,861 @@
+{
+	"info": {
+		"_postman_id": "8bb38d38-944a-44c1-8408-efa46d7276c0",
+		"name": "YashTools Backend API Collection",
+		"description": "Comprehensive Postman collection to test the Authentication, Authorization, and Multi-Company (Multi-Tenant) endpoints of YashTools.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"accessToken\", jsonData.data.token);",
+									"    pm.collectionVariables.set(\"refreshToken\", jsonData.data.refreshToken);",
+									"    pm.collectionVariables.set(\"companyCode\", jsonData.data.companyCode);",
+									"    console.log(\"Saved accessToken and refreshToken to collection variables.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@yashtools.com\",\n    \"password\": \"Admin@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"accessToken\", jsonData.data.accessToken);",
+									"    pm.collectionVariables.set(\"refreshToken\", jsonData.data.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"currentPassword\": \"Admin@123\",\n    \"newPassword\": \"Admin@1234\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. User Management (Admin Only)",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"sales.sw@yashtools.com\",\n    \"password\": \"Sales@123\",\n    \"name\": \"Swara Enterprises Sales Exec\",\n    \"phone\": \"9876543211\",\n    \"role\": \"SALES\",\n    \"companyCode\": \"SW\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/create-user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"create-user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin?page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disable User",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/{{userId}}/disable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"{{userId}}",
+								"disable"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enable User",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/{{userId}}/enable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"{{userId}}",
+								"enable"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Companies",
+			"item": [
+				{
+					"name": "Get All Companies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.length >= 2) {",
+									"    // Automatically save company IDs for testing YT and SW",
+									"    jsonData.data.forEach(function(company) {",
+									"        if (company.code === 'YT') {",
+									"            pm.collectionVariables.set(\"companyIdYT\", company.id);",
+									"        } else if (company.code === 'SW') {",
+									"            pm.collectionVariables.set(\"companyIdSW\", company.id);",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/companies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"companies"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Customers (Tenant-Owned)",
+			"item": [
+				{
+					"name": "Create Customer (in Yash Tools - YT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"customerIdYT\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyName\": \"YT Auto Components\",\n    \"customerName\": \"Anil Shah\",\n    \"legalEntity\": \"Proprietorship\",\n    \"businessType\": \"Auto Ancillary\",\n    \"mobileNumber\": \"9911223344\",\n    \"email\": \"anil@ytauto.com\",\n    \"billingAddress\": \"Plot 24, MIDC Bhosari, Pune\",\n    \"deliveryAddress\": \"Plot 24, MIDC Bhosari, Pune\",\n    \"gstNumber\": \"27AAAAY2424A1Z1\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Customer (in Swara Enterprises - SW)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"customerIdSW\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdSW}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyName\": \"SW Heavy Engineering\",\n    \"customerName\": \"Milind Patil\",\n    \"legalEntity\": \"Pvt Ltd\",\n    \"businessType\": \"Fabricator\",\n    \"mobileNumber\": \"9911223355\",\n    \"email\": \"milind@swheavy.com\",\n    \"billingAddress\": \"Plot 88, MIDC Waluj, Aurangabad\",\n    \"deliveryAddress\": \"Plot 88, MIDC Waluj, Aurangabad\",\n    \"gstNumber\": \"27AAAAS8888B1Z2\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customers (YT Context)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customers (SW Context)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdSW}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Enquiries (Tenant-Owned)",
+			"item": [
+				{
+					"name": "Create Enquiry (YT Context)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"enquiryIdYT\", jsonData.data.enquiryId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"{{customerIdYT}}\",\n    \"isUrgent\": true,\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"Solid Carbide Endmill 10mm\",\n            \"quantity\": 5,\n            \"trial\": false,\n            \"remarks\": \"Standard 4-Flute\",\n            \"newToolSpecs\": {\n                \"materialType\": \"CARBIDE\",\n                \"materialGrade\": \"K20\",\n                \"coatingRequired\": true,\n                \"coatingType\": \"ALCRONA\",\n                \"diameter\": 10.0,\n                \"fluteLength\": 30.0,\n                \"shankDiameter\": 10.0,\n                \"overallLength\": 75.0,\n                \"technicalNotes\": \"Coating required\"\n            }\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/enquiries",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enquiries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Cross-Company Enquiry (Expect Forbidden/Error)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdSW}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"{{customerIdYT}}\",\n    \"isUrgent\": false,\n    \"items\": [\n        {\n            \"orderType\": \"RESHARPENING\",\n            \"toolName\": \"Carbide Drill 8mm\",\n            \"quantity\": 10,\n            \"trial\": false,\n            \"remarks\": \"Regrind only\",\n            \"resharpeningSpecs\": {\n                \"resharpeningType\": \"FULL\",\n                \"coatingRequired\": false\n            }\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/enquiries",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enquiries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Enquiries (YT Context)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/enquiries",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enquiries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Enquiries (SW Context)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdSW}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/enquiries",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enquiries"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Labor Management (Global/Shared)",
+			"item": [
+				{
+					"name": "Create Laborer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"laborerId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Suresh Ghadge\",\n    \"phNumber\": \"9011223344\",\n    \"email\": \"suresh@yashtools.com\",\n    \"address\": \"Hadapsar, Pune\",\n    \"role\": \"OPERATOR\",\n    \"wageType\": \"DAILY\",\n    \"dailyWage\": 450.00,\n    \"pieceRate\": 0.00,\n    \"hourlyRate\": 0.00,\n    \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/labors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Laborers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Record Attendance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"laborerId\": {{laborerId}},\n    \"workDate\": \"2026-06-19\",\n    \"checkInTime\": \"09:00:00\",\n    \"checkOutTime\": \"17:30:00\",\n    \"hoursWorked\": 8.5,\n    \"piecesCompleted\": 0,\n    \"earnedAmount\": 450.00,\n    \"wageTypeSnapshot\": \"DAILY\",\n    \"appliedRate\": 450.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/attendance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"attendance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance For Laborer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/attendance/laborer/{{laborerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"laborer",
+								"{{laborerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Record Advance Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"laborerId\": {{laborerId}},\n    \"transactionDate\": \"2026-06-19\",\n    \"amount\": 1000.00,\n    \"transactionType\": \"GIVEN\",\n    \"notes\": \"Advance for family emergency\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/advances",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"advances"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Labor Detailed Reports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labor-reports/summary?preset=THIS_WEEK",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labor-reports",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_WEEK"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "companyCode",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "companyIdYT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "companyIdSW",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerIdYT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerIdSW",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "enquiryIdYT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "laborerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

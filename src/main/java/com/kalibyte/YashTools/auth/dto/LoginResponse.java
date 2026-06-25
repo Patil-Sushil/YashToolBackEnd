@@ -19,4 +19,5 @@ public class LoginResponse {
     private UUID id;
     private String email;
     private List<String> roles;
+    private String companyCode;
 }

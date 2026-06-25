@@ -17,8 +17,11 @@ public interface CustomerMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "status", constant = "ACTIVE")
+    @Mapping(target = "company", ignore = true)
     Customer toEntity(CustomerRequest request);
 
+    @Mapping(target = "companyCode", source = "company.code")
+    @Mapping(target = "companyId", source = "company.id")
     CustomerResponse toResponse(Customer customer);
 
     @Mapping(target = "id", ignore = true)
@@ -27,5 +30,6 @@ public interface CustomerMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "company", ignore = true)
     void updateEntityFromRequest(CustomerRequest request, @MappingTarget Customer customer);
 }

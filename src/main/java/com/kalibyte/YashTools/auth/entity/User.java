@@ -40,6 +40,9 @@ public class User {
 
     private boolean enabled = true;
 
+    @Column(name = "company_code", nullable = false)
+    private String companyCode = "YT";
+
     @Column(name = "deleted")
     private boolean deleted = false;
 

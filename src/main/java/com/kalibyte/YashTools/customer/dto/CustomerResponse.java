@@ -24,4 +24,6 @@ public class CustomerResponse {
     private String deliveryAddress;
     private String gstNumber;
     private String status;
+    private String companyCode;
+    private UUID companyId;
 }

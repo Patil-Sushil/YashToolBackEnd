@@ -1,49 +1,61 @@
 package com.kalibyte.YashTools.enquiry.entity;
 
-import com.kalibyte.YashTools.master.coating.entity.Coating;
-import com.kalibyte.YashTools.master.rawmaterial.entity.RawMaterial;
+import com.kalibyte.YashTools.common.enums.CoatingType;
+import com.kalibyte.YashTools.enquiry.entity.enums.MaterialGrade;
+import com.kalibyte.YashTools.enquiry.entity.enums.MaterialType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import java.util.UUID;
 
+/**
+ * Technical specifications for new tool manufacturing orders
+ */
 @Entity
 @Table(name = "new_tool_specs")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class NewToolSpecs {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
-    //  Correct relationship to EnquiryItem
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enquiry_item_id", nullable = false, unique = true)
     private EnquiryItem enquiryItem;
 
-    //  SIMPLE BOOLEAN (NO RELATIONSHIP)
-    @Column(nullable = false)
-    private Boolean hasCoating;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "material_type", nullable = false, length = 30)
+    private MaterialType materialType;
 
-    //  ACTUAL RELATIONSHIP TO COATING MASTER
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coating_id")
-    private Coating coating;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "material_grade", nullable = false, length = 30)
+    private MaterialGrade materialGrade;
 
-    //  RAW MATERIAL IS MANDATORY
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "raw_material_id", nullable = false)
-    private RawMaterial rawMaterial;
+    @Column(name = "coating_required", nullable = false)
+    @Builder.Default
+    private Boolean coatingRequired = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "coating_type", length = 30)
+    private CoatingType coatingType;
 
     @Column(nullable = false)
     private Double diameter;
 
-    @Column(nullable = false)
+    @Column(name = "flute_length", nullable = false)
     private Double fluteLength;
 
-    @Column(nullable = false)
+    @Column(name = "shank_diameter", nullable = false)
     private Double shankDiameter;
 
-    @Column(nullable = false)
+    @Column(name = "overall_length", nullable = false)
     private Double overallLength;
+
+    @Column(name = "technical_notes", columnDefinition = "TEXT")
+    private String technicalNotes;
 }

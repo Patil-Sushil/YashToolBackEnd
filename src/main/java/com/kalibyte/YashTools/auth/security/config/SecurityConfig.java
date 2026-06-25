@@ -1,8 +1,9 @@
-// src/main/java/com/kalibyte/YashTools/auth/security/config/SecurityConfig.java
+
 package com.kalibyte.YashTools.auth.security.config;
 
 
 import com.kalibyte.YashTools.auth.security.filter.JwtAuthenticationFilter;
+import com.kalibyte.YashTools.common.multi_company.CompanyContextFilter;
 import com.kalibyte.YashTools.auth.security.handler.JwtAccessDeniedHandler;
 import com.kalibyte.YashTools.auth.security.handler.JwtAuthenticationEntryPoint;
 import com.kalibyte.YashTools.auth.security.token.CustomUserDetailsService;
@@ -39,12 +40,13 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
     private final JwtAccessDeniedHandler accessDeniedHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CompanyContextFilter companyContextFilter;
 
     @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -75,7 +77,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/gst/**")
                         .hasAnyRole("CA", "ADMIN")
 
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+
+                                    .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
 
                         // Reports
                         .requestMatchers("/api/reports/**")
@@ -142,7 +145,8 @@ public class SecurityConfig {
                 )
 
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(companyContextFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }
@@ -152,8 +156,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
-        configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "X-Company-Code"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition", "X-Company-Code"));
         configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
 
@@ -170,7 +174,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 

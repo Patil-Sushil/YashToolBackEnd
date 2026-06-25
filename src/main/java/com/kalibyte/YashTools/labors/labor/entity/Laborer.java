@@ -39,13 +39,13 @@ public class Laborer {
     @Enumerated(EnumType.STRING)
     private WageType wageType; // 'HOURLY' or 'PIECE_RATE'
 
-    @Column(name = "daily_wage",precision = 19, scale = 2)
+    @Column(name = "daily_wage", precision = 19, scale = 2)
     private BigDecimal dailyWage;
 
-    @Column(name = "piece_rate",precision = 19, scale = 2)
+    @Column(name = "piece_rate", precision = 19, scale = 2)
     private BigDecimal pieceRate;
 
-    @Column(name = "hourly_rate",precision = 19, scale = 2)
+    @Column(name = "hourly_rate", precision = 19, scale = 2)
     private BigDecimal hourlyRate;
 
     @Builder.Default

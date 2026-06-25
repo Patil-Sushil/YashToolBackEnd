@@ -16,5 +16,6 @@ public class ResharpeningSpecsResponse {
         private ResharpeningType resharpeningType;
         private Boolean hasCoating;
         private String coatingName;
+        private String technicalNotes;
 
 }

@@ -1,18 +1,20 @@
 package com.kalibyte.YashTools.master.rawmaterial.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RawMaterialRequest {
-    @NotBlank
+
+    @NotBlank(message = "Raw material name is required")
     private String name;
 
-    @NotBlank
+    @NotNull(message = "Rate is required")
+    @Positive(message = "Rate must be greater than zero")
     private Double rate;
-
 }

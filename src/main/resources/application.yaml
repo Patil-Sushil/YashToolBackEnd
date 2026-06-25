@@ -6,9 +6,9 @@ spring:
     name: YashTools
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:9090/YashTool?useSSL=false}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:1422}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -19,40 +19,70 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
-        default_schema: public
 
   flyway:
     enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    repair-on-migrate: true
     locations: classpath:db/migration
-    baseline-on-migrate: false
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${SPRING_MAIL_USERNAME}
-    password: ${SPRING_MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-        starttls:
-          enable: true
+  # File upload configuration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
+      resolve-lazily: false
+
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: ${SPRING_MAIL_USERNAME}
+#    password: ${SPRING_MAIL_PASSWORD}
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
+#            required: true
 
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: 3600000
+  secret: ${JWT_SECRET:Q0tQeXJmOW9Jb2ZxV2F5cFhUeG5sQzFkQkZpQzZ3c0ZxS0p4cA==}
+  expiration: 604800000
   refresh-expiration: 604800000
 
 app:
   company-state: ${COMPANY_STATE:Maharashtra}
+
   cors:
-    allowed-origins: ${ALLOWED_ORIGINS}
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
+
   default-admin:
     email: admin@yashtools.com
-    password: ${DEFAULT_ADMIN_PASSWORD}
+    password: Admin@123
 
 logging:
   level:
     org.flywaydb: INFO
     org.springframework.security: INFO
     com.kalibyte.YashTools: INFO
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
+
+management:
+  health:
+    mail:
+      enabled: false
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized

@@ -8,15 +8,20 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", builder = @org.mapstruct.Builder(disableBuilder = true))
+@Mapper(
+        componentModel = "spring",
+        builder = @org.mapstruct.Builder(disableBuilder = true)
+)
 public interface RawMaterialMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "active", constant = "true")
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "deactivatedAt", ignore = true)
     RawMaterial toEntity(RawMaterialRequest request);
 
-    RawMaterialResponse toResponse(RawMaterial material);
+    RawMaterialResponse toResponse(RawMaterial entity);
 
     List<RawMaterialResponse> toResponseList(List<RawMaterial> entities);
-
 }

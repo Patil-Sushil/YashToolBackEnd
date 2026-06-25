@@ -1,18 +1,22 @@
 spring:
   datasource:
-    url: jdbc:postgresql://192.168.11.41:5432/YashTool?useSSL=false
-    username: devuser
-    password: devpassword
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:9090/YashTool?useSSL=false}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:1422}
 
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
 
   flyway:
     enabled: true
-    url: jdbc:postgresql://192.168.11.41:5432/YashTool?useSSL=false
-    user: devuser
-    password: devpassword
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:9090/YashTool?useSSL=false}
+    user: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:1422}
     baseline-on-migrate: true
     baseline-version: 0
     repair-on-migrate: true
@@ -23,6 +27,10 @@ logging:
   level:
     org.flywaydb: DEBUG
     org.springframework.boot.autoconfigure.flyway: DEBUG
+    com.kalibyte.YashTools: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
 
 jwt:
   secret: Q0tQeXJmOW9Jb2ZxV2F5cFhUeG5sQzFkQkZpQzZ3c0ZxS0p4cA==
@@ -34,3 +42,9 @@ app:
     allowed-origins: http://localhost:3000,http://localhost:5173
   default-admin:
     password: Admin@123
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
