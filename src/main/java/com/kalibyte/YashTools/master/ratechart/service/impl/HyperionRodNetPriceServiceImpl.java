@@ -1,5 +1,6 @@
 package com.kalibyte.YashTools.master.ratechart.service.impl;
 
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.exception.BusinessException;
 import com.kalibyte.YashTools.common.exception.ResourceNotFoundException;
@@ -33,7 +34,7 @@ public class HyperionRodNetPriceServiceImpl implements HyperionRodNetPriceServic
     private final HyperionRodNetPriceMapper mapper;
 
     @Override
-    @LoggableAction("CREATE_ROD_NET_PRICE")
+    @LoggableAction(value = "Create Rod Net Price", action = AuditAction.RATE_CHART_ROD_NET_PRICE_CREATED, entityType = "RATE_CHART")
     public HyperionRodNetPriceResponse create(HyperionRodNetPriceRequest request) {
         log.debug("Creating rod net price for item: {}", request.getItem());
 
@@ -50,7 +51,7 @@ public class HyperionRodNetPriceServiceImpl implements HyperionRodNetPriceServic
     }
 
     @Override
-    @LoggableAction("UPDATE_ROD_NET_PRICE")
+    @LoggableAction(value = "Update Rod Net Price", action = AuditAction.RATE_CHART_ROD_NET_PRICE_UPDATED, entityType = "RATE_CHART")
     public HyperionRodNetPriceResponse update(UUID id, HyperionRodNetPriceRequest request) {
         log.debug("Updating rod net price with id: {}", id);
 
@@ -105,7 +106,7 @@ public class HyperionRodNetPriceServiceImpl implements HyperionRodNetPriceServic
     }
 
     @Override
-    @LoggableAction("DEACTIVATE_ROD_NET_PRICE")
+    @LoggableAction(value = "Deactivate Rod Net Price", action = AuditAction.RATE_CHART_ROD_NET_PRICE_DELETED, entityType = "RATE_CHART")
     public void deactivate(UUID id) {
         log.debug("Deactivating rod net price with id: {}", id);
         HyperionRodNetPrice entity = repository.findById(id)
@@ -116,7 +117,7 @@ public class HyperionRodNetPriceServiceImpl implements HyperionRodNetPriceServic
     }
 
     @Override
-    @LoggableAction("IMPORT_ROD_NET_PRICE")
+    @LoggableAction(value = "Import Rod Net Price", action = AuditAction.RATE_CHART_ROD_NET_PRICE_IMPORTED, entityType = "RATE_CHART")
     public int importExcel(InputStream inputStream) {
         log.info("Starting Excel import for rod net prices");
 

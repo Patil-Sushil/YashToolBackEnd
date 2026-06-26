@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.labors.advance.controller;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.labors.advance.dto.AdvanceTransactionRequestDTO;
 import com.kalibyte.YashTools.labors.advance.dto.AdvanceTransactionResponseDTO;
@@ -27,18 +29,21 @@ public class AdvanceController {
 
     @PostMapping("/grant")
     @Operation(summary = "Grant a cash advance", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Grant Cash Advance", action = AuditAction.ADVANCE_CREATED, entityType = "ADVANCE")
     public ResponseEntity<ApiResponse<AdvanceTransactionResponseDTO>> grantAdvance(@RequestBody AdvanceTransactionRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success("Advance granted successfully", advanceService.grantAdvance(request)));
     }
 
     @GetMapping("/balance/{laborerId}")
     @Operation(summary = "Get outstanding advance balance", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Retrieve Outstanding Advance Balance", action = AuditAction.ADVANCE_VIEWED, entityType = "ADVANCE")
     public ResponseEntity<ApiResponse<BigDecimal>> getOutstandingBalance(@PathVariable Long laborerId) {
         return ResponseEntity.ok(ApiResponse.success(advanceService.getOutstandingBalance(laborerId)));
     }
 
     @GetMapping("/laborer/{laborerId}")
     @Operation(summary = "Get advance transaction history", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Retrieve Advance Transactions By Laborer", action = AuditAction.ADVANCE_VIEWED, entityType = "ADVANCE")
     public ResponseEntity<ApiResponse<List<AdvanceTransactionResponseDTO>>> getTransactionsByLaborer(@PathVariable Long laborerId) {
         return ResponseEntity.ok(ApiResponse.success(advanceService.getTransactionsByLaborer(laborerId)));
     }

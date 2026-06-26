@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.labors.labor.controller;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.labors.labor.dto.LaborerRequestDTO;
 import com.kalibyte.YashTools.labors.labor.dto.LaborerResponseDTO;
@@ -28,6 +30,7 @@ public class LaborerController {
     @PostMapping
     @Operation(summary = "Create a new laborer", description = "Only accessible by ADMIN")
     @PreAuthorize("hasRole('ADMIN')")
+    @LoggableAction(value = "Register Laborer", action = AuditAction.LABORER_CREATED, entityType = "LABORER")
     public ResponseEntity<ApiResponse<LaborerResponseDTO>> createLaborer(@Valid @RequestBody LaborerRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success("Laborer created successfully", laborerService.createLaborer(request)));
     }
@@ -35,6 +38,7 @@ public class LaborerController {
     @GetMapping
     @Operation(summary = "Get all laborers", description = "Only accessible by ADMIN")
     @PreAuthorize("hasRole('ADMIN')")
+    @LoggableAction(value = "Retrieve All Laborers", action = AuditAction.LABORER_VIEWED, entityType = "LABORER")
     public ResponseEntity<ApiResponse<List<LaborerResponseDTO>>> getAllLaborers(@RequestParam(required = false) LaborRole role) {
         if (role != null) {
             return ResponseEntity.ok(ApiResponse.success(laborerService.getLaborersByRole(role)));
@@ -45,6 +49,7 @@ public class LaborerController {
     @GetMapping("/{id}")
     @Operation(summary = "Get laborer by ID", description = "Only accessible by ADMIN")
     @PreAuthorize("hasRole('ADMIN')")
+    @LoggableAction(value = "Retrieve Laborer By ID", action = AuditAction.LABORER_VIEWED, entityType = "LABORER")
     public ResponseEntity<ApiResponse<LaborerResponseDTO>> getLaborerById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(laborerService.getLaborerById(id)));
     }
@@ -52,6 +57,7 @@ public class LaborerController {
     @PutMapping("/{id}")
     @Operation(summary = "Update laborer by ID", description = "Only accessible by ADMIN")
     @PreAuthorize("hasRole('ADMIN')")
+    @LoggableAction(value = "Update Laborer Info", action = AuditAction.LABORER_UPDATED, entityType = "LABORER")
     public ResponseEntity<ApiResponse<LaborerResponseDTO>> updateLaborer(@PathVariable Long id, @Valid @RequestBody LaborerRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success("Laborer updated successfully", laborerService.updateLaborer(id, request)));
     }
@@ -59,6 +65,7 @@ public class LaborerController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Deactivate a labor", description = "Only accessible by ADMIN")
     @PreAuthorize("hasRole('ADMIN')")
+    @LoggableAction(value = "Deactivate Laborer", action = AuditAction.LABORER_UPDATED, entityType = "LABORER")
     public ResponseEntity<ApiResponse<LaborerResponseDTO>> deactivateLaborer(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success("Deactivated the labor",laborerService.deleteLaborer(id)));
     }

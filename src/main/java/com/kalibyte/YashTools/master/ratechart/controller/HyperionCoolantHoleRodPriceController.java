@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.master.ratechart.controller;
 
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.common.response.PageResponse;
 import com.kalibyte.YashTools.master.ratechart.dto.request.HyperionCoolantHoleRodPriceRequest;
@@ -42,6 +44,7 @@ public class HyperionCoolantHoleRodPriceController {
     )
     @PostMapping("/import")
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Import Coolant Hole Prices Excel", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_IMPORTED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<String>> importExcel(
             @RequestParam("file") MultipartFile file
     ) {
@@ -96,6 +99,7 @@ public class HyperionCoolantHoleRodPriceController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Create Coolant Hole Price Entry", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_CREATED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<HyperionCoolantHoleRodPriceResponse>> create(
             @Valid @RequestBody HyperionCoolantHoleRodPriceRequest request
     ) {
@@ -112,6 +116,7 @@ public class HyperionCoolantHoleRodPriceController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Update Coolant Hole Price Entry", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_UPDATED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<HyperionCoolantHoleRodPriceResponse>> update(
             @PathVariable UUID id,
             @Valid @RequestBody HyperionCoolantHoleRodPriceRequest request
@@ -125,6 +130,7 @@ public class HyperionCoolantHoleRodPriceController {
 
     @Operation(summary = "Get coolant hole price by ID")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @LoggableAction(value = "Retrieve Coolant Hole Price Entry", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_VIEWED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<HyperionCoolantHoleRodPriceResponse>> getById(@PathVariable UUID id) {
         log.info("Fetching coolant hole price by id: {}", id);
         HyperionCoolantHoleRodPriceResponse response = service.getById(id);
@@ -135,6 +141,7 @@ public class HyperionCoolantHoleRodPriceController {
 
     @Operation(summary = "Get all active coolant hole prices")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @LoggableAction(value = "Retrieve All Coolant Hole Prices", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_VIEWED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<List<HyperionCoolantHoleRodPriceResponse>>> getAll() {
         log.info("Fetching all active coolant hole prices");
         List<HyperionCoolantHoleRodPriceResponse> responses = service.getAllActive();
@@ -145,6 +152,7 @@ public class HyperionCoolantHoleRodPriceController {
 
     @Operation(summary = "Get paginated active coolant hole prices")
     @GetMapping(value = "/paginated", produces = MediaType.APPLICATION_JSON_VALUE)
+    @LoggableAction(value = "Retrieve Paginated Coolant Hole Prices", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_VIEWED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<PageResponse<HyperionCoolantHoleRodPriceResponse>>> getAllPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -174,6 +182,7 @@ public class HyperionCoolantHoleRodPriceController {
     @Operation(summary = "Deactivate coolant hole price")
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Deactivate Coolant Hole Price Entry", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_DELETED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<Void>> deactivate(@PathVariable UUID id) {
         log.info("Deactivating coolant hole price with id: {}", id);
         service.deactivate(id);

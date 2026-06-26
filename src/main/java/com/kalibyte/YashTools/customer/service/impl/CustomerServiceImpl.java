@@ -1,5 +1,6 @@
 package com.kalibyte.YashTools.customer.service.impl;
 
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.exception.BusinessException;
 import com.kalibyte.YashTools.common.exception.ResourceNotFoundException;
@@ -38,7 +39,7 @@ public class CustomerServiceImpl implements CustomerService {
     // Email must be unique among active (isDeleted=false) customers
     @Override
     @Transactional
-    @LoggableAction("CREATE_CUSTOMER")
+    @LoggableAction(value = "Create Customer", action = AuditAction.CUSTOMER_CREATED, entityType = "CUSTOMER")
     public CustomerResponse createCustomer(CustomerRequest request) {
 
         // Check if mobile already exists for an active customer
@@ -79,7 +80,7 @@ public class CustomerServiceImpl implements CustomerService {
     // Updates an existing customer (only if not deleted).
     @Override
     @Transactional
-    @LoggableAction("UPDATE_CUSTOMER")
+    @LoggableAction(value = "Update Customer", action = AuditAction.CUSTOMER_UPDATED, entityType = "CUSTOMER")
     public CustomerResponse updateCustomer(UUID customerId, CustomerRequest request) {
         // Fetch customer by ID and ensure it's not soft-deleted
         Customer customer = customerRepository.findById(customerId)

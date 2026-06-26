@@ -1,5 +1,6 @@
 package com.kalibyte.YashTools.enquiry.service.impl;
 
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.exception.BusinessException;
 import com.kalibyte.YashTools.common.exception.ResourceNotFoundException;
@@ -36,7 +37,7 @@ public class EnquiryServiceImpl implements EnquiryService {
 
     @Override
     @Transactional
-    @LoggableAction("CREATE_ENQUIRY")
+    @LoggableAction(value = "Create Enquiry", action = AuditAction.ENQUIRY_CREATED, entityType = "ENQUIRY")
     public EnquiryResponse createEnquiry(CreateEnquiryRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() ->
@@ -98,7 +99,7 @@ public class EnquiryServiceImpl implements EnquiryService {
      */
     @Override
     @Transactional
-    @LoggableAction("UPDATE_ENQUIRY_STATUS")
+    @LoggableAction(value = "Update Enquiry Status", action = AuditAction.ENQUIRY_STATUS_UPDATED, entityType = "ENQUIRY")
     public EnquiryResponse updateEnquiryStatus(UUID enquiryId, UpdateEnquiryStatusRequest request) {
         log.info("Updating status for enquiry ID: {} to {}", enquiryId, request.getStatus());
 

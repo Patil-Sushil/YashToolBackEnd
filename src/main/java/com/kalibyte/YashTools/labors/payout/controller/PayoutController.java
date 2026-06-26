@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.labors.payout.controller;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.labors.payout.dto.DisbursePayoutRequestDTO;
 import com.kalibyte.YashTools.labors.payout.dto.WeeklyPayoutRequestDTO;
@@ -31,18 +33,21 @@ public class PayoutController {
 
 	@PostMapping("/generate")
     @Operation(summary = "Generate weekly payout for a laborer", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Generate Weekly Payout", action = AuditAction.PAYOUT_CREATED, entityType = "PAYOUT")
     public ResponseEntity<ApiResponse<WeeklyPayoutResponseDTO>> generateWeeklyPayout(@RequestBody @Valid WeeklyPayoutRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success("Weekly payout generated successfully", weeklyPayoutService.generateWeeklyPayout(request)));
     }
 
     @GetMapping("/laborer/{laborerId}")
     @Operation(summary = "Get payout history for a laborer", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Retrieve Payouts By Laborer", action = AuditAction.PAYOUT_VIEWED, entityType = "PAYOUT")
     public ResponseEntity<ApiResponse<List<WeeklyPayoutResponseDTO>>> getPayoutsByLaborer(@PathVariable Long laborerId) {
         return ResponseEntity.ok(ApiResponse.success(weeklyPayoutService.getPayoutsByLaborer(laborerId)));
     }
 
     @PostMapping("/{payoutId}/disburse")
     @Operation(summary = "Mark a weekly payout as PAID", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Disburse Payout", action = AuditAction.PAYOUT_CREATED, entityType = "PAYOUT")
     public ResponseEntity<ApiResponse<WeeklyPayoutResponseDTO>> disbursePayout(
             @PathVariable Long payoutId,
             @RequestBody @Valid DisbursePayoutRequestDTO request) {

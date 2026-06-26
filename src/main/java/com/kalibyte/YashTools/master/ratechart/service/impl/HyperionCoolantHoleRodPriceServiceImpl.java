@@ -1,5 +1,6 @@
 package com.kalibyte.YashTools.master.ratechart.service.impl;
 
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.exception.BusinessException;
 import com.kalibyte.YashTools.common.exception.ResourceNotFoundException;
@@ -33,7 +34,7 @@ public class HyperionCoolantHoleRodPriceServiceImpl implements HyperionCoolantHo
     private final HyperionCoolantHoleRodPriceMapper mapper;
 
     @Override
-    @LoggableAction("CREATE_COOLANT_HOLE_PRICE")
+    @LoggableAction(value = "Create Coolant Hole Price", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_CREATED, entityType = "RATE_CHART")
     public HyperionCoolantHoleRodPriceResponse create(HyperionCoolantHoleRodPriceRequest request) {
         log.debug("Creating coolant hole price for category: {}, item: {}", request.getCategory(), request.getItem());
 
@@ -50,7 +51,7 @@ public class HyperionCoolantHoleRodPriceServiceImpl implements HyperionCoolantHo
     }
 
     @Override
-    @LoggableAction("UPDATE_COOLANT_HOLE_PRICE")
+    @LoggableAction(value = "Update Coolant Hole Price", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_UPDATED, entityType = "RATE_CHART")
     public HyperionCoolantHoleRodPriceResponse update(UUID id, HyperionCoolantHoleRodPriceRequest request) {
         log.debug("Updating coolant hole price with id: {}", id);
 
@@ -106,7 +107,7 @@ public class HyperionCoolantHoleRodPriceServiceImpl implements HyperionCoolantHo
     }
 
     @Override
-    @LoggableAction("DEACTIVATE_COOLANT_HOLE_PRICE")
+    @LoggableAction(value = "Deactivate Coolant Hole Price", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_DELETED, entityType = "RATE_CHART")
     public void deactivate(UUID id) {
         log.debug("Deactivating coolant hole price with id: {}", id);
         HyperionCoolantHoleRodPrice entity = repository.findById(id)
@@ -117,7 +118,7 @@ public class HyperionCoolantHoleRodPriceServiceImpl implements HyperionCoolantHo
     }
 
     @Override
-    @LoggableAction("IMPORT_COOLANT_HOLE_PRICE")
+    @LoggableAction(value = "Import Coolant Hole Price", action = AuditAction.RATE_CHART_COOLANT_HOLE_ROD_IMPORTED, entityType = "RATE_CHART")
     public int importExcel(InputStream inputStream) {
         log.info("Starting Excel import for coolant hole prices");
 

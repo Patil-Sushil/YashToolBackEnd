@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.enquiry.controller;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.enquiry.dto.request.CreateEnquiryRequest;
 import com.kalibyte.YashTools.enquiry.dto.request.UpdateEnquiryStatusRequest;
@@ -31,6 +33,7 @@ public class EnquiryController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
     @Operation(summary = "Create new enquiry")
+    @LoggableAction(value = "Create Enquiry", action = AuditAction.ENQUIRY_CREATED, entityType = "ENQUIRY")
     public ResponseEntity<ApiResponse<EnquiryResponse>> createEnquiry(
             @Valid @RequestBody CreateEnquiryRequest request
     ) {
@@ -43,6 +46,7 @@ public class EnquiryController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SALES') or @enquirySecurityService.canAccessEnquiry(#id)")
     @Operation(summary = "Get enquiry by ID")
+    @LoggableAction(value = "Retrieve Enquiry By ID", action = AuditAction.ENQUIRY_VIEWED, entityType = "ENQUIRY")
     public ResponseEntity<ApiResponse<EnquiryResponse>> getById(
             @Parameter(description = "Enquiry unique identifier")
             @PathVariable UUID id
@@ -54,6 +58,7 @@ public class EnquiryController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
     @Operation(summary = "Get all enquiries")
+    @LoggableAction(value = "Retrieve All Enquiries", action = AuditAction.ENQUIRY_VIEWED, entityType = "ENQUIRY")
     public ResponseEntity<ApiResponse<List<EnquiryResponse>>> getAllEnquiries() {
         List<EnquiryResponse> responses = enquiryService.getAllEnquiries();
         return ResponseEntity.ok(ApiResponse.success("Enquiries retrieved successfully", responses));
@@ -62,6 +67,7 @@ public class EnquiryController {
     @GetMapping("/customer/{customerId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
     @Operation(summary = "Get enquiries by customer")
+    @LoggableAction(value = "Retrieve Enquiries By Customer", action = AuditAction.ENQUIRY_VIEWED, entityType = "ENQUIRY")
     public ResponseEntity<ApiResponse<List<EnquiryResponse>>> getEnquiriesByCustomer(
             @Parameter(description = "Customer unique identifier")
             @PathVariable UUID customerId
@@ -86,6 +92,7 @@ public class EnquiryController {
                     "Allowed transitions: CREATED→UNDER_REVIEW/QUOTED/CLOSED, " +
                     "UNDER_REVIEW→QUOTED/CLOSED, QUOTED→ACCEPTED/CLOSED, ACCEPTED→CLOSED"
     )
+    @LoggableAction(value = "Update Enquiry Status", action = AuditAction.ENQUIRY_STATUS_UPDATED, entityType = "ENQUIRY")
     public ResponseEntity<ApiResponse<EnquiryResponse>> updateStatus(
             @Parameter(description = "Enquiry unique identifier")
             @PathVariable UUID id,

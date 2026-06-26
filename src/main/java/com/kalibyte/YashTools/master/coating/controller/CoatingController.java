@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.master.coating.controller;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.master.coating.dto.CoatingRequest;
 import com.kalibyte.YashTools.master.coating.dto.CoatingResponse;
 import com.kalibyte.YashTools.master.coating.service.CoatingService;
@@ -24,12 +26,14 @@ public class CoatingController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Create Coating", action = AuditAction.COATING_CREATED, entityType = "COATING")
     public ResponseEntity<ApiResponse<CoatingResponse>> create(@Valid @RequestBody CoatingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Coating created successfully", service.create(request)));
     }
 
     @GetMapping
+    @LoggableAction(value = "Retrieve All Coatings", action = AuditAction.COATING_VIEWED, entityType = "COATING")
     public ResponseEntity<ApiResponse<List<CoatingResponse>>> getAll() {
         return ResponseEntity.ok(ApiResponse.success("Coatings retrieved successfully", service.getAllActive()));
 
@@ -37,6 +41,7 @@ public class CoatingController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Deactivate Coating", action = AuditAction.COATING_DELETED, entityType = "COATING")
     public ResponseEntity<ApiResponse<Void>> deactivate(@PathVariable Long id) {
         service.deactivate(id);
         return ResponseEntity.ok(ApiResponse.success("Coating deactivated successfully", null));

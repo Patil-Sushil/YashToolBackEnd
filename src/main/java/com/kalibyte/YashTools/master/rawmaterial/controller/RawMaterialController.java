@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.master.rawmaterial.controller;
 
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.master.rawmaterial.dto.RawMaterialRequest;
 import com.kalibyte.YashTools.master.rawmaterial.dto.RawMaterialResponse;
@@ -23,6 +25,7 @@ public class RawMaterialController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Create Raw Material", action = AuditAction.RAW_MATERIAL_CREATED, entityType = "RAW_MATERIAL")
     public ResponseEntity<ApiResponse<RawMaterialResponse>> create(
             @Valid @RequestBody RawMaterialRequest request
     ) {
@@ -35,6 +38,7 @@ public class RawMaterialController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Update Raw Material", action = AuditAction.RAW_MATERIAL_UPDATED, entityType = "RAW_MATERIAL")
     public ResponseEntity<ApiResponse<RawMaterialResponse>> update(
             @PathVariable UUID id,
             @Valid @RequestBody RawMaterialRequest request
@@ -48,6 +52,7 @@ public class RawMaterialController {
     }
 
     @GetMapping("/{id}")
+    @LoggableAction(value = "Retrieve Raw Material By ID", action = AuditAction.RAW_MATERIAL_VIEWED, entityType = "RAW_MATERIAL")
     public ResponseEntity<ApiResponse<RawMaterialResponse>> getById(
             @PathVariable UUID id
     ) {
@@ -60,6 +65,7 @@ public class RawMaterialController {
     }
 
     @GetMapping
+    @LoggableAction(value = "Retrieve All Raw Materials", action = AuditAction.RAW_MATERIAL_VIEWED, entityType = "RAW_MATERIAL")
     public ResponseEntity<ApiResponse<List<RawMaterialResponse>>> getAll() {
         return ResponseEntity.ok(
                 ApiResponse.success(
@@ -71,6 +77,7 @@ public class RawMaterialController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Deactivate Raw Material", action = AuditAction.RAW_MATERIAL_DELETED, entityType = "RAW_MATERIAL")
     public ResponseEntity<ApiResponse<Void>> deactivate(
             @PathVariable UUID id
     ) {

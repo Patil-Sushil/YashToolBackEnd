@@ -10,6 +10,7 @@ import com.kalibyte.YashTools.auth.security.token.CustomUserDetails;
 import com.kalibyte.YashTools.auth.security.token.JwtTokenProvider;
 import com.kalibyte.YashTools.auth.service.AuthService;
 import com.kalibyte.YashTools.auth.service.RefreshTokenService;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.exception.BusinessException;
 import com.kalibyte.YashTools.common.response.PageResponse;
@@ -100,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @LoggableAction("CREATE_USER")
+    @LoggableAction(value = "Create User", action = AuditAction.USER_CREATED, entityType = "USER")
     public UserResponse createUser(UserRegistrationRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -130,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    @LoggableAction("CHANGE_PASSWORD")
+    @LoggableAction(value = "Change Password", action = AuditAction.PASSWORD_CHANGED, entityType = "USER")
     public void changePassword(ChangePasswordRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -186,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
 
     // Prevent users from deleting their own accounts
     @Override
-    @LoggableAction("DELETE_USER")
+    @LoggableAction(value = "Delete User", action = AuditAction.USER_DELETED, entityType = "USER")
     public void deleteUser(UUID id) {
 
         CustomUserDetails currentUser =
@@ -204,7 +205,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @LoggableAction("DISABLE_USER")
+    @LoggableAction(value = "Disable User", action = AuditAction.USER_DISABLED, entityType = "USER")
     public void disableUser(UUID id) {
 
         User user = userRepository.findById(id)
@@ -215,7 +216,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @LoggableAction("ENABLE_USER")
+    @LoggableAction(value = "Enable User", action = AuditAction.USER_ENABLED, entityType = "USER")
     public void enableUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("User not found"));

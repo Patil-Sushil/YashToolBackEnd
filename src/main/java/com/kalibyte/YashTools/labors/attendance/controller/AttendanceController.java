@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.labors.attendance.controller;
 
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.labors.attendance.dto.AttendanceRequestDTO;
 import com.kalibyte.YashTools.labors.attendance.dto.AttendanceResponseDTO;
@@ -27,6 +29,7 @@ public class AttendanceController {
     @PostMapping
     @Operation(summary = "Log single attendance", description = "Only accessible by ADMIN")
     @PreAuthorize("hasRole('ADMIN')")
+    @LoggableAction(value = "Log Attendance", action = AuditAction.ATTENDANCE_RECORDED, entityType = "ATTENDANCE")
     public ResponseEntity<ApiResponse<AttendanceResponseDTO>> logAttendance(@RequestBody AttendanceRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success("Attendance logged successfully", attendanceService.logAttendance(request)));
     }
@@ -34,6 +37,7 @@ public class AttendanceController {
     @PostMapping("/bulk")
     @Operation(summary = "Log bulk attendance", description = "Only accessible by ADMIN")
     @PreAuthorize("hasRole('ADMIN')")
+    @LoggableAction(value = "Bulk Log Attendance", action = AuditAction.ATTENDANCE_RECORDED, entityType = "ATTENDANCE")
     public ResponseEntity<ApiResponse<List<AttendanceResponseDTO>>> bulkLogAttendance(@RequestBody BulkAttendanceRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success("Bulk attendance logged successfully", attendanceService.bulkLogAttendance(request)));
     }

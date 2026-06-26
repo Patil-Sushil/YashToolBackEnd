@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.master.ratechart.controller;
 
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.common.response.PageResponse;
 import com.kalibyte.YashTools.master.ratechart.dto.request.HyperionRodNetPriceRequest;
@@ -43,6 +45,7 @@ public class HyperionRodNetPriceController {
     )
     @PostMapping("/import")
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Import Rod Net Prices Excel", action = AuditAction.RATE_CHART_ROD_NET_PRICE_IMPORTED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<String>> importExcel(
             @RequestParam(value = "file", required = true) MultipartFile file
     ) {
@@ -101,6 +104,7 @@ public class HyperionRodNetPriceController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Create Rod Net Price Entry", action = AuditAction.RATE_CHART_ROD_NET_PRICE_CREATED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<HyperionRodNetPriceResponse>> create(
             @Valid @RequestBody HyperionRodNetPriceRequest request
     ) {
@@ -117,6 +121,7 @@ public class HyperionRodNetPriceController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Update Rod Net Price Entry", action = AuditAction.RATE_CHART_ROD_NET_PRICE_UPDATED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<HyperionRodNetPriceResponse>> update(
             @PathVariable UUID id,
             @Valid @RequestBody HyperionRodNetPriceRequest request
@@ -130,6 +135,7 @@ public class HyperionRodNetPriceController {
 
     @Operation(summary = "Get rod net price by ID")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @LoggableAction(value = "Retrieve Rod Net Price Entry", action = AuditAction.RATE_CHART_ROD_NET_PRICE_VIEWED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<HyperionRodNetPriceResponse>> getById(@PathVariable UUID id) {
         log.info("Fetching rod net price by id: {}", id);
         HyperionRodNetPriceResponse response = service.getById(id);
@@ -140,6 +146,7 @@ public class HyperionRodNetPriceController {
 
     @Operation(summary = "Get all active rod net prices")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @LoggableAction(value = "Retrieve All Rod Net Prices", action = AuditAction.RATE_CHART_ROD_NET_PRICE_VIEWED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<List<HyperionRodNetPriceResponse>>> getAll() {
         log.info("Fetching all active rod net prices");
         List<HyperionRodNetPriceResponse> responses = service.getAllActive();
@@ -150,6 +157,7 @@ public class HyperionRodNetPriceController {
 
     @Operation(summary = "Get paginated active rod net prices")
     @GetMapping(value = "/paginated", produces = MediaType.APPLICATION_JSON_VALUE)
+    @LoggableAction(value = "Retrieve Paginated Rod Net Prices", action = AuditAction.RATE_CHART_ROD_NET_PRICE_VIEWED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<PageResponse<HyperionRodNetPriceResponse>>> getAllPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -179,6 +187,7 @@ public class HyperionRodNetPriceController {
     @Operation(summary = "Deactivate rod net price")
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN','STORE')")
+    @LoggableAction(value = "Deactivate Rod Net Price Entry", action = AuditAction.RATE_CHART_ROD_NET_PRICE_DELETED, entityType = "RATE_CHART")
     public ResponseEntity<ApiResponse<Void>> deactivate(@PathVariable UUID id) {
         log.info("Deactivating rod net price with id: {}", id);
         service.deactivate(id);

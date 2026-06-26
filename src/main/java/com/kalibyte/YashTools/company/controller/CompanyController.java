@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.company.controller;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.company.dto.CompanyResponse;
 import com.kalibyte.YashTools.company.entity.Company;
@@ -20,6 +22,7 @@ public class CompanyController {
     private final CompanyRepository companyRepository;
 
     @GetMapping
+    @LoggableAction(value = "Retrieve All Companies", action = AuditAction.COMPANY_VIEWED, entityType = "COMPANY")
     public ResponseEntity<ApiResponse<List<CompanyResponse>>> getAllCompanies() {
         List<Company> companies = companyRepository.findAll();
         List<CompanyResponse> response = companies.stream()

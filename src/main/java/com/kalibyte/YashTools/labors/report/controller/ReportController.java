@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.labors.report.controller;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.labors.report.dto.DateRangePreset;
 import com.kalibyte.YashTools.labors.report.dto.DateRangeRequest;
@@ -34,6 +36,7 @@ public class ReportController {
 
     @GetMapping("/summary")
     @Operation(summary = "Get labor expense summary for a date range/preset")
+    @LoggableAction(value = "Retrieve Labor Expense Summary", action = AuditAction.GET_REPORT, entityType = "REPORT")
     public ResponseEntity<ApiResponse<LaborExpenseReportDTO>> getSummary(
             @RequestParam(required = false) DateRangePreset preset,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -46,6 +49,7 @@ public class ReportController {
 
     @GetMapping("/weekly")
     @Operation(summary = "Get weekly labor expense report", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Retrieve Weekly Labor Expense Report", action = AuditAction.GET_REPORT, entityType = "REPORT")
     public ResponseEntity<ApiResponse<LaborExpenseReportDTO>> getWeeklyReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(ApiResponse.success(reportService.getWeeklyReport(date)));
@@ -53,6 +57,7 @@ public class ReportController {
 
     @GetMapping("/monthly")
     @Operation(summary = "Get monthly labor expense report", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Retrieve Monthly Labor Expense Report", action = AuditAction.GET_REPORT, entityType = "REPORT")
     public ResponseEntity<ApiResponse<LaborExpenseReportDTO>> getMonthlyReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(ApiResponse.success(reportService.getMonthlyReport(date)));
@@ -60,12 +65,14 @@ public class ReportController {
 
     @GetMapping("/yearly/{year}")
     @Operation(summary = "Get yearly labor expense report", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Retrieve Yearly Labor Expense Report", action = AuditAction.GET_REPORT, entityType = "REPORT")
     public ResponseEntity<ApiResponse<LaborExpenseReportDTO>> getYearlyReport(@PathVariable int year) {
         return ResponseEntity.ok(ApiResponse.success(reportService.getYearlyReport(year)));
     }
 
     @GetMapping("/export")
     @Operation(summary = "Export labor expense reports to Excel", description = "Only accessible by ADMIN")
+    @LoggableAction(value = "Export Labor Expense Reports to Excel", action = AuditAction.DATA_EXPORTED, entityType = "REPORT")
     public ResponseEntity<byte[]> exportReports(
             @RequestParam(required = false) DateRangePreset preset,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -93,4 +100,3 @@ public class ReportController {
         return DateRangeResolver.resolve(request);
     }
 }
-

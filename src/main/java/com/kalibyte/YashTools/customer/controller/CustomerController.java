@@ -1,5 +1,7 @@
 package com.kalibyte.YashTools.customer.controller;
 
+import com.kalibyte.YashTools.common.annotation.LoggableAction;
+import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.common.response.PageResponse;
 import com.kalibyte.YashTools.customer.dto.CustomerRequest;
@@ -27,6 +29,7 @@ public class CustomerController {
     // Create new customer
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','SALES')")
+    @LoggableAction(value = "Create Customer", action = AuditAction.CUSTOMER_CREATED, entityType = "CUSTOMER")
     public ResponseEntity<ApiResponse<CustomerResponse>> createCustomer(@Valid @RequestBody CustomerRequest request) {
         CustomerResponse response = customerService.createCustomer(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -36,6 +39,7 @@ public class CustomerController {
     // Update an existing customer by id
     @PatchMapping("/{customerId}")
     @PreAuthorize("hasAnyRole('ADMIN','SALES')")
+    @LoggableAction(value = "Update Customer", action = AuditAction.CUSTOMER_UPDATED, entityType = "CUSTOMER")
     public ResponseEntity<ApiResponse<CustomerResponse>> updateCustomer(
             @PathVariable("customerId") UUID customerId,
             @Valid @RequestBody CustomerRequest request) {
@@ -46,6 +50,7 @@ public class CustomerController {
     // Get a single customer by id
     @GetMapping("/{customerId}")
     @PreAuthorize("hasAnyRole('ADMIN','SALES') or @securityService.canAccessCustomer(#customerId)")
+    @LoggableAction(value = "Retrieve Customer By ID", action = AuditAction.CUSTOMER_VIEWED, entityType = "CUSTOMER")
     public ResponseEntity<ApiResponse<CustomerResponse>> getCustomer(
             @PathVariable("customerId") UUID customerId) {
         CustomerResponse response = customerService.getCustomerById(customerId);
@@ -54,6 +59,7 @@ public class CustomerController {
 
     // Get all customers (paginated)
     @GetMapping
+    @LoggableAction(value = "Retrieve All Customers", action = AuditAction.CUSTOMER_VIEWED, entityType = "CUSTOMER")
     public ResponseEntity<ApiResponse<PageResponse<CustomerResponse>>> listCustomers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
