@@ -1,7 +1,7 @@
 package com.kalibyte.YashTools.auth.mapper;
 
-import com.kalibyte.YashTools.auth.dto.UserRegistrationRequest;
-import com.kalibyte.YashTools.auth.dto.UserResponse;
+import com.kalibyte.YashTools.auth.dto.request.UserRegistrationRequest;
+import com.kalibyte.YashTools.auth.dto.response.UserResponse;
 import com.kalibyte.YashTools.auth.entity.Role;
 import com.kalibyte.YashTools.auth.entity.User;
 import org.mapstruct.Builder;

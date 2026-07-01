@@ -1,7 +1,7 @@
 package com.kalibyte.YashTools.auth.controller;
 
-import com.kalibyte.YashTools.auth.dto.UserRegistrationRequest;
-import com.kalibyte.YashTools.auth.dto.UserResponse;
+import com.kalibyte.YashTools.auth.dto.request.UserRegistrationRequest;
+import com.kalibyte.YashTools.auth.dto.response.UserResponse;
 import com.kalibyte.YashTools.auth.service.AuthService;
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.audit.entity.enums.AuditAction;

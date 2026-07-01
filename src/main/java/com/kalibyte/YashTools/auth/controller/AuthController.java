@@ -1,7 +1,12 @@
 package com.kalibyte.YashTools.auth.controller;
 
 
-import com.kalibyte.YashTools.auth.dto.*;
+import com.kalibyte.YashTools.auth.dto.request.ChangePasswordRequest;
+import com.kalibyte.YashTools.auth.dto.request.LoginRequest;
+import com.kalibyte.YashTools.auth.dto.request.LogoutRequest;
+import com.kalibyte.YashTools.auth.dto.request.TokenRefreshRequest;
+import com.kalibyte.YashTools.auth.dto.response.LoginResponse;
+import com.kalibyte.YashTools.auth.dto.response.TokenRefreshResponse;
 import com.kalibyte.YashTools.auth.service.AuthService;
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.audit.entity.enums.AuditAction;

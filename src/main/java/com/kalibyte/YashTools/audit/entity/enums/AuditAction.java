@@ -200,6 +200,14 @@ public enum AuditAction {
     RAW_MATERIAL_VIEWED,
     RAW_MATERIAL_DELETED,
 
+    // ── Quotation ─────────────────────────────────────────────────────────────
+    QUOTATION_CREATED,
+    QUOTATION_UPDATED,
+    QUOTATION_DELETED,
+    QUOTATION_REVISED,
+    QUOTATION_LOCKED,
+    QUOTATION_CANCELLED,
+
     // ── Other ─────────────────────────────────────────────────────────────────
     OTHER;
 
