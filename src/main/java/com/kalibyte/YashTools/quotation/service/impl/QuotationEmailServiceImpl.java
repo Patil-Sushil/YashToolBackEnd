@@ -12,7 +12,7 @@ import com.kalibyte.YashTools.quotation.exception.QuotationStateException;
 import com.kalibyte.YashTools.quotation.repository.QuotationRepository;
 import com.kalibyte.YashTools.quotation.security.QuotationSecurityService;
 import com.kalibyte.YashTools.quotation.service.QuotationEmailService;
-import com.kalibyte.YashTools.quotation.service.QuotationPdfService;
+import com.kalibyte.YashTools.quotation.pdf.service.QuotationPdfService;
 import com.kalibyte.YashTools.quotation.service.QuotationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

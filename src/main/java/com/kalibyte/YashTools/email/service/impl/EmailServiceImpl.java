@@ -48,6 +48,7 @@ public class EmailServiceImpl implements EmailService {
     private final EmailAttachmentService attachmentService;
     private final EmailTemplateService templateService;
     private final EmailStorageService storageService;
+    private final com.kalibyte.YashTools.company.repository.CompanyRepository companyRepository;
     private final EmailServiceImpl self;
 
     public EmailServiceImpl(
@@ -57,6 +58,7 @@ public class EmailServiceImpl implements EmailService {
             EmailAttachmentService attachmentService,
             EmailTemplateService templateService,
             EmailStorageService storageService,
+            com.kalibyte.YashTools.company.repository.CompanyRepository companyRepository,
             @Lazy EmailServiceImpl self) {
         this.emailLogRepository = emailLogRepository;
         this.mailSender = mailSender;
@@ -64,6 +66,7 @@ public class EmailServiceImpl implements EmailService {
         this.attachmentService = attachmentService;
         this.templateService = templateService;
         this.storageService = storageService;
+        this.companyRepository = companyRepository;
         this.self = self;
     }
 
@@ -159,6 +162,7 @@ public class EmailServiceImpl implements EmailService {
             long total = message.getAttachments().stream().mapToLong(EmailAttachment::sizeBytes)
                     .filter(s -> s >= 0).sum();
             log.setAttachmentTotalSizeBytes(total);
+            emailLogRepository.save(log); // Save to generate ID for storage path folder
             message.getAttachments().forEach(a ->
                     log.addAttachmentLog(EmailAttachmentLog.builder()
                             .filename(a.getFilename())
@@ -204,8 +208,15 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void populateMime(MimeMessage mime, EmailLog emailLog) throws Exception {
+        String fromName = emailProperties.getFromDisplayName();
+        if (emailLog.getCompanyId() != null) {
+            fromName = companyRepository.findById(emailLog.getCompanyId())
+                    .map(com.kalibyte.YashTools.company.entity.Company::getName)
+                    .orElse(fromName);
+        }
+
         mime.setFrom(new InternetAddress(emailProperties.getFromAddress(),
-                emailProperties.getFromDisplayName(), StandardCharsets.UTF_8.name()));
+                fromName, StandardCharsets.UTF_8.name()));
         if (emailLog.getToAddresses() != null) mime.setRecipients(MimeMessage.RecipientType.TO,
                 InternetAddress.parse(emailLog.getToAddresses(), false));
         if (emailLog.getCcAddresses() != null && !emailLog.getCcAddresses().isBlank())

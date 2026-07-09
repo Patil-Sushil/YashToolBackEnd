@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 public interface QuotationMapper {
 
     @Mapping(target = "quotationId", source = "id")
+    @Mapping(target = "customerId", source = "customer.id")
+    @Mapping(target = "sourceEnquiryId", source = "sourceEnquiry.id")
+    @Mapping(target = "parentQuotationId", source = "parentQuotation.id")
     @Mapping(target = "customerCompanyName", source = "customer.companyName")
     @Mapping(target = "customerContactPerson", source = "customer.customerName")
     @Mapping(target = "customerEmail", source = "customer.email")

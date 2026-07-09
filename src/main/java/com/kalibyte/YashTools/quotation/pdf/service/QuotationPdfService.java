@@ -1,4 +1,4 @@
-package com.kalibyte.YashTools.quotation.service;
+package com.kalibyte.YashTools.quotation.pdf.service;
 
 import com.kalibyte.YashTools.quotation.dto.response.QuotationResponse;
 

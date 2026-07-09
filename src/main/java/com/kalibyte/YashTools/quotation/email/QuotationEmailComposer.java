@@ -1,11 +1,14 @@
 package com.kalibyte.YashTools.quotation.email;
 
+import com.kalibyte.YashTools.company.entity.Company;
+import com.kalibyte.YashTools.company.repository.CompanyRepository;
 import com.kalibyte.YashTools.email.constants.EmailConstants;
 import com.kalibyte.YashTools.email.dto.EmailAttachment;
 import com.kalibyte.YashTools.email.dto.EmailMessage;
 import com.kalibyte.YashTools.email.entity.enums.EmailPriority;
 import com.kalibyte.YashTools.email.util.EmailMimeUtils;
 import com.kalibyte.YashTools.quotation.dto.response.QuotationResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -13,11 +16,21 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class QuotationEmailComposer {
+
+    private final CompanyRepository companyRepository;
 
     public static final String TEMPLATE_QUOTATION = "emails/quotation";
 
     public EmailMessage compose(QuotationResponse q, byte[] pdfAttachment, List<String> ccList) {
+
+        String companyName = "Yash Tools";
+        if (q.getCompanyId() != null) {
+            companyName = companyRepository.findById(q.getCompanyId())
+                    .map(Company::getName)
+                    .orElse("Yash Tools");
+        }
 
         Map<String, Object> vars = new HashMap<>();
         vars.put("quotation", q);
@@ -27,6 +40,7 @@ public class QuotationEmailComposer {
         vars.put("quotationNo", q.getQuotationNo());
         vars.put("grandTotal", q.getGrandTotal());
         vars.put("validUntil", q.getValidUntil());
+        vars.put("companyName", companyName);
 
         EmailMessage message = EmailMessage.builder()
                 .entityType(EmailConstants.OWNER_TYPE_QUOTATION)

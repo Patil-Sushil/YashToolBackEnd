@@ -1,6 +1,7 @@
 package com.kalibyte.YashTools.quotation.client;
 
-import com.kalibyte.YashTools.common.enums.OrderType;
+import com.kalibyte.YashTools.common.enums
+        .OrderType;
 import com.kalibyte.YashTools.enquiry.entity.enums.MaterialGrade;
 import com.kalibyte.YashTools.master.ratechart.entity.HyperionCoolantHoleRodPrice;
 import com.kalibyte.YashTools.master.ratechart.entity.HyperionRodNetPrice;
