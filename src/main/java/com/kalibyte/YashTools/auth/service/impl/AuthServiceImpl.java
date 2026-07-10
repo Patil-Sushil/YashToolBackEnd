@@ -1,6 +1,9 @@
 package com.kalibyte.YashTools.auth.service.impl;
 
-import com.kalibyte.YashTools.auth.dto.*;
+import com.kalibyte.YashTools.auth.dto.request.*;
+import com.kalibyte.YashTools.auth.dto.response.LoginResponse;
+import com.kalibyte.YashTools.auth.dto.response.TokenRefreshResponse;
+import com.kalibyte.YashTools.auth.dto.response.UserResponse;
 import com.kalibyte.YashTools.auth.entity.Role;
 import com.kalibyte.YashTools.auth.entity.User;
 import com.kalibyte.YashTools.auth.mapper.AuthMapper;

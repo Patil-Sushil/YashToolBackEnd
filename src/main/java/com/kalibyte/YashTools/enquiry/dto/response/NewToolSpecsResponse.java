@@ -24,15 +24,6 @@ public class NewToolSpecsResponse {
      */
     private String materialTypeDisplay;
 
-    /**
-     * Material grade code
-     */
-    private String materialGrade;
-
-    /**
-     * Material grade description
-     */
-    private String materialGradeDescription;
 
     /**
      * Coating required flag

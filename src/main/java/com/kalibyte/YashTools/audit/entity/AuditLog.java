@@ -39,7 +39,7 @@ public class AuditLog {
     private String username;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, columnDefinition = "varchar(50)")
     private AuditAction action;
 
     @Column(name = "action_description", length = 500)
@@ -61,7 +61,7 @@ public class AuditLog {
     private String userAgent;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(columnDefinition = "varchar(20)")
     private AuditStatus status;
 
     @Column(name = "error_message", columnDefinition = "TEXT")

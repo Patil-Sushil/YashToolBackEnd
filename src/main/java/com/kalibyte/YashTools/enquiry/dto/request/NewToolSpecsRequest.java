@@ -32,11 +32,6 @@ public class NewToolSpecsRequest {
     @NotNull(message = "Material type is required")
     private MaterialType materialType;
 
-    /**
-     * Material grade specification
-     */
-    @NotNull(message = "Material grade is required")
-    private MaterialGrade materialGrade;
 
     /**
      * Coating requirement flag

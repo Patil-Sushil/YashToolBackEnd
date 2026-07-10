@@ -1,33 +1,57 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
 
 spring:
+  profiles:
+    active: dev
   application:
     name: YashTools
 
+  # ==============================
+  # DATABASE
+  # ==============================
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:9090/YashTool?useSSL=false}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:1422}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
+  # ==============================
+  # JPA / HIBERNATE
+  # ==============================
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
         show_sql: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
 
+  # ==============================
+  # FLYWAY MIGRATION
+  # ==============================
   flyway:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 0
-    repair-on-migrate: true
     locations: classpath:db/migration
+    validate-on-migrate: true
 
-  # File upload configuration
+  # ==============================
+  # FILE UPLOAD
+  # ==============================
   servlet:
     multipart:
       enabled: true
@@ -36,53 +60,135 @@ spring:
       file-size-threshold: 2KB
       resolve-lazily: false
 
-#  mail:
-#    host: smtp.gmail.com
-#    port: 587
-#    username: ${SPRING_MAIL_USERNAME}
-#    password: ${SPRING_MAIL_PASSWORD}
-#    properties:
-#      mail:
-#        smtp:
-#          auth: true
-#          starttls:
-#            enable: true
-#            required: true
+  # ==============================
+  # MAIL (Spring's built-in)
+  # ==============================
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:kalibyte.official@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:}
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 30000
+          timeout: 30000
+          writetimeout: 30000
+        smtps:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 
+  # ==============================
+  # THYMELEAF (for email templates)
+  # ==============================
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+
+# ==============================
+# JWT
+# ==============================
 jwt:
   secret: ${JWT_SECRET:Q0tQeXJmOW9Jb2ZxV2F5cFhUeG5sQzFkQkZpQzZ3c0ZxS0p4cA==}
-  expiration: 604800000
+  expiration: 604800000        # 7 days in ms
   refresh-expiration: 604800000
 
+# ==============================
+# APP-LEVEL CONFIG
+# ==============================
 app:
   company-state: ${COMPANY_STATE:Maharashtra}
 
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
 
+  # ==============================
+  # QUOTATION MODULE
+  # ==============================
+  quotation:
+    default-validity-days: 30
+    approval-threshold-percentage: 10.0
+    default-cgst-percentage: 9.0
+    default-sgst-percentage: 9.0
+    default-igst-percentage: 18.0
+    max-revisions: 20
+    auto-apply-coating-charge: true
+    default-coating-charge: 50.00
+
+  # ==============================
+  # REUSABLE EMAIL MODULE
+  # ==============================
+  email:
+    enabled: true
+    from-address: ${SPRING_MAIL_USERNAME:kalibyte.official@gmail.com}
+    from-display-name: "Yash Tools"
+    max-retries: 3
+    thread-pool-size: 5
+    storage-path: ${EMAIL_STORAGE_PATH:/tmp/yash-email}
+    smtp:
+      host: ${SMTP_HOST:smtp.gmail.com}
+      port: ${SMTP_PORT:587}
+      username: ${SPRING_MAIL_USERNAME:kalibyte.official@gmail.com}
+      password: ${SPRING_MAIL_PASSWORD:}
+      protocol: smtp
+      auth: true
+      starttls: true
+      ssl: false
+      connection-timeout-ms: 30000
+      timeout-ms: 30000
+      write-timeout-ms: 30000
+
+  # ==============================
+  # DEFAULT ADMIN (bootstrap)
+  # ==============================
   default-admin:
     email: admin@yashtools.com
     password: Admin@123
 
+# ==============================
+# LOGGING
+# ==============================
 logging:
   level:
+    root: INFO
     org.flywaydb: INFO
     org.springframework.security: INFO
     com.kalibyte.YashTools: INFO
-    org.springframework.web.servlet.mvc.method.annotation: DEBUG
+    com.kalibyte.YashTools.email: INFO
+    com.kalibyte.YashTools.quotation: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/yash-tools.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
 
+# ==============================
+# MANAGEMENT / ACTUATOR
+# ==============================
 management:
-  health:
-    mail:
-      enabled: false
-
   endpoints:
     web:
       exposure:
         include: health,info
-
   endpoint:
     health:
+      show-details: when-authorized
       probes:
         enabled: true
-      show-details: when_authorized
+  health:
+    mail:
+      enabled: false

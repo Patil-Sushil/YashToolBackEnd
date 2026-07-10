@@ -32,9 +32,6 @@ public class NewToolSpecs {
     @Column(name = "material_type", nullable = false, length = 30)
     private MaterialType materialType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "material_grade", nullable = false, length = 30)
-    private MaterialGrade materialGrade;
 
     @Column(name = "coating_required", nullable = false)
     @Builder.Default

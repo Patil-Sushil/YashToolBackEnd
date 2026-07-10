@@ -32,6 +32,15 @@ public class DbCheck {
             } catch (Exception ex) {
                 System.out.println("Error reading companies table: " + ex.getMessage());
             }
+
+            try {
+                List<Map<String, Object>> coolantRods = jdbcTemplate.queryForList("SELECT id, category, item, price, active FROM hyperion_coolant_hole_rod_price");
+                for (Map<String, Object> rod : coolantRods) {
+                    System.out.println("COOLANT_ROD: category=" + rod.get("category") + ", item=" + rod.get("item") + ", price=" + rod.get("price") + ", active=" + rod.get("active"));
+                }
+            } catch (Exception ex) {
+                System.out.println("Error reading hyperion_coolant_hole_rod_price: " + ex.getMessage());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

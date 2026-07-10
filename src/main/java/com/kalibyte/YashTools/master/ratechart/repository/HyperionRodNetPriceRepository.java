@@ -21,5 +21,8 @@ public interface HyperionRodNetPriceRepository extends JpaRepository<HyperionRod
     @Query("SELECT h FROM HyperionRodNetPrice h WHERE LOWER(h.item) = LOWER(:item)")
     Optional<HyperionRodNetPrice> findByItemIgnoreCase(String item);
 
+    @Query("SELECT h FROM HyperionRodNetPrice h WHERE LOWER(h.item) = LOWER(:item) AND h.active = true")
+    Optional<HyperionRodNetPrice> findByItemIgnoreCaseAndActiveTrue(String item);
+
     boolean existsByItemIgnoreCase(String item);
 }

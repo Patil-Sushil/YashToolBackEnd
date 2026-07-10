@@ -162,6 +162,11 @@ public enum AuditAction {
     RATE_CHART_COOLANT_HOLE_ROD_UPDATED,
     RATE_CHART_COOLANT_HOLE_ROD_DELETED,
     RATE_CHART_COOLANT_HOLE_ROD_VIEWED,
+    TOOL_SERVICE_RATE_MASTER_IMPORTED,
+    TOOL_SERVICE_RATE_MASTER_CREATED,
+    TOOL_SERVICE_RATE_MASTER_UPDATED,
+    TOOL_SERVICE_RATE_MASTER_DELETED,
+    TOOL_SERVICE_RATE_MASTER_VIEWED,
 
     // ── Customer Management ───────────────────────────────────────────────────
     CUSTOMER_CREATED,
@@ -199,6 +204,14 @@ public enum AuditAction {
     RAW_MATERIAL_UPDATED,
     RAW_MATERIAL_VIEWED,
     RAW_MATERIAL_DELETED,
+
+    // ── Quotation ─────────────────────────────────────────────────────────────
+    QUOTATION_CREATED,
+    QUOTATION_UPDATED,
+    QUOTATION_DELETED,
+    QUOTATION_REVISED,
+    QUOTATION_LOCKED,
+    QUOTATION_CANCELLED,
 
     // ── Other ─────────────────────────────────────────────────────────────────
     OTHER;

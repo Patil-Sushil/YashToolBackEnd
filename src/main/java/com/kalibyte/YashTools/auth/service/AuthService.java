@@ -1,9 +1,11 @@
 package com.kalibyte.YashTools.auth.service;
 
-import com.kalibyte.YashTools.auth.dto.*;
+import com.kalibyte.YashTools.auth.dto.request.*;
+import com.kalibyte.YashTools.auth.dto.response.LoginResponse;
+import com.kalibyte.YashTools.auth.dto.response.TokenRefreshResponse;
+import com.kalibyte.YashTools.auth.dto.response.UserResponse;
 import com.kalibyte.YashTools.auth.entity.Role;
 import com.kalibyte.YashTools.auth.entity.User;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;

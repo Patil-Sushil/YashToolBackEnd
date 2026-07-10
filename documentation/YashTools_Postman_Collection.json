@@ -506,7 +506,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"customerId\": \"{{customerIdYT}}\",\n    \"isUrgent\": true,\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"Solid Carbide Endmill 10mm\",\n            \"quantity\": 5,\n            \"trial\": false,\n            \"remarks\": \"Standard 4-Flute\",\n            \"newToolSpecs\": {\n                \"materialType\": \"CARBIDE\",\n                \"materialGrade\": \"K20\",\n                \"coatingRequired\": true,\n                \"coatingType\": \"ALCRONA\",\n                \"diameter\": 10.0,\n                \"fluteLength\": 30.0,\n                \"shankDiameter\": 10.0,\n                \"overallLength\": 75.0,\n                \"technicalNotes\": \"Coating required\"\n            }\n        }\n    ]\n}"
+							"raw": "{\n    \"customerId\": \"{{customerIdYT}}\",\n    \"isUrgent\": true,\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"Solid Carbide Endmill 10mm\",\n            \"quantity\": 5,\n            \"trial\": false,\n            \"remarks\": \"Standard 4-Flute\",\n            \"newToolSpecs\": {\n                \"materialType\": \"CARBIDE\",\n                \"coatingRequired\": true,\n                \"coatingType\": \"ALCRONA\",\n                \"diameter\": 10.0,\n                \"fluteLength\": 30.0,\n                \"shankDiameter\": 10.0,\n                \"overallLength\": 75.0,\n                \"technicalNotes\": \"Coating required\"\n            }\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/enquiries",
@@ -769,6 +769,525 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "7. Quotations (Tenant-Owned)",
+			"item": [
+				{
+					"name": "Create Quotation from Enquiry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"quotationId\", jsonData.data.id);",
+									"    pm.collectionVariables.set(\"quotationNo\", jsonData.data.quotationNo);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"enquiryId\": \"{{enquiryIdYT}}\",\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"3.2X330MM UG CARBIDE ROD\",\n            \"materialGrade\": \"K40UF_H10F\",\n            \"quantity\": 10,\n            \"overallLength\": 330.0,\n            \"userMultiplier\": 1.2\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/from-enquiry",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"from-enquiry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Direct Quotation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"quotationId\", jsonData.data.id);",
+									"    pm.collectionVariables.set(\"quotationNo\", jsonData.data.quotationNo);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"{{customerIdYT}}\",\n    \"isUrgent\": false,\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"8.2X330MM UG CARBIDE ROD\",\n            \"materialGrade\": \"TWO_THREE_HOLE_K40_330\",\n            \"quantity\": 5,\n            \"overallLength\": 330.0,\n            \"userMultiplier\": 1.1\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"direct"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Quotation By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Quotation By Number",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/by-number/{{quotationNo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"by-number",
+								"{{quotationNo}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Quotations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations?page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Draft Quotation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"remarks\": \"Updated remarks for discount\",\n    \"discountPercentage\": 12.5,\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"3.2X330MM UG CARBIDE ROD\",\n            \"materialGrade\": \"K40UF_H10F\",\n            \"quantity\": 12,\n            \"overallLength\": 330.0,\n            \"userMultiplier\": 1.2\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Revise Quotation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"parentQuotationId\": \"{{quotationId}}\",\n    \"revisionReason\": \"Revision due to customer feedback on price\",\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"3.2X330MM UG CARBIDE ROD\",\n            \"materialGrade\": \"K40UF_H10F\",\n            \"quantity\": 15,\n            \"overallLength\": 330.0,\n            \"userMultiplier\": 1.2\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/revisions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Revision History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}/revisions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Approvals",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.length > 0) {",
+									"    pm.collectionVariables.set(\"approvalId\", jsonData.data[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/approvals/pending",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"approvals",
+								"pending"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Process Approval",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"approvalId\": \"{{approvalId}}\",\n    \"decision\": \"APPROVED\",\n    \"comments\": \"Approved discount percentage\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/approvals/process",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"approvals",
+								"process"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send Quotation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}/send",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}",
+								"send"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Quotation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}/resend",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}",
+								"resend"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lock Quotation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}/lock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}",
+								"lock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Quotation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}/cancel?reason=Client changed requirements",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}",
+								"cancel"
+							],
+							"query": [
+								{
+									"key": "reason",
+									"value": "Client changed requirements"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Download PDF",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}/pdf",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}",
+								"pdf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Email Delivery History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}/email-history",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}",
+								"email-history"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
@@ -854,6 +1373,21 @@
 		},
 		{
 			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "quotationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "quotationNo",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "approvalId",
 			"value": "",
 			"type": "string"
 		}

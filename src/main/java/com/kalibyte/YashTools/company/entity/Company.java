@@ -15,6 +15,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Builder
 public class Company {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -34,7 +35,7 @@ public class Company {
     @Column(name = "bank_account_no", length = 50)
     private String bankAccountNo;
 
-
+    @Column(name = "bank_ifsc")
     private String bankIfsc;
 
     @Column(name = "bank_branch")
@@ -45,6 +46,14 @@ public class Company {
 
     @Column(name = "logo_url")
     private String logoUrl;
+
+    // ★ Added missing email field
+    @Column(name = "email", length = 150)
+    private String email;
+
+    // ★ Added missing phone field
+    @Column(name = "phone", length = 50)
+    private String phone;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

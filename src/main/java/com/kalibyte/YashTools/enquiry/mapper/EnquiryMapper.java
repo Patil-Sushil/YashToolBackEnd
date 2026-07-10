@@ -76,8 +76,6 @@ public interface EnquiryMapper {
 
     @Mapping(target = "materialType", expression = "java(specs.getMaterialType() != null ? specs.getMaterialType().name() : null)")
     @Mapping(target = "materialTypeDisplay", expression = "java(specs.getMaterialType() != null ? specs.getMaterialType().getDisplayName() : null)")
-    @Mapping(target = "materialGrade", expression = "java(specs.getMaterialGrade() != null ? specs.getMaterialGrade().name() : null)")
-    @Mapping(target = "materialGradeDescription", expression = "java(specs.getMaterialGrade() != null ? specs.getMaterialGrade().getDescription() : null)")
     @Mapping(target = "coatingRequired", source = "coatingRequired")
     @Mapping(target = "coatingType", expression = "java(specs.getCoatingType() != null ? specs.getCoatingType().name() : null)")
     @Mapping(target = "diameter", source = "diameter")

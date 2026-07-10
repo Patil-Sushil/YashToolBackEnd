@@ -62,7 +62,17 @@ public enum MaterialGrade {
     /**
      * Advanced powder metallurgy steel
      */
-    ASP30("ASP30 - Premium PM HSS");
+    ASP30("ASP30 - Premium PM HSS"),
+
+    // New coolant hole grades
+    TWO_THREE_HOLE_K40_330("2 Hole/3 Hole,30 Degree/40 Degree, Grade K-40,330mm"),
+    CENTRAL_PARALLEL_K40_330("Central / Parallel hole, Grade K-40, Length 330mm"),
+
+    // New Net Price grades
+    K40UF_H10F("k40ufH10f"),
+    AM70_DM80("am70Dm80"),
+    PN90("pn90"),
+    GP10_K10F("gp10K10f");
 
     private final String description;
 
@@ -72,5 +82,19 @@ public enum MaterialGrade {
 
     public String getDescription() {
         return description;
+    }
+
+    @com.fasterxml.jackson.annotation.JsonCreator
+    public static MaterialGrade fromString(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        for (MaterialGrade grade : MaterialGrade.values()) {
+            if (grade.name().equalsIgnoreCase(value.trim()) ||
+                grade.getDescription().equalsIgnoreCase(value.trim())) {
+                return grade;
+            }
+        }
+        throw new IllegalArgumentException("Unknown material grade: " + value);
     }
 }

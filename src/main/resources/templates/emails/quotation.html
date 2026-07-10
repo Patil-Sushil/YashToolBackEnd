@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quotation</title>
+</head>'
+<body>
+<p>Hi <strong th:text="${companyName}">Yash Tools</strong>,</p>
+
+<p>Please find attached our commercial quotation for your review and reference.</p>
+
+<p>
+    <strong>Quotation Reference No:</strong>
+    <span th:text="${quotationNo}">YT-QT-2026-000001</span>
+</p>
+
+<p>The detailed quotation is attached to this email as a PDF document. Kindly review the same and let us know in case of any queries or if you require any further information.</p>
+
+<p>Looking forward to your valuable response.</p>
+
+<p>
+    Best Regards,<br>
+    <strong th:text="${companyName}">Yash Tools</strong>
+</p>
+
+<p style="font-size: 12px; color: #666;">
+    &copy; 2026 <span th:text="${companyName}">Yash Tools</span>. All rights reserved.
+</p>
+</body>
+</html>
