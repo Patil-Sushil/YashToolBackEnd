@@ -1,0 +1,258 @@
+package com.kalibyte.YashTools.workorder.service.impl;
+
+import com.kalibyte.YashTools.common.multi_company.CompanyContextHolder;
+import com.kalibyte.YashTools.company.entity.Company;
+import com.kalibyte.YashTools.quotation.entity.Quotation;
+import com.kalibyte.YashTools.quotation.entity.QuotationItem;
+import com.kalibyte.YashTools.quotation.entity.enums.QuotationStatus;
+import com.kalibyte.YashTools.quotation.repository.QuotationRepository;
+import com.kalibyte.YashTools.quotation.security.QuotationSecurityService;
+import com.kalibyte.YashTools.workorder.dto.request.CreateWorkOrderRequest;
+import com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderStatusRequest;
+import com.kalibyte.YashTools.workorder.dto.response.WorkOrderItemResponse;
+import com.kalibyte.YashTools.workorder.dto.response.WorkOrderResponse;
+import com.kalibyte.YashTools.workorder.entity.WorkOrder;
+import com.kalibyte.YashTools.workorder.entity.WorkOrderItem;
+import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
+import com.kalibyte.YashTools.workorder.exception.WorkOrderException;
+import com.kalibyte.YashTools.workorder.repository.WorkOrderRepository;
+import com.kalibyte.YashTools.workorder.service.WorkOrderService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class WorkOrderServiceImpl implements WorkOrderService {
+
+    private final WorkOrderRepository workOrderRepository;
+    private final QuotationRepository quotationRepository;
+    private final QuotationSecurityService quotationSecurityService;
+
+    @Override
+    @Transactional
+    public WorkOrderResponse createFromQuotation(CreateWorkOrderRequest request) {
+        log.info("Converting quotation {} to Work Order", request.getQuotationId());
+
+        Quotation quotation = quotationSecurityService.loadForCurrentCompany(request.getQuotationId());
+
+        if (quotation.getStatus() != QuotationStatus.LOCKED) {
+            throw new WorkOrderException("Only LOCKED quotations can be converted to a Work Order. Current status: " + quotation.getStatus());
+        }
+
+        if (workOrderRepository.existsByQuotationId(quotation.getId())) {
+            throw new WorkOrderException("A Work Order already exists for Quotation: " + quotation.getQuotationNo());
+        }
+
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        String companyCode = CompanyContextHolder.getCompanyCode();
+        if (companyCode == null || companyCode.isBlank()) {
+            companyCode = "YT";
+        }
+
+        long seq = workOrderRepository.count() + 1;
+        String workOrderNo = String.format("%s-WO-%d-%06d", companyCode, LocalDate.now().getYear(), seq);
+
+        Company company = Company.builder().id(companyId).code(companyCode).build();
+
+        WorkOrder wo = WorkOrder.builder()
+                .workOrderNo(workOrderNo)
+                .quotation(quotation)
+                .status(WorkOrderStatus.CREATED)
+                .customer(quotation.getCustomer())
+                .customerCompanyName(quotation.getCustomerCompanyName())
+                .customerContactPerson(quotation.getCustomerContactPerson())
+                .customerEmail(quotation.getCustomerEmail())
+                .customerMobile(quotation.getCustomerMobile())
+                .remarks(request.getRemarks())
+                .plannedStartDate(request.getPlannedStartDate())
+                .plannedEndDate(request.getPlannedEndDate())
+                .build();
+        wo.setCompany(company);
+
+        int line = 1;
+        for (QuotationItem src : quotation.getItems()) {
+            WorkOrderItem target = WorkOrderItem.builder()
+                    .lineNumber(line++)
+                    .quotationItem(src)
+                    .orderType(src.getOrderType())
+                    .toolName(src.getToolName())
+                    .itemName(src.getItemName())
+                    .quantity(src.getQuantity())
+                    .trial(src.getTrial())
+                    .itemRemarks(src.getItemRemarks())
+                    .drawingReference(src.getDrawingReference())
+                    .materialType(src.getMaterialType())
+                    .materialGrade(src.getMaterialGrade())
+                    .coatingRequired(src.getCoatingRequired())
+                    .coatingType(src.getCoatingType())
+                    .resharpeningType(src.getResharpeningType())
+                    .diameter(src.getDiameter())
+                    .fluteLength(src.getFluteLength())
+                    .shankDiameter(src.getShankDiameter())
+                    .overallLength(src.getOverallLength())
+                    .technicalNotes(src.getTechnicalNotes())
+                    .damageLevel(src.getDamageLevel())
+                    .specialGeometry(src.getSpecialGeometry())
+                    .specialProfile(src.getSpecialProfile())
+                    .expressDelivery(src.getExpressDelivery())
+                    .build();
+            wo.addItem(target);
+        }
+
+        WorkOrder saved = workOrderRepository.save(wo);
+        log.info("Work Order {} successfully created from quotation {}", saved.getWorkOrderNo(), quotation.getQuotationNo());
+        return toResponse(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public WorkOrderResponse getById(UUID id) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        WorkOrder wo = workOrderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new WorkOrderException("Work Order not found with ID: " + id));
+        return toResponse(wo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public WorkOrderResponse getByNumber(String workOrderNo) {
+        WorkOrder wo = workOrderRepository.findByWorkOrderNo(workOrderNo)
+                .orElseThrow(() -> new WorkOrderException("Work Order not found with Number: " + workOrderNo));
+        return toResponse(wo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<WorkOrderResponse> list(String status, Pageable pageable) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        if (status != null && !status.isBlank()) {
+            try {
+                WorkOrderStatus statusEnum = WorkOrderStatus.valueOf(status.toUpperCase());
+                return workOrderRepository.findAll((root, query, cb) -> cb.and(
+                        cb.equal(root.get("company").get("id"), companyId),
+                        cb.equal(root.get("status"), statusEnum)
+                ), pageable).map(this::toResponse);
+            } catch (IllegalArgumentException e) {
+                throw new WorkOrderException("Invalid status: " + status);
+            }
+        }
+        return workOrderRepository.findAll((root, query, cb) ->
+                cb.equal(root.get("company").get("id"), companyId), pageable)
+                .map(this::toResponse);
+    }
+
+    @Override
+    @Transactional
+    public WorkOrderResponse updateStatus(UUID id, UpdateWorkOrderStatusRequest request) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        WorkOrder wo = workOrderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new WorkOrderException("Work Order not found with ID: " + id));
+
+        WorkOrderStatus newStatus;
+        try {
+            newStatus = WorkOrderStatus.valueOf(request.getStatus().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new WorkOrderException("Invalid status: " + request.getStatus());
+        }
+
+        WorkOrderStatus currentStatus = wo.getStatus();
+        if (currentStatus == newStatus) {
+            return toResponse(wo);
+        }
+
+        // Validate transitions
+        if (currentStatus == WorkOrderStatus.COMPLETED || currentStatus == WorkOrderStatus.CANCELLED) {
+            throw new WorkOrderException("Cannot change status of a terminal Work Order in status: " + currentStatus);
+        }
+
+        if (newStatus == WorkOrderStatus.IN_PROGRESS) {
+            if (wo.getActualStartDate() == null) {
+                wo.setActualStartDate(LocalDateTime.now());
+            }
+        } else if (newStatus == WorkOrderStatus.COMPLETED || newStatus == WorkOrderStatus.PRODUCTION_COMPLETED || newStatus == WorkOrderStatus.CANCELLED) {
+            if (wo.getActualEndDate() == null) {
+                wo.setActualEndDate(LocalDateTime.now());
+            }
+            if (newStatus == WorkOrderStatus.COMPLETED && wo.getActualStartDate() == null) {
+                wo.setActualStartDate(LocalDateTime.now());
+            }
+        }
+
+        wo.setStatus(newStatus);
+        if (request.getRemarks() != null && !request.getRemarks().isBlank()) {
+            wo.setRemarks((wo.getRemarks() == null ? "" : wo.getRemarks() + "\n") 
+                    + "[" + newStatus + "] " + request.getRemarks());
+        }
+
+        WorkOrder saved = workOrderRepository.save(wo);
+        log.info("Work Order {} status updated to {}", saved.getWorkOrderNo(), newStatus);
+        return toResponse(saved);
+    }
+
+    private WorkOrderResponse toResponse(WorkOrder wo) {
+        List<WorkOrderItemResponse> itemResponses = wo.getItems().stream()
+                .map(i -> WorkOrderItemResponse.builder()
+                        .id(i.getId())
+                        .lineNumber(i.getLineNumber())
+                        .quotationItemId(i.getQuotationItem() != null ? i.getQuotationItem().getId() : null)
+                        .orderType(i.getOrderType().name())
+                        .toolName(i.getToolName())
+                        .itemName(i.getItemName())
+                        .quantity(i.getQuantity())
+                        .trial(i.getTrial())
+                        .itemRemarks(i.getItemRemarks())
+                        .drawingReference(i.getDrawingReference())
+                        .materialType(i.getMaterialType())
+                        .materialGrade(i.getMaterialGrade() != null ? i.getMaterialGrade().name() : null)
+                        .coatingRequired(i.getCoatingRequired())
+                        .coatingType(i.getCoatingType())
+                        .resharpeningType(i.getResharpeningType())
+                        .diameter(i.getDiameter())
+                        .fluteLength(i.getFluteLength())
+                        .shankDiameter(i.getShankDiameter())
+                        .overallLength(i.getOverallLength())
+                        .technicalNotes(i.getTechnicalNotes())
+                        .damageLevel(i.getDamageLevel())
+                        .specialGeometry(i.getSpecialGeometry())
+                        .specialProfile(i.getSpecialProfile())
+                        .expressDelivery(i.getExpressDelivery())
+                        .build())
+                .collect(Collectors.toList());
+
+        return WorkOrderResponse.builder()
+                .id(wo.getId())
+                .workOrderNo(wo.getWorkOrderNo())
+                .quotationId(wo.getQuotation().getId())
+                .quotationNo(wo.getQuotation().getQuotationNo())
+                .status(wo.getStatus().name())
+                .customerId(wo.getCustomer().getId())
+                .customerCompanyName(wo.getCustomerCompanyName())
+                .customerContactPerson(wo.getCustomerContactPerson())
+                .customerEmail(wo.getCustomerEmail())
+                .customerMobile(wo.getCustomerMobile())
+                .remarks(wo.getRemarks())
+                .plannedStartDate(wo.getPlannedStartDate())
+                .plannedEndDate(wo.getPlannedEndDate())
+                .actualStartDate(wo.getActualStartDate())
+                .actualEndDate(wo.getActualEndDate())
+                .items(itemResponses)
+                .createdAt(wo.getCreatedAt())
+                .createdBy(wo.getCreatedBy())
+                .updatedAt(wo.getUpdatedAt())
+                .updatedBy(wo.getUpdatedBy())
+                .companyId(wo.getCompany().getId())
+                .companyCode(wo.getCompany().getCode())
+                .build();
+    }
+}

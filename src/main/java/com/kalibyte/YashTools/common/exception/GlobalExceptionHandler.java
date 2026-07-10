@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -83,6 +84,20 @@ public class GlobalExceptionHandler {
         log.warn("Validation failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.failure("Validation failed: " + errors));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        String msg = "Malformed JSON request or invalid data type. ";
+        Throwable rootCause = ex.getRootCause();
+        if (rootCause != null) {
+            msg += rootCause.getMessage();
+        } else {
+            msg += ex.getMessage();
+        }
+        log.warn("Message not readable: {}", msg);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.failure(msg));
     }
 
     @ExceptionHandler(Exception.class)
