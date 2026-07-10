@@ -29,4 +29,9 @@ public class QuotationItemSpecsRequest {
     private Double shankDiameter;
 
     private String technicalNotes;
+
+    private String damageLevel; // Minor / Medium / Major
+    private Boolean specialGeometry;
+    private Boolean specialProfile;
+    private Boolean expressDelivery;
 }

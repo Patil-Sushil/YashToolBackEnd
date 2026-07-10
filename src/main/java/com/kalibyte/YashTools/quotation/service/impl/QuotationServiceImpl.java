@@ -213,12 +213,43 @@ public class QuotationServiceImpl implements QuotationService {
     @Transactional
     public QuotationResponse cancel(UUID id, String reason) {
         Quotation q = securityService.loadForCurrentCompany(id);
-        if (q.isTerminal())
-            throw new QuotationStateException("Terminal: " + q.getStatus());
+        if (q.getStatus() == QuotationStatus.LOCKED || q.getStatus() == QuotationStatus.CANCELLED || q.getStatus() == QuotationStatus.EXPIRED) {
+            throw new QuotationStateException("Cannot cancel quotation in status: " + q.getStatus());
+        }
 
         q.setStatus(QuotationStatus.CANCELLED);
         q.setInternalNotes((q.getInternalNotes() == null ? "" : q.getInternalNotes())
                 + "\n[CANCELLED] " + LocalDateTime.now() + " - " + reason);
+        return quotationMapper.toResponse(quotationRepository.saveAndFlush(q));
+    }
+
+    // ============================================
+    // RECORD CUSTOMER DECISION
+    // ============================================
+    @Override
+    @Transactional
+    public QuotationResponse recordCustomerDecision(UUID id, String decision, String remarks) {
+        log.info("Recording customer decision for quotation {}: {}", id, decision);
+        Quotation q = securityService.loadForCurrentCompany(id);
+
+        if (q.getStatus() != QuotationStatus.SENT_TO_CUSTOMER) {
+            throw new QuotationStateException(
+                    "Can only record customer decision for quotations in SENT_TO_CUSTOMER status. Current status: " + q.getStatus());
+        }
+
+        if ("APPROVED".equalsIgnoreCase(decision)) {
+            q.setStatus(QuotationStatus.CUSTOMER_APPROVED);
+            q.setCustomerDecision("APPROVED");
+        } else if ("REJECTED".equalsIgnoreCase(decision)) {
+            q.setStatus(QuotationStatus.CUSTOMER_REJECTED);
+            q.setCustomerDecision("REJECTED");
+        } else {
+            throw new QuotationStateException("Invalid customer decision: " + decision + ". Allowed values are APPROVED or REJECTED.");
+        }
+
+        q.setCustomerDecisionAt(LocalDateTime.now());
+        q.setCustomerDecisionRemarks(remarks);
+
         return quotationMapper.toResponse(quotationRepository.saveAndFlush(q));
     }
 
@@ -292,6 +323,7 @@ public class QuotationServiceImpl implements QuotationService {
                     .userMultiplier(b.getUserMultiplier())
                     .basePrice(b.getBasePrice())
                     .multipliedPrice(b.getMultipliedPrice())
+                    .coatingCharge(b.getCoatingCharge() != null ? b.getCoatingCharge() : BigDecimal.ZERO)
                     .unitPrice(b.getUnitPrice())
                     .lineSubtotal(b.getLineSubtotal())
                     .lineTaxableAmount(b.getLineSubtotal())
@@ -312,6 +344,10 @@ public class QuotationServiceImpl implements QuotationService {
                 item.setFluteLength(req.getSpecs().getFluteLength());
                 item.setShankDiameter(req.getSpecs().getShankDiameter());
                 item.setTechnicalNotes(req.getSpecs().getTechnicalNotes());
+                item.setDamageLevel(req.getSpecs().getDamageLevel());
+                item.setSpecialGeometry(Boolean.TRUE.equals(req.getSpecs().getSpecialGeometry()));
+                item.setSpecialProfile(Boolean.TRUE.equals(req.getSpecs().getSpecialProfile()));
+                item.setExpressDelivery(Boolean.TRUE.equals(req.getSpecs().getExpressDelivery()));
             }
             q.addItem(item);
             subtotal = subtotal.add(b.getLineSubtotal());

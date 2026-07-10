@@ -158,6 +158,15 @@ public class QuotationController {
                 quotationService.cancel(id, reason)));
     }
 
+    @PostMapping("/{id}/customer-decision")
+    public ResponseEntity<ApiResponse<QuotationResponse>> recordCustomerDecision(
+            @PathVariable UUID id,
+            @RequestParam String decision,
+            @RequestParam(required = false) String remarks) {
+        return ResponseEntity.ok(ApiResponse.success("Customer decision recorded",
+                quotationService.recordCustomerDecision(id, decision, remarks)));
+    }
+
     // ============================================
     // PDF
     // ============================================

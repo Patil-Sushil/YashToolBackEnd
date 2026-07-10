@@ -18,6 +18,7 @@ import com.kalibyte.YashTools.quotation.repository.QuotationRevisionRepository;
 import com.kalibyte.YashTools.quotation.security.QuotationSecurityService;
 import com.kalibyte.YashTools.quotation.service.PricingEngineService;
 import com.kalibyte.YashTools.quotation.service.QuotationRevisionService;
+import com.kalibyte.YashTools.quotation.service.QuotationApprovalService;
 import com.kalibyte.YashTools.quotation.util.PricingFormula;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,20 +42,40 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
     private final QuotationMapper mapper;
     private final QuotationSecurityService security;
     private final PricingEngineService pricingEngine;
+    private final QuotationApprovalService approvalService;
 
     @Override
     @Transactional
     public QuotationResponse createRevision(ReviseQuotationRequest req) {
         Quotation parent = security.loadForCurrentCompany(req.getParentQuotationId());
-        if (parent.getStatus() == QuotationStatus.LOCKED)
-            throw new QuotationStateException("Cannot revise LOCKED quotation");
+        if (parent.getStatus() != QuotationStatus.SENT_TO_CUSTOMER 
+                && parent.getStatus() != QuotationStatus.CUSTOMER_REJECTED) {
+            throw new QuotationStateException("Cannot revise quotation in status: " + parent.getStatus()
+                    + ". Revisions are only allowed for quotations that have been sent to the customer or rejected by the customer.");
+        }
+
+        Quotation rootParent = parent;
+        while (rootParent.getParentQuotation() != null) {
+            rootParent = rootParent.getParentQuotation();
+        }
+
+        // Dynamically find the next available revision suffix number by checking database presence
+        int nextRevisionNumber = rootParent.getRevisionCount() + 1;
+        while (quotationRepository.findByQuotationNo(rootParent.getQuotationNo() + "-R" + nextRevisionNumber).isPresent()) {
+            nextRevisionNumber++;
+        }
+
+        rootParent.setRevisionCount(nextRevisionNumber);
+        if (!rootParent.getId().equals(parent.getId())) {
+            quotationRepository.saveAndFlush(rootParent);
+        }
 
         Company companyRef = Company.builder()
                 .id(parent.getCompany().getId())
                 .code(parent.getCompany().getCode())
                 .build();
         Quotation revised = Quotation.builder()
-                .quotationNo(parent.getQuotationNo() + "-R" + (parent.getRevisionCount() + 1))
+                .quotationNo(rootParent.getQuotationNo() + "-R" + nextRevisionNumber)
                 .version(parent.getVersion() + 1)
                 .parentQuotation(parent)
                 .sourceType(parent.getSourceType())
@@ -98,6 +119,11 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
 
         Quotation saved = quotationRepository.saveAndFlush(revised);
         recalculateTotals(saved);
+        saved = quotationRepository.saveAndFlush(saved);
+
+        if (saved.getStatus() == QuotationStatus.PENDING_APPROVAL) {
+            approvalService.requestApproval(saved.getId(), saved.getDiscountPercentage());
+        }
 
         RevisionType type = RevisionType.CUSTOMER_FEEDBACK;
         if (req.getRevisionType() != null) {
@@ -154,12 +180,14 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
                     .overallLength(req.getOverallLength())
                     .materialGrade(req.getMaterialGrade())
                     .rateChartItem(b.getRateChartItem())
+                    .rateChartGrade(req.getMaterialGrade() != null ? req.getMaterialGrade().name() : null)
                     .ratePerUnit(b.getRatePerUnit())
                     .standardRodLength(BigDecimal.valueOf(b.getStandardRodLengthMm()))
                     .actualLengthUsed(BigDecimal.valueOf(b.getActualLengthMm()))
                     .userMultiplier(b.getUserMultiplier())
                     .basePrice(b.getBasePrice())
                     .multipliedPrice(b.getMultipliedPrice())
+                    .coatingCharge(b.getCoatingCharge() != null ? b.getCoatingCharge() : BigDecimal.ZERO)
                     .unitPrice(b.getUnitPrice())
                     .lineSubtotal(b.getLineSubtotal())
                     .lineTaxableAmount(b.getLineSubtotal())
@@ -167,6 +195,24 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
                     .rateSourceTable(b.getRateSourceTable())
                     .rateFetchedAt(LocalDateTime.now())
                     .build();
+
+            if (req.getSpecs() != null) {
+                item.setMaterialType(req.getSpecs().getMaterialType() != null
+                        ? req.getSpecs().getMaterialType().name() : null);
+                item.setCoatingRequired(Boolean.TRUE.equals(req.getSpecs().getCoatingRequired()));
+                item.setCoatingType(req.getSpecs().getCoatingType() != null
+                        ? req.getSpecs().getCoatingType().name() : null);
+                item.setResharpeningType(req.getSpecs().getResharpeningType() != null
+                        ? req.getSpecs().getResharpeningType().name() : null);
+                item.setDiameter(req.getSpecs().getDiameter());
+                item.setFluteLength(req.getSpecs().getFluteLength());
+                item.setShankDiameter(req.getSpecs().getShankDiameter());
+                item.setTechnicalNotes(req.getSpecs().getTechnicalNotes());
+                item.setDamageLevel(req.getSpecs().getDamageLevel());
+                item.setSpecialGeometry(Boolean.TRUE.equals(req.getSpecs().getSpecialGeometry()));
+                item.setSpecialProfile(Boolean.TRUE.equals(req.getSpecs().getSpecialProfile()));
+                item.setExpressDelivery(Boolean.TRUE.equals(req.getSpecs().getExpressDelivery()));
+            }
             q.addItem(item);
             subtotal = subtotal.add(b.getLineSubtotal());
         }
@@ -196,6 +242,10 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
                     .fluteLength(src.getFluteLength())
                     .shankDiameter(src.getShankDiameter())
                     .technicalNotes(src.getTechnicalNotes())
+                    .damageLevel(src.getDamageLevel())
+                    .specialGeometry(src.getSpecialGeometry())
+                    .specialProfile(src.getSpecialProfile())
+                    .expressDelivery(src.getExpressDelivery())
                     .rateChartItem(src.getRateChartItem())
                     .rateChartGrade(src.getRateChartGrade())
                     .ratePerUnit(src.getRatePerUnit())
@@ -219,7 +269,12 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
     }
 
     private void recalculateTotals(Quotation q) {
-        BigDecimal taxable = q.getSubtotal().subtract(q.getDiscountAmount());
+        BigDecimal discountPercentage = q.getDiscountPercentage() != null ? q.getDiscountPercentage() : BigDecimal.ZERO;
+        BigDecimal discountAmount = q.getSubtotal().multiply(discountPercentage)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        q.setDiscountAmount(discountAmount);
+
+        BigDecimal taxable = q.getSubtotal().subtract(discountAmount);
         if (taxable.compareTo(BigDecimal.ZERO) < 0) taxable = BigDecimal.ZERO;
         q.setTaxableAmount(taxable);
 
@@ -229,7 +284,12 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
         q.setSgstAmount(sgst);
         q.setTotalTax(cgst.add(sgst));
         q.setGrandTotal(taxable.add(q.getTotalTax()).setScale(2, RoundingMode.HALF_UP));
-        q.setStatus(QuotationStatus.PRICING_READY);
+
+        if (discountPercentage.compareTo(BigDecimal.ZERO) > 0 && approvalService.requiresApproval(discountPercentage)) {
+            q.setStatus(QuotationStatus.PENDING_APPROVAL);
+        } else {
+            q.setStatus(QuotationStatus.PRICING_READY);
+        }
     }
 
     private QuotationRevisionResponse toRevisionResponse(QuotationRevision r) {

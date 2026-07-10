@@ -11,22 +11,17 @@ import java.math.BigDecimal;
  * Decorator that adds coating surcharge on top of the default strategy.
  */
 @Component
-@RequiredArgsConstructor
 public class CoatingPricingStrategy implements PricingStrategy {
 
     private final DefaultPricingStrategy base;
-    private final QuotationProperties properties;
+
+    public CoatingPricingStrategy(DefaultPricingStrategy base) {
+        this.base = base;
+    }
 
     @Override
     public BigDecimal computeUnitPrice(PricingContext ctx) {
-        BigDecimal price = base.computeUnitPrice(ctx);
-
-        if (properties.isAutoApplyCoatingCharge()
-                && ctx.getCoatingType() != null
-                && !ctx.getCoatingType().isBlank()) {
-            price = price.add(properties.getDefaultCoatingCharge());
-        }
-        return price;
+        return base.computeUnitPrice(ctx);
     }
 
     @Override

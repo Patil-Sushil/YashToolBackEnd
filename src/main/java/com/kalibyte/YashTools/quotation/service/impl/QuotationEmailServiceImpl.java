@@ -7,8 +7,10 @@ import com.kalibyte.YashTools.email.service.EmailRetryService;
 import com.kalibyte.YashTools.email.service.EmailService;
 import com.kalibyte.YashTools.quotation.dto.response.QuotationResponse;
 import com.kalibyte.YashTools.quotation.email.QuotationEmailHandler;
+import com.kalibyte.YashTools.quotation.entity.Quotation;
 import com.kalibyte.YashTools.quotation.entity.enums.QuotationStatus;
 import com.kalibyte.YashTools.quotation.exception.QuotationStateException;
+import com.kalibyte.YashTools.quotation.exception.QuotationNotFoundException;
 import com.kalibyte.YashTools.quotation.repository.QuotationRepository;
 import com.kalibyte.YashTools.quotation.security.QuotationSecurityService;
 import com.kalibyte.YashTools.quotation.service.QuotationEmailService;
@@ -46,6 +48,15 @@ public class QuotationEmailServiceImpl implements QuotationEmailService {
     @Transactional
     public EmailResult sendQuotation(UUID id, List<String> cc) {
         log.info("Sending quotation email for {}", id);
+
+        Quotation entity = quotationRepository.findById(id)
+                .orElseThrow(() -> new QuotationNotFoundException("Quotation not found: " + id));
+        if (entity.getStatus() != QuotationStatus.PRICING_READY 
+                && entity.getStatus() != QuotationStatus.APPROVED
+                && entity.getStatus() != QuotationStatus.SENT_TO_CUSTOMER) {
+            throw new QuotationStateException("Cannot send quotation in its current status: " + entity.getStatus()
+                    + ". It must be PRICING_READY, APPROVED, or already SENT_TO_CUSTOMER.");
+        }
 
         QuotationResponse q = quotationService.getById(id);
         if (q.getCustomerEmail() == null || q.getCustomerEmail().isBlank())
@@ -92,7 +103,8 @@ public class QuotationEmailServiceImpl implements QuotationEmailService {
     public void markAsSent(UUID id) {
         quotationRepository.findById(id).ifPresent(q -> {
             if (q.getStatus() == QuotationStatus.PRICING_READY
-                    || q.getStatus() == QuotationStatus.APPROVED) {
+                    || q.getStatus() == QuotationStatus.APPROVED
+                    || q.getStatus() == QuotationStatus.SENT_TO_CUSTOMER) {
                 q.setStatus(QuotationStatus.SENT_TO_CUSTOMER);
                 q.setSentToCustomerAt(LocalDateTime.now());
                 q.setSentToCustomerBy(security.currentUsername());

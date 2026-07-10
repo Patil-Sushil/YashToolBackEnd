@@ -74,6 +74,21 @@ public class QuotationItem extends AuditableEntity {
     @Column(name = "technical_notes", columnDefinition = "TEXT")
     private String technicalNotes;
 
+    @Column(name = "damage_level", length = 50)
+    private String damageLevel;
+
+    @Column(name = "special_geometry")
+    @Builder.Default
+    private Boolean specialGeometry = false;
+
+    @Column(name = "special_profile")
+    @Builder.Default
+    private Boolean specialProfile = false;
+
+    @Column(name = "express_delivery")
+    @Builder.Default
+    private Boolean expressDelivery = false;
+
     @Column(name = "rate_chart_item")
     private String rateChartItem;
     @Column(name = "rate_chart_grade", length = 30)

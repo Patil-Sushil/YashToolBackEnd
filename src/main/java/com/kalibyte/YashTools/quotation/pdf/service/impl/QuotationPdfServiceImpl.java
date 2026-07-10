@@ -117,7 +117,7 @@ public class QuotationPdfServiceImpl implements QuotationPdfService {
         List<TemplateItem> items = new ArrayList<>();
         if (quotation.getItems() != null) {
             for (QuotationItemResponse item : quotation.getItems()) {
-                items.add(mapToTemplateItem(item, quotation.getCompanyCode()));
+                items.add(mapToTemplateItem(item, quotation.getCompanyCode(), quotation.getDiscountPercentage()));
             }
         }
         return items;
@@ -182,7 +182,7 @@ public class QuotationPdfServiceImpl implements QuotationPdfService {
         return baos.toByteArray();
     }
 
-    private TemplateItem mapToTemplateItem(QuotationItemResponse item, String companyCode) {
+    private TemplateItem mapToTemplateItem(QuotationItemResponse item, String companyCode, BigDecimal globalDiscountPercentage) {
         String desc = item.getToolName();
         if (desc == null || desc.trim().isEmpty()) {
             desc = item.getItemName();
@@ -195,36 +195,46 @@ public class QuotationPdfServiceImpl implements QuotationPdfService {
 
         BigDecimal ratePerPiece = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
 
-        String discountPercent = "0";
-        if (item.getLineSubtotal() != null && item.getLineSubtotal().compareTo(BigDecimal.ZERO) > 0
-                && item.getLineDiscountAmount() != null) {
+        BigDecimal discountPct = BigDecimal.ZERO;
+        if (globalDiscountPercentage != null && globalDiscountPercentage.compareTo(BigDecimal.ZERO) > 0) {
+            discountPct = globalDiscountPercentage;
+        }
+
+        String discountPercentStr = "0";
+        BigDecimal lineDiscountAmount = BigDecimal.ZERO;
+        if (discountPct.compareTo(BigDecimal.ZERO) > 0) {
+            discountPercentStr = discountPct.stripTrailingZeros().toPlainString();
+            if (item.getLineSubtotal() != null) {
+                lineDiscountAmount = item.getLineSubtotal()
+                        .multiply(discountPct)
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            }
+        } else if (item.getLineSubtotal() != null && item.getLineSubtotal().compareTo(BigDecimal.ZERO) > 0
+                && item.getLineDiscountAmount() != null && item.getLineDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal pct = item.getLineDiscountAmount()
                     .multiply(BigDecimal.valueOf(100))
                     .divide(item.getLineSubtotal(), 0, RoundingMode.HALF_UP);
-            discountPercent = pct.toString();
+            discountPercentStr = pct.toString();
+            lineDiscountAmount = item.getLineDiscountAmount();
+        }
+
+        BigDecimal totalAmount = item.getLineSubtotal() != null ? item.getLineSubtotal() : BigDecimal.ZERO;
+        if (lineDiscountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalAmount = totalAmount.subtract(lineDiscountAmount);
         }
 
         BigDecimal finalRate = ratePerPiece;
         if (item.getQuantity() != null && item.getQuantity() > 0) {
-            BigDecimal lineAmt = item.getLineSubtotal() != null ? item.getLineSubtotal() : BigDecimal.ZERO;
-            if (item.getLineDiscountAmount() != null) {
-                lineAmt = lineAmt.subtract(item.getLineDiscountAmount());
-            }
-            finalRate = lineAmt.divide(BigDecimal.valueOf(item.getQuantity()), 2, RoundingMode.HALF_UP);
-        }
-
-        BigDecimal totalAmount = item.getLineTotal() != null ? item.getLineTotal() : BigDecimal.ZERO;
-        if (totalAmount.compareTo(BigDecimal.ZERO) == 0 && item.getQuantity() != null && finalRate != null) {
-            totalAmount = finalRate.multiply(BigDecimal.valueOf(item.getQuantity()));
+            finalRate = totalAmount.divide(BigDecimal.valueOf(item.getQuantity()), 2, RoundingMode.HALF_UP);
         }
 
         return TemplateItem.builder()
                 .lineNumber(item.getLineNumber())
-                .description(desc.toString())
+                .description(desc)
                 .code(code)
                 .quantity(item.getQuantity() != null ? item.getQuantity() : 1)
                 .ratePerPiece(ratePerPiece)
-                .discountPercent(discountPercent)
+                .discountPercent(discountPercentStr)
                 .finalRate(finalRate)
                 .totalAmount(totalAmount)
                 .build();

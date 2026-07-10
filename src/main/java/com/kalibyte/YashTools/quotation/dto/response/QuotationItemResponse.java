@@ -35,6 +35,11 @@ public class QuotationItemResponse {
     private Double overallLength;
     private String technicalNotes;
 
+    private String damageLevel;
+    private Boolean specialGeometry;
+    private Boolean specialProfile;
+    private Boolean expressDelivery;
+
     private String rateChartItem;
     private String rateChartGrade;
     private BigDecimal ratePerUnit;
