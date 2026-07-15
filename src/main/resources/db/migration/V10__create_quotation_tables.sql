@@ -203,6 +203,162 @@ CREATE TABLE IF NOT EXISTS quotation_approvals (
     CONSTRAINT fk_approval_quotation FOREIGN KEY (quotation_id) REFERENCES quotations(id) ON DELETE CASCADE,
     CONSTRAINT chk_approval_status CHECK (approval_status IN ('PENDING','APPROVED','REJECTED','WITHDRAWN'))
     );
+    -- V10__inventory_module.sql
+
+    -- 1. Category
+    CREATE TABLE IF NOT EXISTS inventory_categories (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(100) NOT NULL,
+        code VARCHAR(50) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255),
+        CONSTRAINT uk_category_code UNIQUE (code),
+        CONSTRAINT uk_category_name UNIQUE (name)
+    );
+
+    -- 2. Material Grade
+    CREATE TABLE IF NOT EXISTS inventory_material_grades (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(100) NOT NULL,
+        code VARCHAR(50) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255),
+        CONSTRAINT uk_mat_grade_code UNIQUE (code),
+        CONSTRAINT uk_mat_grade_name UNIQUE (name)
+    );
+
+    -- 4. Item
+    CREATE TABLE IF NOT EXISTS inventory_items (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(150) NOT NULL,
+        sku VARCHAR(100) NOT NULL,
+        description TEXT,
+        category_id UUID NOT NULL REFERENCES inventory_categories(id),
+        material_grade_id UUID REFERENCES inventory_material_grades(id),
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255),
+        CONSTRAINT uk_item_sku UNIQUE (sku)
+    );
+
+    -- 5. Stock
+    CREATE TABLE IF NOT EXISTS inventory_stocks (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        item_id UUID NOT NULL REFERENCES inventory_items(id),
+        material_grade_id UUID REFERENCES inventory_material_grades(id),
+        quantity NUMERIC(19, 4) NOT NULL DEFAULT 0.0000,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255)
+    );
+
+    CREATE UNIQUE INDEX uk_stock_composite ON inventory_stocks (item_id) WHERE material_grade_id IS NULL;
+    CREATE UNIQUE INDEX uk_stock_composite_with_grade ON inventory_stocks (item_id, material_grade_id) WHERE material_grade_id IS NOT NULL;
+
+    -- 6. Stock Transaction
+    CREATE TABLE IF NOT EXISTS inventory_stock_transactions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        transaction_type VARCHAR(50) NOT NULL,
+        item_id UUID NOT NULL REFERENCES inventory_items(id),
+        material_grade_id UUID REFERENCES inventory_material_grades(id),
+        quantity NUMERIC(19, 4) NOT NULL,
+        reference_number VARCHAR(100),
+        remarks TEXT,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255)
+    );
+
+    -- 7. Cut Piece
+    CREATE TABLE IF NOT EXISTS inventory_cut_pieces (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        code VARCHAR(50) NOT NULL,
+        item_id UUID NOT NULL REFERENCES inventory_items(id),
+        material_grade_id UUID NOT NULL REFERENCES inventory_material_grades(id),
+        remaining_length NUMERIC(19, 4) NOT NULL,
+        status VARCHAR(50) NOT NULL,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255),
+        CONSTRAINT uk_cutpiece_code UNIQUE (code)
+    );
+
+    -- 8. Material Issue
+    CREATE TABLE IF NOT EXISTS inventory_material_issues (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        issue_number VARCHAR(50) NOT NULL,
+        item_id UUID NOT NULL REFERENCES inventory_items(id),
+        material_grade_id UUID NOT NULL REFERENCES inventory_material_grades(id),
+        issue_type VARCHAR(50) NOT NULL,
+        cut_piece_id UUID REFERENCES inventory_cut_pieces(id),
+        required_length NUMERIC(19, 4) NOT NULL,
+        issued_length NUMERIC(19, 4) NOT NULL,
+        new_cut_piece_id UUID REFERENCES inventory_cut_pieces(id),
+        status VARCHAR(50) NOT NULL,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255),
+        CONSTRAINT uk_mat_issue_number UNIQUE (issue_number)
+    );
+
+    -- 9. Stock Adjustment
+    CREATE TABLE IF NOT EXISTS inventory_stock_adjustments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        adjustment_number VARCHAR(50) NOT NULL,
+        item_id UUID NOT NULL REFERENCES inventory_items(id),
+        material_grade_id UUID REFERENCES inventory_material_grades(id),
+        quantity NUMERIC(19, 4) NOT NULL,
+        adjustment_type VARCHAR(50) NOT NULL,
+        reason VARCHAR(50) NOT NULL,
+        remarks TEXT,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255),
+        CONSTRAINT uk_stock_adj_number UNIQUE (adjustment_number)
+    );
+
+    -- 10. Stock Take
+    CREATE TABLE IF NOT EXISTS inventory_stock_takes (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        stock_take_number VARCHAR(50) NOT NULL,
+        status VARCHAR(50) NOT NULL,
+        remarks TEXT,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255),
+        CONSTRAINT uk_stock_take_number UNIQUE (stock_take_number)
+    );
+
+    -- 11. Stock Take Line
+    CREATE TABLE IF NOT EXISTS inventory_stock_take_lines (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        stock_take_id UUID NOT NULL REFERENCES inventory_stock_takes(id) ON DELETE CASCADE,
+        item_id UUID NOT NULL REFERENCES inventory_items(id),
+        material_grade_id UUID REFERENCES inventory_material_grades(id),
+        system_quantity NUMERIC(19, 4) NOT NULL,
+        physical_quantity NUMERIC(19, 4) NOT NULL,
+        difference_quantity NUMERIC(19, 4) NOT NULL,
+        approved BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        created_by VARCHAR(255),
+        updated_by VARCHAR(255)
+    );
+
 
 -- ============================================================
 -- INDEXES

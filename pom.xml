@@ -20,14 +20,15 @@
 	<properties>
 		<java.version>21</java.version>
 		<jjwt.version>0.13.0</jjwt.version>
-		<mapstruct.version>1.5.5.Final</mapstruct.version>
-		<lombok.version>1.18.46</lombok.version>
-		<flyway.version>12.5.0</flyway.version>
-		<springdoc.version>3.0.3</springdoc.version>
-		<poi.version>5.5.1</poi.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -56,11 +57,9 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<!-- Source: https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.11</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -156,9 +155,22 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
 			<version>${jjwt.version}</version>
+		</dependency>
+
+		<!-- Add this dependency to read .env file -->
+		<dependency>
+			<groupId>me.paulschwarz</groupId>
+			<artifactId>spring-dotenv</artifactId>
+			<version>4.0.0</version>
 		</dependency>
 
 		<dependency>
@@ -174,7 +186,6 @@
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -218,6 +229,9 @@
 							<version>0.2.0</version>
 						</path>
 					</annotationProcessorPaths>
+					<compilerArgs>
+						<compilerArg>-Amapstruct.unmappedTargetPolicy=IGNORE</compilerArg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>

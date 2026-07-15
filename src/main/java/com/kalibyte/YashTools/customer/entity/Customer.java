@@ -13,9 +13,7 @@ import org.hibernate.annotations.Filter;
                 @UniqueConstraint(columnNames = {"company_id", "email"})
         }
 )
-@Filter(name = "companyFilter", condition = "company_id = :companyId")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
 @NoArgsConstructor
