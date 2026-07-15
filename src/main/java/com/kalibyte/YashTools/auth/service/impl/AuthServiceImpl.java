@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -194,9 +195,10 @@ public class AuthServiceImpl implements AuthService {
     public void deleteUser(UUID id) {
 
         CustomUserDetails currentUser =
-                (CustomUserDetails) SecurityContextHolder.getContext()
-                        .getAuthentication().getPrincipal();
+                (CustomUserDetails) Objects.requireNonNull(SecurityContextHolder.getContext()
+                        .getAuthentication()).getPrincipal();
 
+        assert currentUser != null;
         if (currentUser.getId().equals(id)) {
             throw new BusinessException("You cannot delete your own account");
         }

@@ -23,13 +23,10 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
 
-  # ==============================
-  # JPA / HIBERNATE
-  # ==============================
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
