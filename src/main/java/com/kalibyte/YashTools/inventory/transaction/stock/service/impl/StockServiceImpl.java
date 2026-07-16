@@ -92,11 +92,15 @@ public class StockServiceImpl implements StockService {
             throw new BusinessException("Quantity to deduct must be greater than zero");
         }
 
+        String gradeStr = (materialGrade != null) ? materialGrade.getName() : "N/A";
         Stock stock = stockRepository.findStock(item, materialGrade)
-                .orElseThrow(() -> new BusinessException("No stock record found to deduct from"));
+                .orElseThrow(() -> new BusinessException("No raw material available in stock. Please purchase the raw material (Item: " 
+                        + item.getName() + ", Grade: " + gradeStr + ")"));
 
         if (stock.getQuantity().compareTo(quantity) < 0) {
-            throw new BusinessException("Insufficient stock. Available: " + stock.getQuantity() + ", Required: " + quantity);
+            throw new BusinessException("Insufficient stock. Available: " + stock.getQuantity() 
+                    + ", Required: " + quantity + ". Please purchase the raw material (Item: " 
+                    + item.getName() + ", Grade: " + gradeStr + ")");
         }
 
         stock.setQuantity(stock.getQuantity().subtract(quantity));

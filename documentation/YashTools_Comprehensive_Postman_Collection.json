@@ -1,0 +1,1991 @@
+{
+	"info": {
+		"_postman_id": "7cc42b87-4c51-4a38-892b-01225f9b81bb",
+		"name": "YashTools Comprehensive API Collection",
+		"description": "Comprehensive Postman collection to test the entire YashTools ERP backend including Authentication, User Management, Companies, Customers, Enquiries, Labor Management, Quotations, Raw Materials, Inventory Management, Production planning & execution, and Purchase flow.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"accessToken\", jsonData.data.token);",
+									"    pm.collectionVariables.set(\"refreshToken\", jsonData.data.refreshToken);",
+									"    pm.collectionVariables.set(\"companyCode\", jsonData.data.companyCode);",
+									"    console.log(\"Saved accessToken and refreshToken to collection variables.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@yashtools.com\",\n    \"password\": \"Admin@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"accessToken\", jsonData.data.accessToken);",
+									"    pm.collectionVariables.set(\"refreshToken\", jsonData.data.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"currentPassword\": \"Admin@123\",\n    \"newPassword\": \"Admin@1234\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. User Management (Admin Only)",
+			"item": [
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"userId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"sales.sw@yashtools.com\",\n    \"password\": \"Sales@123\",\n    \"name\": \"Swara Enterprises Sales Exec\",\n    \"phone\": \"9876543211\",\n    \"role\": \"SALES\",\n    \"companyCode\": \"SW\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/create-user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"create-user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin?page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disable User",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/{{userId}}/disable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"{{userId}}",
+								"disable"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enable User",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/{{userId}}/enable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"{{userId}}",
+								"enable"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Companies",
+			"item": [
+				{
+					"name": "Get All Companies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.length >= 2) {",
+									"    jsonData.data.forEach(function(company) {",
+									"        if (company.code === 'YT') {",
+									"            pm.collectionVariables.set(\"companyIdYT\", company.id);",
+									"        } else if (company.code === 'SW') {",
+									"            pm.collectionVariables.set(\"companyIdSW\", company.id);",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/companies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"companies"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Customers (Tenant-Owned)",
+			"item": [
+				{
+					"name": "Create Customer (in Yash Tools - YT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"customerIdYT\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyName\": \"YT Auto Components\",\n    \"customerName\": \"Anil Shah\",\n    \"legalEntity\": \"Proprietorship\",\n    \"businessType\": \"Auto Ancillary\",\n    \"mobileNumber\": \"9911223344\",\n    \"email\": \"anil@ytauto.com\",\n    \"billingAddress\": \"Plot 24, MIDC Bhosari, Pune\",\n    \"deliveryAddress\": \"Plot 24, MIDC Bhosari, Pune\",\n    \"gstNumber\": \"27AAAAY2424A1Z1\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Customer (in Swara Enterprises - SW)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"customerIdSW\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdSW}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyName\": \"SW Heavy Engineering\",\n    \"customerName\": \"Milind Patil\",\n    \"legalEntity\": \"Pvt Ltd\",\n    \"businessType\": \"Fabricator\",\n    \"mobileNumber\": \"9911223355\",\n    \"email\": \"milind@swheavy.com\",\n    \"billingAddress\": \"Plot 88, MIDC Waluj, Aurangabad\",\n    \"deliveryAddress\": \"Plot 88, MIDC Waluj, Aurangabad\",\n    \"gstNumber\": \"27AAAAS8888B1Z2\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customers (YT Context)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customers (SW Context)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdSW}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Enquiries (Tenant-Owned)",
+			"item": [
+				{
+					"name": "Create Enquiry (YT Context)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"enquiryIdYT\", jsonData.data.enquiryId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"{{customerIdYT}}\",\n    \"isUrgent\": true,\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"Solid Carbide Endmill 10mm\",\n            \"quantity\": 5,\n            \"trial\": false,\n            \"remarks\": \"Standard 4-Flute\",\n            \"newToolSpecs\": {\n                \"materialType\": \"CARBIDE\",\n                \"coatingRequired\": true,\n                \"coatingType\": \"ALCRONA\",\n                \"diameter\": 10.0,\n                \"fluteLength\": 30.0,\n                \"shankDiameter\": 10.0,\n                \"overallLength\": 75.0,\n                \"technicalNotes\": \"Coating required\"\n            }\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/enquiries",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enquiries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Enquiries (YT Context)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/enquiries",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enquiries"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Labor Management (Global/Shared)",
+			"item": [
+				{
+					"name": "Create Laborer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"laborerId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Suresh Ghadge\",\n    \"phNumber\": \"9011223344\",\n    \"email\": \"suresh@yashtools.com\",\n    \"address\": \"Hadapsar, Pune\",\n    \"role\": \"OPERATOR\",\n    \"wageType\": \"DAILY\",\n    \"dailyWage\": 450.00,\n    \"pieceRate\": 0.00,\n    \"hourlyRate\": 0.00,\n    \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/labors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Laborers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Record Attendance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"laborerId\": {{laborerId}},\n    \"workDate\": \"2026-06-19\",\n    \"checkInTime\": \"09:00:00\",\n    \"checkOutTime\": \"17:30:00\",\n    \"hoursWorked\": 8.5,\n    \"piecesCompleted\": 0,\n    \"earnedAmount\": 450.00,\n    \"wageTypeSnapshot\": \"DAILY\",\n    \"appliedRate\": 450.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/attendance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"attendance"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Quotations (Tenant-Owned)",
+			"item": [
+				{
+					"name": "Create Quotation from Enquiry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"quotationId\", jsonData.data.id);",
+									"    pm.collectionVariables.set(\"quotationNo\", jsonData.data.quotationNo);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"enquiryId\": \"{{enquiryIdYT}}\",\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"3.2X330MM UG CARBIDE ROD\",\n            \"materialGrade\": \"K40UF_H10F\",\n            \"quantity\": 10,\n            \"overallLength\": 330.0,\n            \"userMultiplier\": 1.2\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/from-enquiry",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"from-enquiry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Quotation By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Company-ID",
+								"value": "{{companyIdYT}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quotations/{{quotationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quotations",
+								"{{quotationId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "8. Raw Materials Master",
+			"item": [
+				{
+					"name": "Create Raw Material",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"rawMaterialId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Carbide Rod 10mm\",\n    \"rate\": 1520.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/masters/raw-materials",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"masters",
+								"raw-materials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Raw Material",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Carbide Rod 10mm - Premium\",\n    \"rate\": 1580.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/masters/raw-materials/{{rawMaterialId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"masters",
+								"raw-materials",
+								"{{rawMaterialId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Raw Material By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/masters/raw-materials/{{rawMaterialId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"masters",
+								"raw-materials",
+								"{{rawMaterialId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Raw Materials",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/masters/raw-materials",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"masters",
+								"raw-materials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate Raw Material",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/masters/raw-materials/{{rawMaterialId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"masters",
+								"raw-materials",
+								"{{rawMaterialId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "9. Inventory Management",
+			"item": [
+				{
+					"name": "Create Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"categoryId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Carbide Rods\",\n    \"code\": \"CR-ROD\",\n    \"description\": \"Solid Carbide uncut rods\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/categories/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"categories",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Material Grade",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"materialGradeId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"K40 Fine Grain\",\n    \"code\": \"K40UF\",\n    \"description\": \"Ultra fine grain carbide grade\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/material-grades",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"material-grades"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Material Grades",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/material-grades/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"material-grades",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"itemId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Carbide Rod 10x330mm\",\n    \"sku\": \"CR-10-330\",\n    \"description\": \"Carbide rod 10mm diameter 330mm length\",\n    \"categoryId\": \"{{categoryId}}\",\n    \"materialGradeId\": \"{{materialGradeId}}\",\n    \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/items",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/items/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"items",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stock Adjustment - Add Stock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"itemId\": \"{{itemId}}\",\n    \"materialGradeId\": \"{{materialGradeId}}\",\n    \"quantity\": 25.0,\n    \"adjustmentType\": \"ADD\",\n    \"reason\": \"EXCESS\",\n    \"remarks\": \"Adding initial raw materials for production line testing\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/stock-adjustments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"stock-adjustments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stock Query",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/stocks/query?itemId={{itemId}}&materialGradeId={{materialGradeId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"stocks",
+								"query"
+							],
+							"query": [
+								{
+									"key": "itemId",
+									"value": "{{itemId}}"
+								},
+								{
+									"key": "materialGradeId",
+									"value": "{{materialGradeId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Material Issue - Consume Rod",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"materialIssueId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"itemId\": \"{{itemId}}\",\n    \"materialGradeId\": \"{{materialGradeId}}\",\n    \"issueType\": \"FULL_ROD\",\n    \"requiredLength\": 120.0,\n    \"fullRodLength\": 330.0,\n    \"jobCardId\": \"{{jobCardId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/inventory/material-issues",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"material-issues"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "10. Production (Planning & Execution)",
+			"item": [
+				{
+					"name": "Create Machine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"machineId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Anca MX7 Grinder\",\n    \"code\": \"ANCA-MX7\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/machines",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"machines"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Machines",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/machines?page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"machines"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Job Card",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"jobCardId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"workOrderItemId\": \"{{workOrderItemId}}\",\n    \"quantity\": 10,\n    \"priority\": 2,\n    \"remarks\": \"To be processed urgently in Morning shift\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/job-cards",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"job-cards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Split Job Card",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jobCardId\": \"{{jobCardId}}\",\n    \"splitQuantities\": [5, 5]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/job-cards/split",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"job-cards",
+								"split"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Job Card Priority",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/job-cards/{{jobCardId}}/priority?priority=5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"job-cards",
+								"{{jobCardId}}",
+								"priority"
+							],
+							"query": [
+								{
+									"key": "priority",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Schedule Production",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"scheduleId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jobCardId\": \"{{jobCardId}}\",\n    \"machineId\": \"{{machineId}}\",\n    \"operatorId\": {{laborerId}},\n    \"shift\": \"MORNING\",\n    \"plannedStartDate\": \"2026-07-16\",\n    \"plannedEndDate\": \"2026-07-18\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/production-schedules",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-schedules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Job Execution Log",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"executionLogId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jobCardId\": \"{{jobCardId}}\",\n    \"operatorId\": {{laborerId}},\n    \"machineId\": \"{{machineId}}\",\n    \"shift\": \"MORNING\",\n    \"targetQuantity\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/production-executions/start",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-executions",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Job Execution Progress",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"producedQuantity\": 10,\n    \"rejectedQuantity\": 1,\n    \"reworkQuantity\": 1,\n    \"machineDowntimeMinutes\": 15,\n    \"downtimeReason\": \"Wheel dressing check\",\n    \"remarks\": \"Progressing well\",\n    \"isShiftComplete\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/production-executions/{{executionLogId}}/progress",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-executions",
+								"{{executionLogId}}",
+								"progress"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Record Quality Inspection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"qualityInspectionId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jobCardId\": \"{{jobCardId}}\",\n    \"acceptedQuantity\": 8,\n    \"rejectedQuantity\": 1,\n    \"reworkQuantity\": 1,\n    \"inspector\": \"QC Inspector Anil\",\n    \"remarks\": \"Outer diameter specifications met, 1 requires rework\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quality-inspections",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quality-inspections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Quality Inspection Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quality-inspections/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quality-inspections",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "11. Purchase Module",
+			"item": [
+				{
+					"name": "Create Payment Terms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"paymentTermsId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"NET-30\",\n    \"name\": \"30 Days Terms\",\n    \"numberOfDays\": 30,\n    \"description\": \"Payment due within 30 days of invoice date\",\n    \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase/payment-terms",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase",
+								"payment-terms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Purchase Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"purchaseTypeId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"RAW-CARBIDE\",\n    \"name\": \"Raw Material Carbide\",\n    \"description\": \"Procurement of raw solid carbide rods\",\n    \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase/purchase-types",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase",
+								"purchase-types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Vendor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"vendorId\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vendorName\": \"Hyperion Materials Supplier\",\n    \"gstin\": \"27AAAAS1234F1Z1\",\n    \"pan\": \"AAAAS1234F\",\n    \"contactDetails\": \"sales@hyperion.com\",\n    \"address\": \"MIDC Phase 1, Bhosari, Pune\",\n    \"paymentTermsId\": \"{{paymentTermsId}}\",\n    \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase/vendors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase",
+								"vendors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Purchase Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"purchaseOrderId\", jsonData.data.id);",
+									"    if (jsonData.data.items && jsonData.data.items.length > 0) {",
+									"        pm.collectionVariables.set(\"poItemReferenceId\", jsonData.data.items[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vendorId\": \"{{vendorId}}\",\n    \"poDate\": \"2026-07-15\",\n    \"expectedDeliveryDate\": \"2026-07-20\",\n    \"paymentTermsId\": \"{{paymentTermsId}}\",\n    \"purchaseTypeId\": \"{{purchaseTypeId}}\",\n    \"remarks\": \"Purchase order for carbide rods\",\n    \"items\": [\n        {\n            \"itemId\": \"{{itemId}}\",\n            \"materialGradeId\": \"{{materialGradeId}}\",\n            \"orderedQuantity\": 50.0,\n            \"unit\": \"Rods\",\n            \"rate\": 1200.00,\n            \"gstPercentage\": 18.00,\n            \"discount\": 0.00\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase/purchase-orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase",
+								"purchase-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Goods Receipt Note (GRN)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.collectionVariables.set(\"goodsReceiptId\", jsonData.data.id);",
+									"    if (jsonData.data.purchaseInvoiceId) {",
+									"        pm.collectionVariables.set(\"purchaseInvoiceId\", jsonData.data.purchaseInvoiceId);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"purchaseOrderId\": \"{{purchaseOrderId}}\",\n    \"grnDate\": \"2026-07-15\",\n    \"warehouse\": \"Main Raw Material Warehouse\",\n    \"receivedBy\": \"Store Manager Rohan\",\n    \"remarks\": \"Received and accepted in full quality check\",\n    \"items\": [\n        {\n            \"poItemReferenceId\": \"{{poItemReferenceId}}\",\n            \"acceptedQuantity\": 50.0,\n            \"rejectedQuantity\": 0.0\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase/goods-receipts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase",
+								"goods-receipts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Record Vendor Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"paymentDate\": \"2026-07-15\",\n    \"vendorId\": \"{{vendorId}}\",\n    \"paymentMethod\": \"BANK_TRANSFER\",\n    \"paymentReferenceNumber\": \"TXN981273912\",\n    \"remarks\": \"Paid invoice for initial batch supply\",\n    \"items\": [\n        {\n            \"purchaseInvoiceId\": \"{{purchaseInvoiceId}}\",\n            \"paidAmount\": 70800.00\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase/vendor-payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase",
+								"vendor-payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Outstanding Invoices Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase/vendor-payments/reports/outstanding?vendorId={{vendorId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase",
+								"vendor-payments",
+								"reports",
+								"outstanding"
+							],
+							"query": [
+								{
+									"key": "vendorId",
+									"value": "{{vendorId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "companyCode",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "companyIdYT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "companyIdSW",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerIdYT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerIdSW",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "enquiryIdYT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "laborerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "quotationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "quotationNo",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "approvalId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "rawMaterialId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "categoryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "materialGradeId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "itemId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "materialIssueId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "machineId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "jobCardId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "workOrderItemId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "scheduleId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "executionLogId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "qualityInspectionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "paymentTermsId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "purchaseTypeId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "vendorId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "purchaseOrderId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "poItemReferenceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "goodsReceiptId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "purchaseInvoiceId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

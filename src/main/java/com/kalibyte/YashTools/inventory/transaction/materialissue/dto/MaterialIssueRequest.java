@@ -29,4 +29,6 @@ public class MaterialIssueRequest {
     private BigDecimal requiredLength;
 
     private BigDecimal fullRodLength;
+
+    private UUID jobCardId;
 }

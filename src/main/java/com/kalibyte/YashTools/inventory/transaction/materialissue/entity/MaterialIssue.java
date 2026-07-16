@@ -55,6 +55,10 @@ public class MaterialIssue extends AuditableEntity {
     @JoinColumn(name = "new_cut_piece_id")
     private CutPiece newCutPiece;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_card_id")
+    private com.kalibyte.YashTools.production.jobcard.entity.JobCard jobCard;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private MaterialIssueStatus status;

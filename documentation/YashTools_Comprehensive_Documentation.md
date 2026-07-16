@@ -1,3 +1,9 @@
+# YashTools ERP — Comprehensive Project Documentation
+
+This file consolidates all documentation regarding the YashTools ERP backend, including core architecture, authentication flows, production module details, database migrations, and operational guidelines.
+
+---
+
 # YashTools Backend - Complete Project Documentation
 
 **Version:** 2.0  
@@ -1810,4 +1816,231 @@ git push origin feature/my-feature
 # Create PR on GitHub/GitLab
 ```
 
+
+
+
+---
+
+# Authentication & Authorization Documentation
+
+This document outlines the security architecture and implementation details for the YashTools Backend.
+
+## 1. Overview
+The system uses **JWT (JSON Web Token)** for stateless authentication, complemented by a **Refresh Token** mechanism stored in the database for secure session management and long-lived sessions.
+
+## 2. Authentication Flow
+
+### Login (`POST /api/auth/login`)
+1. User provides email and password.
+2. System authenticates credentials via `AuthenticationManager`.
+3. Upon success:
+   - A short-lived **Access Token (JWT)** is generated.
+   - A long-lived **Refresh Token (UUID)** is generated and stored in the database.
+4. Response includes both tokens, user ID, email, and assigned roles.
+
+### Token Refresh (`POST /api/auth/refresh`)
+To maintain a session without re-entering credentials:
+1. Client sends the `refreshToken`.
+2. System validates the token exists in the DB, is not expired, and is not revoked.
+3. **Token Rotation**: 
+   - The old refresh token is marked as `revoked`.
+   - A new access token and a **new** refresh token are generated and returned.
+   - This prevents replay attacks if a refresh token is leaked.
+
+### Logout (`POST /api/auth/logout`)
+1. Client sends the `refreshToken`.
+2. System marks the token as `revoked` in the database, effectively ending that session.
+
+## 3. Security Features
+
+### Password Management
+- **BCrypt Hashing**: Passwords are never stored in plain text.
+- **Complexity Validation**: Enforced via `PasswordValidator` (8-20 chars, upper/lower/digit/special).
+- **Password Change Security**: Changing a password automatically deletes all active refresh tokens for that user, forcing a re-login on all devices.
+
+### Role-Based Access Control (RBAC)
+- Roles are persisted in the `role` table.
+- Default roles: `ROLE_ADMIN`, `ROLE_SALES`, `ROLE_USER`.
+- Endpoints are protected using `@PreAuthorize` annotations (e.g., `@PreAuthorize("hasRole('ADMIN')")`).
+
+### JWT Structure
+- **Issuer**: `yashtool-erp`
+- **Claims**: `userId`, `roles`, `enabled`, `sub` (email).
+- **Signing**: HMAC SHA-256 using a base64 encoded secret key.
+
+## 4. Database Schema
+
+### `users` table
+Primary storage for user identity and status.
+
+### `refresh_tokens` table
+- `id`: UUID (Primary Key)
+- `token`: Unique string (UUID)
+- `user_id`: Reference to user
+- `expiry_date`: Timestamp
+- `revoked`: Boolean flag for manual logout or rotation
+- `created_at`: Audit timestamp
+
+## 5. Error Handling
+Common security exceptions handled by `GlobalExceptionHandler`:
+- `401 Unauthorized`: Invalid/Expired Access Token or expired Refresh Token.
+- `403 Forbidden`: Insufficient role permissions.
+- `409 Conflict`: Attempting to use a revoked or invalid token.
+
+## 6. Configuration (application.yaml)
+- `jwt.secret`: Secret key for signing JWTs.
+- `jwt.expiration`: Access token lifetime (default: 1 hour).
+- `jwt.refresh-expiration`: Refresh token lifetime (default: 7 days).
+
+
+---
+
+# YashTools ERP — Production Planning & Execution Module
+
+This module manages shop floor operations, machine tracking, production scheduling, execution logging, quality assurance, and closed-loop rework integration with inventory stock.
+
+---
+
+## 1. System Architecture & Entity Flow
+
+The module is structured around the central entity **JobCard**, which serves as the bridge between sales/work orders and shop floor execution:
+
+```mermaid
+graph TD
+    WO[WorkOrder] -->|Locked & Released| JC[JobCard]
+    JC -->|Split| JCSplit[Multiple JobCards]
+    JC -->|Released| Sch[ProductionSchedule]
+    Sch -->|Assigned Machine/Operator/Shift| Exec[ExecutionLog]
+    Exec -->|Daily Shop Floor Updates| QC[QualityInspection]
+    QC -->|Failed QC / Rework| RW[Rework JobCard]
+    QC -->|Passed QC| Completed[Work Order Item Completed]
+```
+
+---
+
+## 2. Table Schemas
+
+### `machines`
+Tracks physical assets (machines) on the shop floor.
+* `id` (UUID, PK)
+* `company_id` (UUID, FK to companies)
+* `name` (VARCHAR)
+* `code` (VARCHAR, Unique per company)
+* `status` (ACTIVE, INACTIVE, UNDER_MAINTENANCE)
+
+### `job_cards`
+Represents the exact batch size and technical specs for production.
+* `id` (UUID, PK)
+* `job_card_no` (VARCHAR, Format: `[CompanyCode]-JC-YYYY-######`)
+* `work_order_id` (UUID, FK to work_orders)
+* `work_order_item_id` (UUID, FK to work_order_items)
+* `status` (CREATED, PLANNED, ASSIGNED, STARTED, PAUSED, COMPLETED, CANCELLED)
+* `priority` (INT)
+* `total_quantity` (INT)
+* `is_rework` (BOOLEAN)
+* `rework_parent_job_card_id` (UUID, FK to parent job card)
+
+### `production_schedules`
+Maintains calendar scheduling for machines and operators.
+* `id` (UUID, PK)
+* `job_card_id` (UUID, FK to job_cards, Unique)
+* `machine_id` (UUID, FK to machines)
+* `operator_id` (BIGINT, FK to laborers)
+* `shift` (MORNING, EVENING, NIGHT)
+* `planned_start_date` (DATE)
+* `planned_end_date` (DATE)
+* `status` (PENDING, RUNNING, PAUSED, COMPLETED)
+
+### `execution_logs`
+Logs hourly/shift progress on the shop floor.
+* `id` (UUID, PK)
+* `job_card_id` (UUID, FK to job_cards)
+* `operator_id` (BIGINT, FK to laborers)
+* `machine_id` (UUID, FK to machines)
+* `shift` (MORNING, EVENING, NIGHT)
+* `start_time` (TIMESTAMP)
+* `end_time` (TIMESTAMP)
+* `target_quantity` (INT)
+* `produced_quantity` (INT)
+* `rejected_quantity` (INT)
+* `rework_quantity` (INT)
+* `pending_quantity` (INT)
+* `machine_downtime_minutes` (INT)
+* `downtime_reason` (VARCHAR)
+
+### `quality_inspections`
+Final quality check before items are moved to finished goods or inventory.
+* `id` (UUID, PK)
+* `job_card_id` (UUID, FK to job_cards, Unique)
+* `accepted_quantity` (INT)
+* `rejected_quantity` (INT)
+* `rework_quantity` (INT)
+* `inspector` (VARCHAR)
+* `inspection_date` (TIMESTAMP)
+* `result` (PASS, REJECT)
+
+---
+
+## 3. Key Core Logics
+
+### A. Split Job Card
+A planner can split a large Job Card into smaller ones to run concurrently on multiple machines.
+1. The parent card is marked `CANCELLED`.
+2. New cards are generated preserving technical specifications, linked back to the same Work Order Item, with sequence numbering (e.g. `YT-JC-2026-000001-1`).
+3. Total quantity of child cards must sum up exactly to the parent card's quantity.
+
+### B. Connected Inventory Deduction
+When releasing a Job Card to production:
+1. Material is issued using the `/api/inventory/material-issues` endpoint.
+2. The system checks available raw material stock (Item + Grade + Length).
+3. If stock does not exist or is insufficient, it halts with a clear validation prompt:
+   `"No raw material available in stock. Please purchase the raw material (Item: Carbide Rod 10mm, Grade: K40 - Fine Grain Carbide)"`
+4. On successful issue, it deducts full rods or updates cut piece lengths and updates the Job Card status to `ASSIGNED`.
+
+### C. QC Closed-Loop Rework
+When recording a quality inspection:
+1. The inspector reports accepted, rejected, and rework quantities.
+2. The total (`accepted + rejected + rework`) must equal the total produced quantity from the shop floor logs.
+3. If `reworkQuantity > 0`, the system automatically spawns a new **Rework Job Card** with high priority (`parentPriority + 1`) to ensure the parts are scheduled for correction immediately.
+
+---
+
+## 4. API Reference Sheet
+
+| Domain | Method | Endpoint | Description |
+| :--- | :--- | :--- | :--- |
+| **Machines** | `POST` | `/api/machines` | Register a new machine |
+| | `GET` | `/api/machines` | List machines (Tenant Filtered) |
+| | `DELETE` | `/api/machines/{id}` | Delete machine |
+| **Job Cards** | `POST` | `/api/job-cards` | Create Job Card from Work Order |
+| | `POST` | `/api/job-cards/split` | Split a Job Card |
+| | `PUT` | `/api/job-cards/{id}/priority` | Update priority level |
+| **Scheduling** | `POST` | `/api/production-schedules` | Schedule Job to machine/operator |
+| | `PUT` | `/api/production-schedules/{id}` | Reschedule start/end dates |
+| **Execution** | `POST` | `/api/production-executions/start` | Operator starts job shift log |
+| | `PUT` | `/api/production-executions/{logId}/progress` | Log produced qty / downtime / complete shift |
+| **Quality & KPIs**| `POST` | `/api/quality-inspections` | Record QC inspection & trigger Rework |
+| | `GET` | `/api/quality-inspections/dashboard` | Get live planner KPI metrics |
+
+
+---
+
+
+# YashTools ERP — Database Migrations & Multi-Company Normalization
+
+## V20: Remove Redundant company_code Column
+In version 2.0, the ERP system transitioned from storing `company_code` directly in each domain table to using a dedicated `companies` table referenced by `company_id`. 
+In migration **V20__remove_redundant_company_code.sql**, the redundant and unmapped `company_code` column (which had `NOT NULL` constraints but was missing from Java JPA entities like `Quotation`, `WorkOrder`, `Machine`, etc.) was removed.
+
+### Affected Tables:
+- `quotations`
+- `work_orders`
+- `machines`
+- `job_cards`
+- `production_schedules`
+- `quality_inspections`
+
+### Benefits:
+- Restores database 3NF normalization (eliminating duplicate functional dependency between `company_id` and `company_code`).
+- Prevents database constraint violation errors (`null value in column "company_code" violates not-null constraint`) on record insertion.
 
