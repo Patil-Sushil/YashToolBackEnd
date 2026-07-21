@@ -20,7 +20,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<jjwt.version>0.13.0</jjwt.version>
-		<mapstruct.version>1.6.3</mapstruct.version>
+		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<lombok.version>1.18.46</lombok.version>
 		<flyway.version>12.5.0</flyway.version>
 		<springdoc.version>3.0.3</springdoc.version>
@@ -60,7 +60,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.13</version>
+			<version>42.7.11</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -218,9 +218,6 @@
 							<version>0.2.0</version>
 						</path>
 					</annotationProcessorPaths>
-					<compilerArgs>
-						<compilerArg>-Amapstruct.unmappedTargetPolicy=IGNORE</compilerArg>
-					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>

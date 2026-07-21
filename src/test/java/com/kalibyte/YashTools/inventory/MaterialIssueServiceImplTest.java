@@ -50,6 +50,8 @@ class MaterialIssueServiceImplTest {
     private CutPieceService cutPieceService;
     @Mock
     private StockTransactionService stockTransactionService;
+    @Mock
+    private com.kalibyte.YashTools.production.jobcard.repository.JobCardRepository jobCardRepository;
 
     @InjectMocks
     private MaterialIssueServiceImpl materialIssueService;

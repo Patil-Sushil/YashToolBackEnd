@@ -25,6 +25,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.kalibyte.YashTools.production.jobcard.entity.JobCard;
+import com.kalibyte.YashTools.production.jobcard.entity.enums.JobCardStatus;
+import com.kalibyte.YashTools.production.jobcard.repository.JobCardRepository;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -37,6 +40,7 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
     private final ItemRepository itemRepository;
     private final MaterialGradeRepository materialGradeRepository;
     private final CutPieceRepository cutPieceRepository;
+    private final JobCardRepository jobCardRepository;
     
     private final StockService stockService;
     private final CutPieceService cutPieceService;
@@ -44,7 +48,7 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
 
     public MaterialIssueServiceImpl(MaterialIssueRepository repository, MaterialIssueMapper mapper,
                                    ItemRepository itemRepository, MaterialGradeRepository materialGradeRepository,
-                                   CutPieceRepository cutPieceRepository,
+                                   CutPieceRepository cutPieceRepository, JobCardRepository jobCardRepository,
                                    StockService stockService, CutPieceService cutPieceService,
                                    StockTransactionService stockTransactionService) {
         this.repository = repository;
@@ -52,6 +56,7 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
         this.itemRepository = itemRepository;
         this.materialGradeRepository = materialGradeRepository;
         this.cutPieceRepository = cutPieceRepository;
+        this.jobCardRepository = jobCardRepository;
         this.stockService = stockService;
         this.cutPieceService = cutPieceService;
         this.stockTransactionService = stockTransactionService;
@@ -65,6 +70,12 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
         
         MaterialGrade materialGrade = materialGradeRepository.findById(request.getMaterialGradeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Material Grade not found with ID: " + request.getMaterialGradeId()));
+
+        JobCard jobCard = null;
+        if (request.getJobCardId() != null) {
+            jobCard = jobCardRepository.findById(request.getJobCardId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Job Card not found with ID: " + request.getJobCardId()));
+        }
 
         long count = repository.count();
         String issueNumber = String.format("ISS-%06d", count + 1);
@@ -137,8 +148,14 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
                 .requiredLength(request.getRequiredLength())
                 .issuedLength(issuedLength)
                 .newCutPiece(newCutPiece)
+                .jobCard(jobCard)
                 .status(MaterialIssueStatus.ISSUED)
                 .build();
+
+        if (jobCard != null && (jobCard.getStatus() == JobCardStatus.CREATED || jobCard.getStatus() == JobCardStatus.PLANNED)) {
+            jobCard.setStatus(JobCardStatus.ASSIGNED);
+            jobCardRepository.save(jobCard);
+        }
 
         return mapper.toResponse(repository.save(issue));
     }

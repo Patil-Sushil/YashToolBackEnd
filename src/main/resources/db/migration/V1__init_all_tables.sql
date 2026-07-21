@@ -366,7 +366,20 @@ CREATE INDEX IF NOT EXISTS idx_item_trial ON enquiry_items(trial) WHERE trial = 
 
 -- Audit log indexes
 CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id);
-CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_log(created_at);
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name='audit_log' AND column_name='created_at'
+    ) THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM pg_class WHERE relname = 'idx_audit_created'
+        ) THEN
+            CREATE INDEX idx_audit_created ON audit_log(created_at);
+        END IF;
+    END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action);
 
 -- Coating and raw material indexes
@@ -389,7 +402,16 @@ COMMENT ON COLUMN enquiries.is_urgent IS 'Priority flag for expedited processing
 COMMENT ON COLUMN enquiry_items.trial IS 'Trial order flag (max quantity: 1)';
 COMMENT ON COLUMN new_tool_specs.coating_required IS 'If true, coating_type must be specified';
 COMMENT ON COLUMN new_tool_specs.material_type IS 'Base material (HSS, Carbide, etc.)';
-COMMENT ON COLUMN new_tool_specs.material_grade IS 'Material grade (M2, M35, K10, etc.)';
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name='new_tool_specs' AND column_name='material_grade'
+    ) THEN
+        EXECUTE 'COMMENT ON COLUMN new_tool_specs.material_grade IS ''Material grade (M2, M35, K10, etc.)''';
+    END IF;
+END $$;
 COMMENT ON COLUMN reforming_specs.coating_required IS 'If true, coating_type must be specified';
 COMMENT ON COLUMN resharpening_specs.coating_required IS 'If true, coating_type must be specified';
 

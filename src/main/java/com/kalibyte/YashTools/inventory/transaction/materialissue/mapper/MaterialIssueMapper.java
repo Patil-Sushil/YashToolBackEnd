@@ -18,5 +18,7 @@ public interface MaterialIssueMapper {
     @Mapping(target = "cutPieceCode", source = "cutPiece.code")
     @Mapping(target = "newCutPieceId", source = "newCutPiece.id")
     @Mapping(target = "newCutPieceCode", source = "newCutPiece.code")
+    @Mapping(target = "jobCardId", source = "jobCard.id")
+    @Mapping(target = "jobCardNo", source = "jobCard.jobCardNo")
     MaterialIssueResponse toResponse(MaterialIssue materialIssue);
 }

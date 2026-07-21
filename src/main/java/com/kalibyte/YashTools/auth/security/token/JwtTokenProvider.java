@@ -29,14 +29,21 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("JWT secret is missing. Set JWT_SECRET or configure jwt.secret for the active profile.");
+        }
+
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("JWT secret must decode to at least 32 bytes for HS256.");
+        }
+
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(Authentication authentication) {
 
-        CustomUserDetails user =
-                (CustomUserDetails) authentication.getPrincipal();
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 
         return generateToken(user);
     }
@@ -87,8 +94,11 @@ public class JwtTokenProvider {
 
         UUID userId = UUID.fromString(claims.get("userId", String.class));
         String email = claims.getSubject();
+        Object rolesClaim = claims.get("roles");
+        List<String> roles = rolesClaim instanceof List<?> list
+                ? list.stream().map(Object::toString).toList()
+                : List.of();
         @SuppressWarnings("unchecked")
-        List<String> roles = claims.get("roles", List.class);
         Boolean enabled = claims.get("enabled", Boolean.class);
         String companyCode = claims.get("companyCode", String.class);
 

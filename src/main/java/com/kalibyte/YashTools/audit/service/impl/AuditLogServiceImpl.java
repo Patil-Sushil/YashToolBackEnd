@@ -345,7 +345,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     // LOG AN ACTION
     // ============================================================
     @Override
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void log(AuditLog auditLog) {
         try {
             auditLogRepository.save(auditLog);

@@ -14,15 +14,15 @@ public class YashToolBackEndApplication {
 	private static void runFlywayMigrations() {
 		String url = System.getenv("SPRING_DATASOURCE_URL");
 		if (url == null) {
-			url = "jdbc:postgresql://localhost:5432/yash_tools?useSSL=false";
+			url = "jdbc:postgresql://localhost:9090/YashTool?useSSL=false";
 		}
 		String username = System.getenv("SPRING_DATASOURCE_USERNAME");
 		if (username == null) {
-			username = "lightblade";
+			username = "postgres";
 		}
 		String password = System.getenv("SPRING_DATASOURCE_PASSWORD");
 		if (password == null) {
-			password = "4911";
+			password = "1422";
 		}
 
 		System.out.println("====== Running Flyway Migrations from Main ======");

@@ -37,4 +37,7 @@ public class MaterialIssueResponse {
     private MaterialIssueStatus status;
     private LocalDateTime createdAt;
     private String createdBy;
+    
+    private UUID jobCardId;
+    private String jobCardNo;
 }
