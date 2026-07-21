@@ -86,7 +86,7 @@ public interface AuditLogRepository extends
             FROM AuditLog al
             WHERE al.username IS NOT NULL
             GROUP BY al.userId, al.username
-            ORDER BY totalActions DESC
+            ORDER BY COUNT(al) DESC
             """)
     List<UserActivityProjection> getTopUsersByActivityProjection();
 
@@ -95,16 +95,16 @@ public interface AuditLogRepository extends
             FROM AuditLog al
             WHERE al.username = :username
             GROUP BY al.action
-            ORDER BY count DESC
+            ORDER BY COUNT(al) DESC
             """)
     List<Object[]> getTopActionsByUser(@Param("username") String username);
 
     @Query("""
-            SELECT CAST(a.timestamp AS date), COUNT(a)
+            SELECT FUNCTION('date', a.timestamp), COUNT(a)
             FROM AuditLog a
             WHERE a.timestamp >= :since
-            GROUP BY CAST(a.timestamp AS date)
-            ORDER BY CAST(a.timestamp AS date) DESC
+            GROUP BY FUNCTION('date', a.timestamp)
+            ORDER BY FUNCTION('date', a.timestamp) DESC
             """)
     List<Object[]> getDailyActivity(@Param("since") LocalDateTime since);
 }

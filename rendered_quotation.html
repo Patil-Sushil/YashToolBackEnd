@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8" />
+    <title>Quotation</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #ffffff;
+            color: #333333;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        /* Header Table */
+        .header-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333333;
+        }
+
+        .header-table td {
+            vertical-align: top;
+            padding-bottom: 12px;
+        }
+
+        .company-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #111111;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .company-details {
+            font-size: 11px;
+            color: #555555;
+            line-height: 1.5;
+        }
+
+        .company-logo {
+            max-height: 60px;
+            max-width: 200px;
+        }
+
+        /* Title */
+        .title-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #111111;
+            border-bottom: 1px solid #cccccc;
+            padding-bottom: 5px;
+        }
+
+        /* Info Section (To / Date) */
+        .info-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+
+        .info-table td {
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .info-block-left {
+            padding-right: 15px;
+        }
+
+        .info-block-right {
+            text-align: right;
+            padding-left: 15px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #777777;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .info-value-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #111111;
+            margin-bottom: 3px;
+        }
+
+        .info-value-text {
+            font-size: 12px;
+            color: #444444;
+            line-height: 1.4;
+        }
+
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .items-table th {
+            background-color: #f5f5f5;
+            border-top: 1px solid #cccccc;
+            border-bottom: 2px solid #333333;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #444444;
+            text-align: center;
+        }
+
+        .items-table td {
+            border-bottom: 1px solid #dddddd;
+            padding: 8px;
+            font-size: 11px;
+            color: #333333;
+            vertical-align: top;
+            text-align: center;
+        }
+
+        .items-table th.align-left, .items-table td.align-left {
+            text-align: left;
+        }
+
+        .items-table th.align-right, .items-table td.align-right {
+            text-align: right;
+        }
+
+        .item-description {
+            font-weight: bold;
+            color: #111111;
+            margin-bottom: 3px;
+        }
+
+        /* Summary and Total Table */
+        .summary-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .total-table {
+            width: 280px;
+            margin-left: auto;
+            border-collapse: collapse;
+        }
+
+        .total-table td {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .total-label {
+            text-align: right;
+            color: #666666;
+        }
+
+        .total-value {
+            text-align: right;
+            font-weight: bold;
+            color: #111111;
+        }
+
+        .grand-total-row td {
+            border-top: 1.5px solid #333333;
+            border-bottom: 1.5px solid #333333;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 6px 8px;
+            background-color: #f9f9f9;
+        }
+
+        /* Terms and Conditions */
+        .terms-container {
+            margin-top: 25px;
+        }
+
+        .terms-title {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #111111;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #dddddd;
+            padding-bottom: 2px;
+        }
+
+        .terms-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .terms-table td {
+            padding: 3px 0;
+            font-size: 11px;
+            vertical-align: top;
+        }
+
+        .terms-item-label {
+            font-weight: bold;
+            color: #444444;
+            width: 120px;
+        }
+
+        .terms-item-value {
+            color: #555555;
+        }
+
+        .closing-text {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #666666;
+            font-style: italic;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER SECTION -->
+    <div class="header-table">
+        <table style="width: 100%; border-collapse: collapse; border: none;">
+            <tr>
+                <td style="vertical-align: top; width: 65%; border: none;">
+                    <div class="company-name">Yash Tools</div>
+                    <div class="company-details">
+                        <span>Industrial Area, Maharashtra</span><br />
+                        Email: <span>info@yashtools.com</span> | 
+                        Mob: <span>02712-234567</span>
+                        <span><br />GSTIN: <span>27AAAAY0000A1Z1</span></span>
+                    </div>
+                </td>
+                
+            </tr>
+        </table>
+    </div>
+
+    <!-- TITLE -->
+    <div class="title-container">
+        <div class="title">Quotation</div>
+    </div>
+
+    <!-- TO AND DATE SECTION -->
+    <div class="info-table">
+        <table style="width: 100%; border-collapse: collapse; border: none;">
+            <tr>
+                <td style="vertical-align: top; width: 50%; border: none;">
+                    <div class="info-block-left">
+                        <div class="info-label">Quotation To</div>
+                        <div class="info-value-title">YT Auto Components</div>
+                        <div class="info-value-text">Plot 24, MIDC Bhosari, Pune</div>
+                    </div>
+                </td>
+                <td style="vertical-align: top; width: 50%; border: none; text-align: right;">
+                    <div class="info-block-right">
+                        <div class="info-label">Quotation Details</div>
+                        <div class="info-value-text">
+                            <strong>Quotation No:</strong> <span>YT-QT-2026-000002</span><br />
+                            <strong>Date:</strong> <span>20/07/2026</span><br />
+                            <span>
+                                <strong>Valid Until:</strong> <span>31/07/2026</span>
+                            </span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ITEMS TABLE -->
+    <table class="items-table">
+        <thead>
+        <tr>
+            <th style="width: 6%;">S.No</th>
+            <th class="align-left" style="width: 44%;">Item Description</th>
+            <th style="width: 14%;">Code</th>
+            <th style="width: 8%;">Qty</th>
+            <th class="align-right" style="width: 11%;">Rate</th>
+            <th style="width: 7%;">Dis%</th>
+            <th class="align-right" style="width: 10%;">Amount</th>
+        </tr>
+        </thead>
+        <tbody>
+        
+            <tr>
+                <td>1</td>
+                <td class="align-left">
+                    <div class="item-description">Solid Carbide Endmill 10mm</div>
+                </td>
+                <td>YT1</td>
+                <td>1</td>
+                <td class="align-right">6,828.48</td>
+                <td>0%</td>
+                <td class="align-right">6,828.48</td>
+            </tr>
+        
+
+        
+        </tbody>
+    </table>
+
+    <!-- TOTALS SECTION -->
+    <div class="summary-container">
+        <table style="width: 100%; border-collapse: collapse; border: none;">
+            <tr>
+                <td style="width: 50%; vertical-align: top; border: none;"></td>
+                <td style="width: 50%; vertical-align: top; border: none; padding: 0;">
+                    <table class="total-table">
+                        <tr>
+                            <td class="total-label">Subtotal:</td>
+                            <td class="total-value">6,828.48</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="total-label">Taxable Amount:</td>
+                            <td class="total-value">6,828.48</td>
+                        </tr>
+                        <tr>
+                            <td class="total-label">CGST:</td>
+                            <td class="total-value">614.56</td>
+                        </tr>
+                        <tr>
+                            <td class="total-label">SGST:</td>
+                            <td class="total-value">614.56</td>
+                        </tr>
+                        
+                        
+                        <tr class="grand-total-row">
+                            <td class="total-label" style="font-weight: bold; color: #111111;">Grand Total:</td>
+                            <td class="total-value" style="font-weight: bold; color: #111111;">8,057.60</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- TERMS AND CONDITIONS SECTION -->
+    <div class="terms-container">
+        <div class="terms-title">Terms &amp; Conditions</div>
+        <table class="terms-table">
+            <tr>
+                <td class="terms-item-label">GST</td>
+                <td class="terms-item-value">18% / As applicable</td>
+            </tr>
+            <tr>
+                <td class="terms-item-label">Delivery</td>
+                <td class="terms-item-value">Ex-works MIDC factory location.</td>
+            </tr>
+            <tr>
+                <td class="terms-item-label">Payment</td>
+                <td class="terms-item-value">100% advance payment against proforma invoice.</td>
+            </tr>
+            <tr>
+                <td class="terms-item-label">Other Terms</td>
+                <td class="terms-item-value">1. Price is valid for 30 days. 2. Subject to standard terms of sale.</td>
+            </tr>
+        </table>
+        
+        <div class="closing-text">
+            We hope our quoted price is reasonable and look forward to receiving your valued purchase order. Thank you and assuring you of our best services at all times.
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
