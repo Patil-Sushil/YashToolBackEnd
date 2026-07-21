@@ -5,6 +5,7 @@ import com.kalibyte.YashTools.common.multi_company.CompanyContextHolder;
 import com.kalibyte.YashTools.company.entity.Company;
 import com.kalibyte.YashTools.production.execution.entity.ExecutionLog;
 import com.kalibyte.YashTools.production.execution.repository.ExecutionLogRepository;
+import com.kalibyte.YashTools.production.finishedgoods.service.FinishedGoodsStockService;
 import com.kalibyte.YashTools.production.jobcard.entity.JobCard;
 import com.kalibyte.YashTools.production.jobcard.entity.enums.JobCardStatus;
 import com.kalibyte.YashTools.production.jobcard.repository.JobCardRepository;
@@ -42,6 +43,7 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
     private final ExecutionLogRepository executionLogRepository;
     private final ProductionScheduleRepository scheduleRepository;
     private final MachineRepository machineRepository;
+    private final FinishedGoodsStockService finishedGoodsStockService;
 
     @Override
     @Transactional
@@ -85,6 +87,10 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
 
         QualityInspection saved = qualityInspectionRepository.save(qi);
 
+        // Auto-increment finished goods inventory upon a successful PASS or any accepted quantity
+        if (request.getAcceptedQuantity() > 0) {
+            finishedGoodsStockService.addFinishedGoodsStock(jc.getWorkOrderItem(), request.getAcceptedQuantity());
+        }
         // Auto-create Rework Job Card if reworkQuantity > 0
         if (request.getReworkQuantity() > 0) {
             long seq = jobCardRepository.count() + 1;

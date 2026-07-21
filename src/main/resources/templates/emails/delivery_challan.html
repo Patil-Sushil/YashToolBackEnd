@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Delivery Challan</title>
+</head>
+<body>
+<p>Dear <strong th:text="${customerName}">Customer</strong>,</p>
+
+<p>Please find attached the Delivery Challan for your dispatch reference.</p>
+
+<p>
+    <strong>Delivery Challan Reference No:</strong>
+    <span th:text="${challanNo}">YT-DC-2026-000001</span><br/>
+    <strong>Work Order No:</strong>
+    <span th:text="${workOrderNo}">YT-WO-2026-000001</span><br/>
+    <strong>Vehicle No:</strong>
+    <span th:text="${vehicleNo}">N/A</span>
+</p>
+
+<p>The detailed Delivery Challan document is attached to this email as a PDF. Kindly acknowledge receipt of the dispatched goods.</p>
+
+<p>Thank you for doing business with us.</p>
+
+<p>
+    Best Regards,<br/>
+    <strong th:text="${companyName}">Yash Tools</strong>
+</p>
+
+<p style="font-size: 12px; color: #666;">
+    &copy; 2026 <span th:text="${companyName}">Yash Tools</span>. All rights reserved.
+</p>
+</body>
+</html>

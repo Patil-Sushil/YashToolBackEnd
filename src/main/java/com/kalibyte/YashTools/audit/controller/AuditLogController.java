@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin/audit-logs")
+@RequestMapping({"/api/audit-logs", "/api/admin/audit-logs"})
 @RequiredArgsConstructor
 public class AuditLogController {
 
@@ -145,7 +145,7 @@ public class AuditLogController {
     /**
      * Get top active users
      */
-    @GetMapping("/top-users")
+    @GetMapping({"/top-users", "/user-activity"})
     @PreAuthorize("hasRole('ADMIN')")
     @LoggableAction(
             value = "Retrieve top active users",

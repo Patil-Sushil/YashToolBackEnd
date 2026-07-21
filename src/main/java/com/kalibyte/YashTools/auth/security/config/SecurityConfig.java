@@ -105,6 +105,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/production/**")
                         .hasAnyRole("ADMIN", "PRODUCTION")
 
+                        .requestMatchers("/api/finished-goods/**")
+                        .hasAnyRole("ADMIN", "STORE", "PRODUCTION", "FINANCE")
+
+                        .requestMatchers("/api/packing/**")
+                        .hasAnyRole("ADMIN", "STORE", "PRODUCTION")
+
+                        .requestMatchers("/api/delivery-challans/**")
+                        .hasAnyRole("ADMIN", "STORE", "PRODUCTION")
+
+                        .requestMatchers("/api/sales-invoices/**")
+                        .hasAnyRole("ADMIN", "FINANCE")
+
                         // Finance
                         .requestMatchers("/api/finance/**")
                         .hasAnyRole("ADMIN", "FINANCE")
