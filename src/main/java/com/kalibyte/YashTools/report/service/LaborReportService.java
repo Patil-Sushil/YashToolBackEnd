@@ -1,10 +1,10 @@
-package com.kalibyte.YashTools.labors.report.service;
+package com.kalibyte.YashTools.report.service;
 
 import com.kalibyte.YashTools.labors.attendance.entity.Attendance;
 import com.kalibyte.YashTools.labors.attendance.repository.AttendanceRepository;
-import com.kalibyte.YashTools.labors.report.dto.LaborAttendanceReportDTO;
-import com.kalibyte.YashTools.labors.report.dto.LaborDetailedReportDTO;
-import com.kalibyte.YashTools.labors.report.dto.LaborExpenseReportDTO;
+import com.kalibyte.YashTools.report.dto.LaborAttendanceReportDTO;
+import com.kalibyte.YashTools.report.dto.LaborDetailedReportDTO;
+import com.kalibyte.YashTools.report.dto.LaborExpenseReportDTO;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -16,14 +16,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.IsoFields;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ReportService {
+public class LaborReportService {
 
     private final AttendanceRepository attendanceRepository;
 
@@ -145,21 +144,21 @@ public class ReportService {
                     row.createCell(4).setCellValue(attendance.getHoursWorked() != null ? attendance.getHoursWorked().doubleValue() : 0.0);
                     row.createCell(5).setCellValue(attendance.getEarnedAmount().doubleValue());
                 }
-                
+
                 // Summary row per labor
                 Row summaryRow = sheet.createRow(rowIdx++);
                 Cell labelCell = summaryRow.createCell(0);
                 labelCell.setCellValue("TOTAL FOR " + laborReport.getLaborerName());
                 labelCell.setCellStyle(boldStyle);
-                
+
                 Cell totalHoursCell = summaryRow.createCell(4);
                 totalHoursCell.setCellValue(laborReport.getTotalHours().doubleValue());
                 totalHoursCell.setCellStyle(boldStyle);
-                
+
                 Cell totalEarnedCell = summaryRow.createCell(5);
                 totalEarnedCell.setCellValue(laborReport.getTotalEarned().doubleValue());
                 totalEarnedCell.setCellStyle(boldStyle);
-                
+
                 rowIdx++; // Empty row for spacing
             }
 

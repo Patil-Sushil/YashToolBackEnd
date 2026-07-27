@@ -1,4 +1,4 @@
-package com.kalibyte.YashTools.labors.report.dto;
+package com.kalibyte.YashTools.report.dto;
 
 public enum DateRangePreset {
     TODAY,

@@ -1,0 +1,847 @@
+{
+	"info": {
+		"_postman_id": "8aa18e12-4c22-421b-85d1-0266e7b1a1bb",
+		"name": "YashTools Reports API Collection",
+		"description": "Postman collection specifically designed to verify all reporting and financial endpoints in the YashTools ERP Report Module.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Login Successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.token).to.not.be.undefined;",
+									"    // Set token for subsequent requests",
+									"    pm.environment.set(\"accessToken\", jsonData.data.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@yashtools.com\",\n    \"password\": \"Admin@123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Labor Reports",
+			"item": [
+				{
+					"name": "Get Labor Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+									"pm.test(\"Verify structure\", function () {",
+									"    var res = pm.response.json();",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.data.totalLaborCost).to.not.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labor-reports/summary?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labor-reports",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Weekly Labor Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labor-reports/weekly?date=2026-07-27",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labor-reports",
+								"weekly"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2026-07-27"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Monthly Labor Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labor-reports/monthly?date=2026-07-27",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labor-reports",
+								"monthly"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2026-07-27"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Yearly Labor Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labor-reports/yearly/2026",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labor-reports",
+								"yearly",
+								"2026"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Labor Report Excel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+									"pm.test(\"Verify binary bytes\", function () {",
+									"    pm.expect(pm.response.body.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labor-reports/export?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labor-reports",
+								"export"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Production Reports",
+			"item": [
+				{
+					"name": "Production Execution Logs Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+									"pm.test(\"Check details\", function () {",
+									"    var res = pm.response.json();",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.data.totalProducedQuantity).to.not.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/execution?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"execution"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Execution Excel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/execution/export-excel?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"execution",
+								"export-excel"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Execution PDF",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/execution/export-pdf?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"execution",
+								"export-pdf"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Quality Audit Logs Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/quality?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"quality"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Quality Excel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/quality/export-excel?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"quality",
+								"export-excel"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Quality PDF",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/quality/export-pdf?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"quality",
+								"export-pdf"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Coating Consumption Log",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/coating?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"coating"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Coating Excel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/coating/export-excel?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"coating",
+								"export-excel"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Coating PDF",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/coating/export-pdf?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"coating",
+								"export-pdf"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Production Efficiency Metrics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/efficiency?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"efficiency"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Efficiency Excel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/efficiency/export-excel?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"efficiency",
+								"export-excel"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Efficiency PDF",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/efficiency/export-pdf?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"efficiency",
+								"export-pdf"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profit & Loss Reports",
+			"item": [
+				{
+					"name": "Get Profit and Loss Statement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+									"pm.test(\"Validate P&L numbers exists\", function () {",
+									"    var res = pm.response.json();",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.data.revenue).to.not.be.undefined;",
+									"    pm.expect(res.data.totalExpenses).to.not.be.undefined;",
+									"    pm.expect(res.data.netProfit).to.not.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/profit-loss?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"profit-loss"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Profit & Loss Excel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/profit-loss/export-excel?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"profit-loss",
+								"export-excel"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Profit & Loss PDF",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/production-reports/profit-loss/export-pdf?preset=THIS_MONTH",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"production-reports",
+								"profit-loss",
+								"export-pdf"
+							],
+							"query": [
+								{
+									"key": "preset",
+									"value": "THIS_MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

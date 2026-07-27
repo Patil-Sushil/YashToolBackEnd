@@ -1,14 +1,14 @@
-package com.kalibyte.YashTools.labors.report.controller;
+package com.kalibyte.YashTools.report.controller;
 
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
 import com.kalibyte.YashTools.common.response.ApiResponse;
-import com.kalibyte.YashTools.labors.report.dto.DateRangePreset;
-import com.kalibyte.YashTools.labors.report.dto.DateRangeRequest;
-import com.kalibyte.YashTools.labors.report.dto.LaborDetailedReportDTO;
-import com.kalibyte.YashTools.labors.report.dto.LaborExpenseReportDTO;
-import com.kalibyte.YashTools.labors.report.service.ReportService;
-import com.kalibyte.YashTools.labors.report.util.DateRangeResolver;
+import com.kalibyte.YashTools.report.dto.DateRangePreset;
+import com.kalibyte.YashTools.report.dto.DateRangeRequest;
+import com.kalibyte.YashTools.report.dto.LaborDetailedReportDTO;
+import com.kalibyte.YashTools.report.dto.LaborExpenseReportDTO;
+import com.kalibyte.YashTools.report.service.LaborReportService;
+import com.kalibyte.YashTools.report.util.DateRangeResolver;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,9 +30,9 @@ import java.util.List;
 @Tag(name = "Labor Reports", description = "APIs for labor expense reporting and analytics")
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN')")
-public class ReportController {
+public class LaborReportController {
 
-    private final ReportService reportService;
+    private final LaborReportService laborReportService;
 
     @GetMapping("/summary")
     @Operation(summary = "Get labor expense summary for a date range/preset")
@@ -44,7 +44,7 @@ public class ReportController {
         
         DateRangeResolver.DateRange range = resolveRange(preset, startDate, endDate);
         String label = preset != null ? preset.name() : range.startDate() + " to " + range.endDate();
-        return ResponseEntity.ok(ApiResponse.success(reportService.getAggregatedExpensesForPeriod(range.startDate(), range.endDate(), label)));
+        return ResponseEntity.ok(ApiResponse.success(laborReportService.getAggregatedExpensesForPeriod(range.startDate(), range.endDate(), label)));
     }
 
     @GetMapping("/weekly")
@@ -52,7 +52,7 @@ public class ReportController {
     @LoggableAction(value = "Retrieve Weekly Labor Expense Report", action = AuditAction.GET_REPORT, entityType = "REPORT")
     public ResponseEntity<ApiResponse<LaborExpenseReportDTO>> getWeeklyReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(ApiResponse.success(reportService.getWeeklyReport(date)));
+        return ResponseEntity.ok(ApiResponse.success(laborReportService.getWeeklyReport(date)));
     }
 
     @GetMapping("/monthly")
@@ -60,14 +60,14 @@ public class ReportController {
     @LoggableAction(value = "Retrieve Monthly Labor Expense Report", action = AuditAction.GET_REPORT, entityType = "REPORT")
     public ResponseEntity<ApiResponse<LaborExpenseReportDTO>> getMonthlyReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(ApiResponse.success(reportService.getMonthlyReport(date)));
+        return ResponseEntity.ok(ApiResponse.success(laborReportService.getMonthlyReport(date)));
     }
 
     @GetMapping("/yearly/{year}")
     @Operation(summary = "Get yearly labor expense report", description = "Only accessible by ADMIN")
     @LoggableAction(value = "Retrieve Yearly Labor Expense Report", action = AuditAction.GET_REPORT, entityType = "REPORT")
     public ResponseEntity<ApiResponse<LaborExpenseReportDTO>> getYearlyReport(@PathVariable int year) {
-        return ResponseEntity.ok(ApiResponse.success(reportService.getYearlyReport(year)));
+        return ResponseEntity.ok(ApiResponse.success(laborReportService.getYearlyReport(year)));
     }
 
     @GetMapping("/export")
@@ -79,9 +79,9 @@ public class ReportController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) throws IOException {
         
         DateRangeResolver.DateRange range = resolveRange(preset, startDate, endDate);
-        List<LaborDetailedReportDTO> reports = reportService.getDetailedReport(range.startDate(), range.endDate());
+        List<LaborDetailedReportDTO> reports = laborReportService.getDetailedReport(range.startDate(), range.endDate());
         
-        byte[] excelContent = reportService.exportToExcel(reports);
+        byte[] excelContent = laborReportService.exportToExcel(reports);
         
         String filename = "labor_expense_report_" + (preset != null ? preset.name().toLowerCase() : range.startDate().toString()) + ".xlsx";
         

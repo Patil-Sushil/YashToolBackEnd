@@ -1,6 +1,10 @@
-package com.kalibyte.YashTools.labors.report.dto;
+package com.kalibyte.YashTools.report.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,7 +17,7 @@ public class LaborAttendanceReportDTO {
     private LocalDate workDate;
     private LocalTime checkInTime;
     private LocalTime checkOutTime;
-    private BigDecimal hoursWorked;
     private Integer pieceCompleted;
+    private BigDecimal hoursWorked;
     private BigDecimal earnedAmount;
 }

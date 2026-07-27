@@ -1,7 +1,7 @@
-package com.kalibyte.YashTools.labors.report.mapper;
+package com.kalibyte.YashTools.report.mapper;
 
 import com.kalibyte.YashTools.labors.attendance.entity.Attendance;
-import com.kalibyte.YashTools.labors.report.dto.LaborAttendanceReportDTO;
+import com.kalibyte.YashTools.report.dto.LaborAttendanceReportDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

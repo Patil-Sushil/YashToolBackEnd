@@ -96,7 +96,7 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
         if (request.getReworkQuantity() > 0) {
             long seq = jobCardRepository.count() + 1;
             String reworkNo = String.format("%s-JC-RW-%d-%06d", companyCode, LocalDate.now().getYear(), seq);
-            
+
             JobCard reworkCard = JobCard.builder()
                     .jobCardNo(reworkNo)
                     .workOrder(jc.getWorkOrder())

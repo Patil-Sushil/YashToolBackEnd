@@ -1,141 +1,254 @@
 # ==============================================================================
 # YashTools API Integration Test Runner (PowerShell)
-# Runs the comprehensive Postman collection using Newman
+# Runs Newman Postman Collections and validates all Report API endpoints
 # ==============================================================================
 
-param(
+Param(
     [string]$Url = "http://localhost:8080",
     [string]$Collection = "documentation/YashTools.json",
-    [switch]$StartServer,
+    [switch]$AutoStart,
     [switch]$Help
 )
 
 if ($Help) {
-    Write-Host "Usage: .\run_api_tests.ps1 [options]"
+    Write-Host "Usage: .\run_api_tests.ps1 [-Url <url>] [-Collection <path>] [-AutoStart] [-Help]" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Options:"
-    Write-Host "  -Url <url>           Specify the backend Base URL (default: http://localhost:8080)"
-    Write-Host "  -Collection <path>   Specify a custom Postman collection file path"
-    Write-Host "  -StartServer         Auto-start Spring Boot backend if server is not reachable"
-    Write-Host "  -Help                Show this help message"
-    exit 0
+    Write-Host "  -Url         Specify the backend Base URL (default: http://localhost:8080)"
+    Write-Host "  -Collection  Specify a custom Postman collection file path (default: documentation/YashTools.json)"
+    Write-Host "  -AutoStart   Automatically boot the backend server if it's not already running"
+    Write-Host "  -Help        Show this help message"
+    Exit 0
 }
 
-# Handle command line arguments passed without param syntax
-for ($i = 0; $i -lt $args.Count; $i++) {
-    if ($args[$i] -eq "-u" -or $args[$i] -eq "--url") {
-        $Url = $args[++$i]
-    } elseif ($args[$i] -eq "-c" -or $args[$i] -eq "--collection") {
-        $Collection = $args[++$i]
-    } elseif ($args[$i] -eq "-s" -or $args[$i] -eq "--start-server") {
-        $StartServer = $true
-    } elseif ($args[$i] -eq "-h" -or $args[$i] -eq "--help") {
-        Write-Host "Usage: .\run_api_tests.ps1 [-Url <url>] [-Collection <path>] [-StartServer]"
-        exit 0
-    }
-}
-
-$baseUrl = $Url
-$collectionPath = $Collection
+Write-Host "==================================================" -ForegroundColor Cyan
+Write-Host "    YashTools API Integration Test Runner        " -ForegroundColor Cyan
+Write-Host "==================================================" -ForegroundColor Cyan
+Write-Host "Target Base URL : $Url" -ForegroundColor Gray
+Write-Host "Collection File : $Collection" -ForegroundColor Gray
+Write-Host "Auto-Start Server: $($AutoStart.ToBool())" -ForegroundColor Gray
+Write-Host "--------------------------------------------------" -ForegroundColor Gray
 
 # Ensure collection file exists
-if (-not (Test-Path $collectionPath)) {
-    Write-Error "Collection file not found at: $collectionPath"
-    exit 1
+if (-not (Test-Path $Collection)) {
+    Write-Host "[ERROR] Collection file not found at: $Collection" -ForegroundColor Red
+    Exit 1
 }
 
-Write-Host "YashTools Integration Test Runner" -ForegroundColor Blue
-Write-Host "---------------------------------" -ForegroundColor Blue
-Write-Host "Target Base URL: $baseUrl" -ForegroundColor Gray
-Write-Host "Collection File: $collectionPath" -ForegroundColor Gray
-Write-Host "---------------------------------" -ForegroundColor Blue
-
-# Check if Node.js & npm are installed
+# Check if Node.js is installed
 $nodeCheck = Get-Command node -ErrorAction SilentlyContinue
-if (-not $nodeCheck) {
-    Write-Error "Node.js is not installed. Node.js (with npm) is required to run Newman."
-    Write-Warning "Please install Node.js from https://nodejs.org/"
-    exit 1
-}
-
 $npmCheck = Get-Command npm -ErrorAction SilentlyContinue
-if (-not $npmCheck) {
-    Write-Error "npm is not installed."
-    exit 1
+
+if (-not $nodeCheck -or -not $npmCheck) {
+    Write-Host "[ERROR] Node.js or NPM is not installed." -ForegroundColor Red
+    Write-Host "Node.js (with npm) is required to run Newman." -ForegroundColor Yellow
+    Write-Host "Please download and install it from https://nodejs.org/" -ForegroundColor Yellow
+    Exit 1
 }
 
-# Pre-flight check: Is backend running?
-Function Test-ServerConnection([string]$testUrl) {
-    try {
-        $uri = [System.Uri]$testUrl
-        $tcp = New-Object System.Net.Sockets.TcpClient
-        $connection = $tcp.BeginConnect($uri.Host, $uri.Port, $null, $null)
-        $wait = $connection.AsyncWaitHandle.WaitOne(2000, $false)
-        if ($wait) {
-            $tcp.EndConnect($connection)
-            $tcp.Close()
-            return $true
-        }
-        $tcp.Close()
-        return $false
-    } catch {
-        return $false
+# Check if Backend Server is Running
+Write-Host "[INFO] Checking if backend server is already running..." -ForegroundColor Blue
+$serverRunning = $false
+try {
+    $response = Invoke-RestMethod -Uri "$Url/actuator/health" -Method Get -TimeoutSec 3 -ErrorAction Stop
+    if ($response.status -eq "UP" -or $response -match "UP") {
+        $serverRunning = $true
     }
 }
+catch {
+    $serverRunning = $false
+}
 
-$serverStartedByScript = $false
+$startedServer = $false
 $serverProcess = $null
 
-if (-not (Test-ServerConnection $baseUrl)) {
-    if ($StartServer) {
-        Write-Host "Backend server is not running on $baseUrl. Attempting to start Spring Boot application..." -ForegroundColor Yellow
-        $serverProcess = Start-Process -FilePath ".\mvnw.cmd" -ArgumentList "spring-boot:run" -PassThru -NoNewWindow
-        $serverStartedByScript = $true
-
-        Write-Host "Waiting for backend server to start up on $baseUrl..." -ForegroundColor Yellow
-        $attempts = 0
-        $maxAttempts = 60
-        while (-not (Test-ServerConnection $baseUrl) -and ($attempts -lt $maxAttempts)) {
+if (-not $serverRunning) {
+    if ($AutoStart) {
+        Write-Host "[INFO] Backend server is not running. Booting it automatically..." -ForegroundColor Blue
+        $env:SPRING_PROFILES_ACTIVE = "dev"
+        
+        # Start backend in a new minimized cmd window to keep console output clean
+        $serverProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\mvnw.cmd spring-boot:run" -PassThru -WindowStyle Minimized
+        $startedServer = $true
+        
+        Write-Host "[INFO] Server process started (PID: $($serverProcess.Id)). Waiting for health check..." -ForegroundColor Blue
+        
+        # Poll health endpoint for up to 60 seconds
+        $maxAttempts = 45
+        $attempt = 1
+        $healthy = $false
+        
+        while ($attempt -le $maxAttempts -and -not $healthy) {
             Start-Sleep -Seconds 2
-            $attempts++
-            Write-Host "." -NoNewline -ForegroundColor Gray
-        }
-        Write-Host ""
-
-        if (-not (Test-ServerConnection $baseUrl)) {
-            Write-Error "Failed to start backend server within timeout period."
-            if ($serverProcess -and -not $serverProcess.HasExited) {
-                Stop-Process -Id $serverProcess.Id -Force
+            try {
+                $response = Invoke-RestMethod -Uri "$Url/actuator/health" -Method Get -TimeoutSec 2 -ErrorAction Stop
+                if ($response.status -eq "UP") {
+                    $healthy = $true
+                }
+            } catch {
+                # Ignore connection errors while starting
             }
-            exit 1
+            Write-Host "[INFO] Waiting for server... (Attempt $attempt / $maxAttempts)" -ForegroundColor Gray
+            $attempt++
         }
-        Write-Host "Backend server started successfully!" -ForegroundColor Green
+        
+        if (-not $healthy) {
+            Write-Host "[ERROR] Timeout waiting for backend server to become healthy." -ForegroundColor Red
+            # Stop the started process tree
+            taskkill /pid $serverProcess.Id /t /f | Out-Null
+            Exit 1
+        }
+        Write-Host "[SUCCESS] Backend server is booted and active!" -ForegroundColor Green
     } else {
-        Write-Error "Backend server is NOT reachable at $baseUrl."
-        Write-Host "Please start your Spring Boot application first (e.g., using '.\mvnw.cmd spring-boot:run')," -ForegroundColor Yellow
-        Write-Host "or re-run this script with the -StartServer switch:" -ForegroundColor Yellow
-        Write-Host "    .\run_api_tests.ps1 -StartServer" -ForegroundColor Cyan
-        exit 1
+        Write-Host "[WARNING] Backend server is not running." -ForegroundColor Yellow
+        Write-Host "Please start the backend first, or run this script with -AutoStart switch:" -ForegroundColor Yellow
+        Write-Host "  .\run_api_tests.ps1 -AutoStart" -ForegroundColor Cyan
+        Write-Host ""
+        $confirmation = Read-Host "Would you like to try running the tests anyway? (y/n)"
+        if ($confirmation -ne "y") {
+            Write-Host "[INFO] Aborted." -ForegroundColor Gray
+            Exit 0
+        }
     }
-}
-
-# Run Newman via npx
-Write-Host "Running tests using Newman via npx..." -ForegroundColor Blue
-$exitCode = 0
-try {
-    npx --yes newman run $collectionPath --env-var "baseUrl=$baseUrl" --reporters cli
-    $exitCode = $LASTEXITCODE
-} finally {
-    if ($serverStartedByScript -and $serverProcess -and -not $serverProcess.HasExited) {
-        Write-Host "Stopping background Spring Boot server..." -ForegroundColor Yellow
-        Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
-    }
-}
-
-if ($exitCode -eq 0) {
-    Write-Host "All API endpoints tested successfully!" -ForegroundColor Green
-    exit 0
 } else {
-    Write-Error "Some API endpoint tests failed. Check the Newman output above."
-    exit $exitCode
+    Write-Host "[SUCCESS] Backend server is already running and reachable!" -ForegroundColor Green
+}
+
+# --- STAGE 1: Run Newman tests ---
+Write-Host ""
+Write-Host "--------------------------------------------------" -ForegroundColor Gray
+Write-Host "[STAGE 1] Running Core ERP End-to-End Newman Collections..." -ForegroundColor Blue
+Write-Host "--------------------------------------------------" -ForegroundColor Gray
+
+Write-Host "[INFO] Running Core Collection: $Collection ..." -ForegroundColor Gray
+$newmanCommand1 = "npx --yes newman run `"$Collection`" --env-var `"baseUrl=$Url`" --reporters cli"
+Invoke-Expression $newmanCommand1
+$newmanExitCode1 = $LASTEXITCODE
+
+Write-Host ""
+$reportsCollection = "documentation/YashTools_Reports_Postman_Collection.json"
+Write-Host "[INFO] Running Reports Collection: $reportsCollection ..." -ForegroundColor Gray
+$newmanCommand2 = "npx --yes newman run `"$reportsCollection`" --env-var `"baseUrl=$Url`" --reporters cli"
+Invoke-Expression $newmanCommand2
+$newmanExitCode2 = $LASTEXITCODE
+
+$newmanExitCode = $newmanExitCode1 + $newmanExitCode2
+
+# --- STAGE 2: Validate Report APIs ---
+Write-Host ""
+Write-Host "--------------------------------------------------" -ForegroundColor Gray
+Write-Host "[STAGE 2] Validating Unified Report API Endpoints..." -ForegroundColor Blue
+Write-Host "--------------------------------------------------" -ForegroundColor Gray
+
+$reportFailures = 0
+
+try {
+    # 1. Login to get Auth Token
+    Write-Host "[INFO] Authenticating as Admin (admin@yashtools.com)..." -ForegroundColor Gray
+    $loginBody = @{
+        email = "admin@yashtools.com"
+        password = "Admin@123"
+    } | ConvertTo-Json
+    
+    $loginRes = Invoke-RestMethod -Uri "$Url/api/auth/login" -Method Post -Body $loginBody -ContentType "application/json"
+    $token = $loginRes.data.token
+    
+    if (-not $token) {
+        throw "Failed to extract access token from login response"
+    }
+    
+    $headers = @{
+        Authorization = "Bearer $token"
+    }
+    
+    # Define Report Endpoints to Test
+    $reportEndpoints = @(
+        # Labor Reports
+        @{ path = "/api/labor-reports/summary?preset=THIS_MONTH"; type = "JSON" },
+        @{ path = "/api/labor-reports/weekly?date=2026-07-27"; type = "JSON" },
+        @{ path = "/api/labor-reports/monthly?date=2026-07-27"; type = "JSON" },
+        @{ path = "/api/labor-reports/yearly/2026"; type = "JSON" },
+        @{ path = "/api/labor-reports/export?preset=THIS_MONTH"; type = "EXCEL" },
+        
+        # Production Reports
+        @{ path = "/api/production-reports/execution?preset=THIS_MONTH"; type = "JSON" },
+        @{ path = "/api/production-reports/execution/export-excel?preset=THIS_MONTH"; type = "EXCEL" },
+        @{ path = "/api/production-reports/execution/export-pdf?preset=THIS_MONTH"; type = "PDF" },
+        
+        @{ path = "/api/production-reports/quality?preset=THIS_MONTH"; type = "JSON" },
+        @{ path = "/api/production-reports/quality/export-excel?preset=THIS_MONTH"; type = "EXCEL" },
+        @{ path = "/api/production-reports/quality/export-pdf?preset=THIS_MONTH"; type = "PDF" },
+        
+        @{ path = "/api/production-reports/coating?preset=THIS_MONTH"; type = "JSON" },
+        @{ path = "/api/production-reports/coating/export-excel?preset=THIS_MONTH"; type = "EXCEL" },
+        @{ path = "/api/production-reports/coating/export-pdf?preset=THIS_MONTH"; type = "PDF" },
+        
+        @{ path = "/api/production-reports/efficiency?preset=THIS_MONTH"; type = "JSON" },
+        @{ path = "/api/production-reports/efficiency/export-excel?preset=THIS_MONTH"; type = "EXCEL" },
+        @{ path = "/api/production-reports/efficiency/export-pdf?preset=THIS_MONTH"; type = "PDF" },
+        
+        # P&L Reports
+        @{ path = "/api/production-reports/profit-loss?preset=THIS_MONTH"; type = "JSON" },
+        @{ path = "/api/production-reports/profit-loss/export-excel?preset=THIS_MONTH"; type = "EXCEL" },
+        @{ path = "/api/production-reports/profit-loss/export-pdf?preset=THIS_MONTH"; type = "PDF" }
+    )
+    
+    foreach ($endpoint in $reportEndpoints) {
+        $testPath = $endpoint.path
+        $expectedType = $endpoint.type
+        Write-Host "Testing GET $testPath ($expectedType) ... " -NoNewline -ForegroundColor Gray
+        
+        try {
+            $response = Invoke-WebRequest -Uri "$Url$testPath" -Method Get -Headers $headers -TimeoutSec 10
+            
+            if ($response.StatusCode -eq 200) {
+                # Check content type / size
+                $length = $response.Content.Length
+                if ($length -gt 0) {
+                    Write-Host "OK (Bytes: $length)" -ForegroundColor Green
+                } else {
+                    Write-Host "FAILED (Empty Response)" -ForegroundColor Red
+                    $reportFailures++
+                }
+            } else {
+                Write-Host "FAILED (HTTP $($response.StatusCode))" -ForegroundColor Red
+                $reportFailures++
+            }
+        }
+        catch {
+            Write-Host "ERROR ($($_.Exception.Message))" -ForegroundColor Red
+            $reportFailures++
+        }
+    }
+}
+catch {
+    Write-Host "[ERROR] Report APIs verification aborted: $($_.Message)" -ForegroundColor Red
+    $reportFailures = 99
+}
+
+# Cleanup server if we started it
+if ($startedServer -and $serverProcess) {
+    Write-Host ""
+    Write-Host "[INFO] Shutting down automatically started backend server (PID: $($serverProcess.Id))...." -ForegroundColor Blue
+    taskkill /pid $serverProcess.Id /t /f | Out-Null
+}
+
+# Overall Exit Status
+Write-Host ""
+Write-Host "==================================================" -ForegroundColor Cyan
+Write-Host "               TEST SUMMARY                       " -ForegroundColor Cyan
+Write-Host "==================================================" -ForegroundColor Cyan
+Write-Host "Stage 1 (Newman Collections): " -NoNewline -ForegroundColor Gray
+if ($newmanExitCode -eq 0) { Write-Host "PASSED" -ForegroundColor Green } else { Write-Host "FAILED" -ForegroundColor Red }
+
+Write-Host "Stage 2 (Report APIs Audit): " -NoNewline -ForegroundColor Gray
+if ($reportFailures -eq 0) { Write-Host "PASSED" -ForegroundColor Green } else { Write-Host "FAILED ($reportFailures errors)" -ForegroundColor Red }
+Write-Host "==================================================" -ForegroundColor Cyan
+
+if ($newmanExitCode1 -eq 0 -and $newmanExitCode2 -eq 0 -and $reportFailures -eq 0) {
+    Write-Host "[SUCCESS] All project endpoints tested successfully!" -ForegroundColor Green
+    Exit 0
+} else {
+    Write-Host "[ERROR] E2E Verification failed. Review logs above." -ForegroundColor Red
+    Exit 1
 }

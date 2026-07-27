@@ -1,6 +1,10 @@
-package com.kalibyte.YashTools.labors.report.dto;
+package com.kalibyte.YashTools.report.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -9,9 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LaborExpenseReportDTO {
-    private String period; // e.g., "2023-W42", "2023-10", "2023"
+    private String period;
     private BigDecimal totalHours;
     private BigDecimal totalLaborCost;
-    private Long totalWorkers;
+    private long totalWorkers;
     private List<LaborDetailedReportDTO> laborDetails;
 }

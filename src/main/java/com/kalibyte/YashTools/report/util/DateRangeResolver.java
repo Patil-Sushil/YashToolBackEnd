@@ -1,8 +1,8 @@
-package com.kalibyte.YashTools.labors.report.util;
+package com.kalibyte.YashTools.report.util;
 
 import com.kalibyte.YashTools.common.exception.BusinessException;
-import com.kalibyte.YashTools.labors.report.dto.DateRangePreset;
-import com.kalibyte.YashTools.labors.report.dto.DateRangeRequest;
+import com.kalibyte.YashTools.report.dto.DateRangePreset;
+import com.kalibyte.YashTools.report.dto.DateRangeRequest;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
