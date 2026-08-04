@@ -704,6 +704,77 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Create Customer (SW)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "SW",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/customers",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"companyName\": \"Swara Allied Parts\",\n    \"customerName\": \"Sanjay Patil\",\n    \"legalEntity\": \"Proprietorship\",\n    \"businessType\": \"Manufacturing\",\n    \"mobileNumber\": \"9123456780\",\n    \"email\": \"sanjay@swaraallied.com\",\n    \"billingAddress\": \"Gat 456, Chakan Industrial Area Phase 2, Pune\",\n    \"deliveryAddress\": \"Gat 456, Chakan Industrial Area Phase 2, Pune\",\n    \"gstNumber\": \"27BBBCB1234B1Z6\",\n    \"companyCode\": \"SW\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data) {",
+                                    "    pm.collectionVariables.set('customerIdSW', jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Customers (SW)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-Company-Code",
+                                "value": "SW",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/customers",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers"
+                            ]
+                        }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -801,6 +872,77 @@
                                 "api",
                                 "enquiries",
                                 "{{enquiryIdYT}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Enquiry (SW)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "SW",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/enquiries",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "enquiries"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customerId\": \"{{customerIdSW}}\",\n    \"isUrgent\": false,\n    \"remarks\": \"Urgent trial order for Swara Allied Parts\",\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"12mm Carbide Endmill (SW)\",\n            \"itemName\": \"12mm Carbide Endmill\",\n            \"quantity\": 5,\n            \"overallLength\": 75.0,\n            \"remarks\": \"Standard profile\",\n            \"specs\": {\n                \"materialType\": \"CARBIDE\",\n                \"materialGrade\": \"K10\",\n                \"coatingRequired\": true,\n                \"coatingType\": \"ALTIN\",\n                \"diameter\": 12.0,\n                \"fluteLength\": 35.0,\n                \"shankDiameter\": 12.0,\n                \"technicalNotes\": \"None\",\n                \"specialGeometry\": false,\n                \"specialProfile\": false,\n                \"expressDelivery\": false\n            }\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data) {",
+                                    "    pm.collectionVariables.set('enquiryIdSW', jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Enquiries (SW)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-Company-Code",
+                                "value": "SW",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/enquiries",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "enquiries"
                             ]
                         }
                     },
@@ -1184,6 +1326,104 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Create Direct Quotation (YT)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "YT",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/quotations/direct",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "quotations",
+                                "direct"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customerId\": \"{{customerIdYT}}\",\n    \"isUrgent\": false,\n    \"remarks\": \"Direct quotation for Apex Tooling Solutions\",\n    \"internalNotes\": \"Margin is 20%\",\n    \"termsAndConditions\": \"Payment within 30 days. Delivery at site.\",\n    \"paymentTerms\": \"NET 30\",\n    \"deliveryTerms\": \"FOB\",\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"10mm Carbide Endmill (Direct)\",\n            \"itemName\": \"10mm Carbide Endmill\",\n            \"quantity\": 10,\n            \"overallLength\": 75.0,\n            \"coatingType\": \"ALTIN\",\n            \"userMultiplier\": 1.0,\n            \"remarks\": \"Direct order\",\n            \"specs\": {\n                \"materialType\": \"CARBIDE\",\n                \"materialGrade\": \"K10\",\n                \"coatingRequired\": true,\n                \"coatingType\": \"ALTIN\",\n                \"diameter\": 10.0,\n                \"fluteLength\": 30.0,\n                \"shankDiameter\": 10.0,\n                \"specialGeometry\": false,\n                \"specialProfile\": false,\n                \"expressDelivery\": false\n            }\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data) {",
+                                    "    pm.collectionVariables.set('quotationId', jsonData.data.id);",
+                                    "    pm.collectionVariables.set('quotationNo', jsonData.data.quotationNo);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create Direct Quotation (SW)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "SW",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/quotations/direct",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "quotations",
+                                "direct"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customerId\": \"{{customerIdSW}}\",\n    \"isUrgent\": false,\n    \"remarks\": \"Direct quotation for Swara Allied Parts\",\n    \"internalNotes\": \"Margin is 15%\",\n    \"termsAndConditions\": \"Payment within 15 days.\",\n    \"paymentTerms\": \"NET 15\",\n    \"deliveryTerms\": \"EX_WORKS\",\n    \"items\": [\n        {\n            \"orderType\": \"NEW_TOOL\",\n            \"toolName\": \"12mm Carbide Endmill (Direct SW)\",\n            \"itemName\": \"12mm Carbide Endmill\",\n            \"quantity\": 5,\n            \"overallLength\": 75.0,\n            \"coatingType\": \"ALTIN\",\n            \"userMultiplier\": 1.0,\n            \"remarks\": \"Direct order SW\",\n            \"specs\": {\n                \"materialType\": \"CARBIDE\",\n                \"materialGrade\": \"K10\",\n                \"coatingRequired\": true,\n                \"coatingType\": \"ALTIN\",\n                \"diameter\": 12.0,\n                \"fluteLength\": 35.0,\n                \"shankDiameter\": 12.0,\n                \"specialGeometry\": false,\n                \"specialProfile\": false,\n                \"expressDelivery\": false\n            }\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data) {",
+                                    "    pm.collectionVariables.set('quotationId', jsonData.data.id);",
+                                    "    pm.collectionVariables.set('quotationNo', jsonData.data.quotationNo);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -1703,7 +1943,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"quotationId\": \"{{quotationId}}\",\n    \"plannedStartDate\": \"2026-07-21\",\n    \"plannedEndDate\": \"2026-07-28\",\n    \"remarks\": \"High priority client work order\"\n}"
+                            "raw": "{\n    \"quotationId\": \"{{quotationId}}\",\n    \"remarks\": \"Order converted to WO\",\n    \"expectedDeliveryDate\": \"2026-08-15\",\n    \"poNumber\": \"PO-998877\"\n}"
                         }
                     },
                     "response": [],
@@ -1797,6 +2037,67 @@
                                 "api",
                                 "work-orders"
                             ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Work Order Item Trial Result",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/work-orders/items/{{workOrderItemId}}/trial-result",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-orders",
+                                "items",
+                                "{{workOrderItemId}}",
+                                "trial-result"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"SUCCESS\",\n    \"feedback\": \"Trial successful. Tool produced 5000 units with high surface quality.\"\n}"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Work Order Planning",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/work-orders/{{workOrderId}}/planning",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-orders",
+                                "{{workOrderId}}",
+                                "planning"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"plannedStartDate\": \"2026-08-05\",\n    \"plannedEndDate\": \"2026-08-10\"\n}"
                         }
                     },
                     "response": []
@@ -2082,6 +2383,55 @@
                                 "quality-inspections",
                                 "dashboard"
                             ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Production Schedules by Machine",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/production-schedules/machine/{{machineId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "production-schedules",
+                                "machine",
+                                "{{machineId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Production Schedules Priorities",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/production-schedules/priorities",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "production-schedules",
+                                "priorities"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"items\": [\n        {\n            \"jobCardId\": \"{{jobCardId}}\",\n            \"priority\": 10\n        }\n    ]\n}"
                         }
                     },
                     "response": []
@@ -3054,6 +3404,406 @@
                                 "api",
                                 "audit-logs",
                                 "user-activity"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "17. Dashboards",
+            "item": [
+                {
+                    "name": "GET Admin Dashboard",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Verify success\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.totalUsers).to.not.be.undefined;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/dashboards/admin",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "dashboards",
+                                "admin"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET Supervisor Dashboard",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Verify success\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.activeLaborersCount).to.not.be.undefined;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/dashboards/supervisor",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "dashboards",
+                                "supervisor"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET Manager Dashboard",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Verify success\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.pendingQuotationApprovals).to.not.be.undefined;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/dashboards/manager",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "dashboards",
+                                "manager"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET Sales Dashboard",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Verify success\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.totalEnquiries).to.not.be.undefined;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/dashboards/sales",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "dashboards",
+                                "sales"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET Production Dashboard",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Verify success\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.runningJobsCount).to.not.be.undefined;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/dashboards/production",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "dashboards",
+                                "production"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET Store Dashboard",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Verify success\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.totalItemsCount).to.not.be.undefined;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/dashboards/store",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "dashboards",
+                                "store"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "18. Transit Damage Rejections",
+            "item": [
+                {
+                    "name": "Report Transit Damage",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Save report ID\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.id).to.not.be.undefined;",
+                                    "    pm.environment.set(\"transitDamageReportId\", res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"deliveryChallanId\": \"{{deliveryChallanId}}\",\n    \"workOrderItemId\": \"{{workOrderItemId}}\",\n    \"damagedQuantity\": 2,\n    \"action\": \"REPLACE\",\n    \"remarks\": \"Damaged during shipment in transit\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transit-damages",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transit-damages"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Approve Transit Damage (Generates JC & Reopens WO)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Verify status APPROVED\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.status).to.eql(\"APPROVED\");",
+                                    "    if (res.data.createdJobCardId) {",
+                                    "        pm.environment.set(\"jobCardId\", res.data.createdJobCardId);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transit-damages/{{transitDamageReportId}}/approve",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transit-damages",
+                                "{{transitDamageReportId}}",
+                                "approve"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reject Transit Damage",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"Verify status REJECTED\", function () {",
+                                    "    var res = pm.response.json();",
+                                    "    pm.expect(res.success).to.be.true;",
+                                    "    pm.expect(res.data.status).to.eql(\"REJECTED\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transit-damages/{{transitDamageReportId}}/reject",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transit-damages",
+                                "{{transitDamageReportId}}",
+                                "reject"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Damage Report By ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transit-damages/{{transitDamageReportId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transit-damages",
+                                "{{transitDamageReportId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Damage Reports For Challan",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transit-damages/challan/{{deliveryChallanId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transit-damages",
+                                "challan",
+                                "{{deliveryChallanId}}"
                             ]
                         }
                     },

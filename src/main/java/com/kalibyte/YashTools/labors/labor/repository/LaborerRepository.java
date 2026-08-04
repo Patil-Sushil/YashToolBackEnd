@@ -11,4 +11,5 @@ import java.util.List;
 public interface LaborerRepository extends JpaRepository<Laborer, Long> {
     List<Laborer> findByIsActiveTrue();
     List<Laborer> findByRoleAndIsActiveTrue(LaborRole role);
+    long countByIsActiveTrue();
 }

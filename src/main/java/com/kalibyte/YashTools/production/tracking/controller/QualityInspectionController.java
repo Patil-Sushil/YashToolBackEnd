@@ -1,4 +1,6 @@
 package com.kalibyte.YashTools.production.tracking.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.production.tracking.dto.PlannerDashboardResponse;
@@ -15,6 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/quality-inspections")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION', 'QUALITY')")
 public class QualityInspectionController {
 
     private final QualityInspectionService qualityInspectionService;

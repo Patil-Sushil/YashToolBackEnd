@@ -610,17 +610,28 @@ com/kalibyte/YashTools/
 │   │   ├── repository/AdvanceTransactionRepository.java
 │   │   └── service/AdvanceService.java
 │   │
-│   ├── report/
-│   │   ├── controller/ReportController.java
+│   ├── report/                          # Unified Reporting & Financial Engine
+│   │   ├── controller/
+│   │   │   ├── LaborReportController.java
+│   │   │   └── ProductionReportController.java
 │   │   ├── dto/
 │   │   │   ├── DateRangeRequest.java
 │   │   │   ├── DateRangePreset.java
-│   │   │   ├── LaborAttendanceReportDTO.java
 │   │   │   ├── LaborDetailedReportDTO.java
-│   │   │   └── LaborExpenseReportDTO.java
-│   │   ├── mapper/ReportMapper.java
+│   │   │   ├── LaborExpenseReportDTO.java
+│   │   │   ├── ProductionExecutionReportDTO.java
+│   │   │   ├── ProductionExecutionDetailDTO.java
+│   │   │   ├── QualityInspectionReportDTO.java
+│   │   │   ├── QualityInspectionDetailDTO.java
+│   │   │   ├── CoatingUtilizationReportDTO.java
+│   │   │   ├── CoatingUtilizationDetailDTO.java
+│   │   │   ├── ProductionEfficiencyReportDTO.java
+│   │   │   ├── ProductionEfficiencyDetailDTO.java
+│   │   │   └── ProfitLossReportDTO.java
 │   │   ├── util/DateRangeResolver.java
-│   │   └── service/ReportService.java
+│   │   └── service/
+│   │       ├── LaborReportService.java
+│   │       └── ProductionReportService.java
 │   │
 │   └── seeder/LaborDatabaseSeeder.java
 │
@@ -806,11 +817,15 @@ com/kalibyte/YashTools/
 - Deduction tracking against payouts
 - Advance transaction history
 
-#### 5E. **Labor Reporting**
-- Attendance reports with date range filters
-- Detailed labor expense reports
-- Preset date ranges (Last Week, Last Month, Last Quarter, YTD, etc.)
-- Excel export capability (Apache POI)
+#### 5E. **Unified Reporting & Financial Analytics Engine**
+- **Labor Expense Reports:** Tracking daily, weekly, monthly, and yearly payouts, attendance summaries, and advance deductions.
+- **Production Execution Logs:** Real-time logging of target vs. produced quantities, operator shifts, machine allocations, and downtime tracking.
+- **Quality Audits (QA):** Pass, reject, and rework logs checking inspection rates by inspector or inspection results.
+- **Coating Utilization Logs:** Matching chemical utilization (Helica, Alcrona, etc.) rates against actual quantities run on the floor to track chemical cost.
+- **Production Efficiency Reports:** Calculating machine productivity and process efficiency by order category type (`NEW_TOOL`, `RESHARPENING`, `REFORMING`).
+- **Profit & Loss (P&L) Reports:** Aggregates live sales invoices revenue, collected GST taxes, carbide raw material purchases, direct wages, and overhead shipping/logistics expenses to compute net profits and margins.
+- **Multi-Format Exports:** High-quality Excel spreadsheets (Apache POI) and print-ready PDF statements (Thymeleaf + Flying Saucer).
+- **Date Presets resolver:** Native support for presets (`TODAY`, `YESTERDAY`, `THIS_WEEK`, `THIS_MONTH`, `THIS_QUARTER`, `THIS_YEAR`, etc.) and custom ranges.
 
 ---
 
@@ -890,8 +905,34 @@ http://localhost:8080/api
 | GET | `/labors/payouts` | Get payouts | ADMIN, FINANCE |
 | POST | `/labors/payouts` | Create weekly payout | ADMIN, FINANCE |
 | POST | `/labors/advances` | Record advance | ADMIN, HR, FINANCE |
-| GET | `/labors/reports/attendance` | Attendance report | ADMIN, FINANCE |
-| GET | `/labors/reports/expense` | Expense report | ADMIN, FINANCE |
+
+### Unified Reports & Financials Endpoints
+
+| Method | Endpoint | Description | Roles / Permissions |
+|--------|----------|-------------|---------------------|
+| **Labor Reports** | | | |
+| GET | `/api/labor-reports/summary` | Aggregated labor expense summary (preset/dates) | ADMIN, FINANCE |
+| GET | `/api/labor-reports/weekly` | Weekly attendance & earnings report | ADMIN, FINANCE |
+| GET | `/api/labor-reports/monthly` | Monthly attendance & earnings report | ADMIN, FINANCE |
+| GET | `/api/labor-reports/yearly/{year}` | Yearly labor cost rollup | ADMIN, FINANCE |
+| GET | `/api/labor-reports/export` | Export labor summary to Excel | ADMIN, FINANCE |
+| **Production Reports** | | | |
+| GET | `/api/production-reports/execution` | Shop-floor execution logs (target vs produced) | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/execution/export-excel` | Export execution log summary to Excel | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/execution/export-pdf` | Export execution log summary to PDF | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/quality` | QA audits summary (pass, reject, rework rates) | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/quality/export-excel` | Export QA audit summary to Excel | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/quality/export-pdf` | Export QA audit summary to PDF | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/coating` | Coating utilization & chemical cost log | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/coating/export-excel` | Export coating utilization log to Excel | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/coating/export-pdf` | Export coating utilization log to PDF | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/efficiency` | Category productivity efficiency logs | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/efficiency/export-excel` | Export category productivity logs to Excel | ADMIN, PRODUCTION, FINANCE |
+| GET | `/api/production-reports/efficiency/export-pdf` | Export category productivity logs to PDF | ADMIN, PRODUCTION, FINANCE |
+| **Profit & Loss Reports** | | | |
+| GET | `/api/production-reports/profit-loss` | Financial P&L Statement (revenue, costs, margins) | ADMIN, FINANCE |
+| GET | `/api/production-reports/profit-loss/export-excel` | Export P&L statement to Excel | ADMIN, FINANCE |
+| GET | `/api/production-reports/profit-loss/export-pdf` | Export P&L statement to PDF | ADMIN, FINANCE |
 
 ### Actuator Endpoints (Management)
 

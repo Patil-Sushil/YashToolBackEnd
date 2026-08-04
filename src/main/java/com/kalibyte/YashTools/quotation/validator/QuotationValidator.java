@@ -34,6 +34,16 @@ public class QuotationValidator {
             throw new PricingException("Line " + lineNo + ": overallLength must be > 0");
         if (item.getQuantity() == null || item.getQuantity() <= 0)
             throw new PricingException("Line " + lineNo + ": quantity must be > 0");
+        
+        if (Boolean.TRUE.equals(item.getTrial())) {
+            if (item.getOrderType() != com.kalibyte.YashTools.common.enums.OrderType.NEW_TOOL) {
+                throw new PricingException("Line " + lineNo + ": Trial feature is only applicable for NEW_TOOL orders");
+            }
+            if (item.getQuantity() != 1) {
+                throw new PricingException("Line " + lineNo + ": Trial quantity must be exactly 1");
+            }
+        }
+
         if (item.getUserMultiplier() == null
                 || item.getUserMultiplier().compareTo(BigDecimal.valueOf(QuotationConstants.MIN_MULTIPLIER)) < 0
                 || item.getUserMultiplier().compareTo(BigDecimal.valueOf(QuotationConstants.MAX_MULTIPLIER)) > 0)

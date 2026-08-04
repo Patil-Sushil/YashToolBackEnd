@@ -13,4 +13,6 @@ public interface ProductionScheduleService {
     ScheduleResponse getById(UUID id);
     ScheduleResponse getByJobCardId(UUID jobCardId);
     Page<ScheduleResponse> list(Pageable pageable);
+    java.util.List<ScheduleResponse> getSchedulesByMachine(UUID machineId);
+    void updatePriorities(com.kalibyte.YashTools.production.planning.dto.UpdatePlanningPrioritiesRequest request);
 }

@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/purchase/goods-receipts")
 @RequiredArgsConstructor
 @Tag(name = "Goods Receipt Note (GRN)", description = "APIs for managing Goods Receipt Notes")
+@PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
 public class GoodsReceiptController {
 
     private final GoodsReceiptService service;

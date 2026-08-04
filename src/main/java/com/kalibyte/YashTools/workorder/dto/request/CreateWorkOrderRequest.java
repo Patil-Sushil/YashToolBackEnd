@@ -17,6 +17,6 @@ public class CreateWorkOrderRequest {
     private UUID quotationId;
 
     private String remarks;
-    private LocalDate plannedStartDate;
-    private LocalDate plannedEndDate;
+    private LocalDate expectedDeliveryDate;
+    private String poNumber;
 }

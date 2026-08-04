@@ -2,6 +2,7 @@ package com.kalibyte.YashTools.purchase.transaction.purchaseinvoice.repository;
 
 import com.kalibyte.YashTools.purchase.transaction.purchaseinvoice.entity.PurchaseInvoice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface PurchaseInvoiceRepository extends JpaRepository<PurchaseInvoice, UUID> {
+public interface PurchaseInvoiceRepository extends JpaRepository<PurchaseInvoice, UUID>, JpaSpecificationExecutor<PurchaseInvoice> {
     Optional<PurchaseInvoice> findByInvoiceNumber(String invoiceNumber);
     Optional<PurchaseInvoice> findBySupplierInvoiceNumber(String supplierInvoiceNumber);
 
@@ -30,4 +31,9 @@ public interface PurchaseInvoiceRepository extends JpaRepository<PurchaseInvoice
 
     @Query("SELECT pi FROM PurchaseInvoice pi ORDER BY pi.createdAt DESC LIMIT 1")
     Optional<PurchaseInvoice> findTopByOrderByCreatedAtDesc();
+
+    List<PurchaseInvoice> findByCompanyIdAndInvoiceDateBetween(UUID companyId, java.time.LocalDate startDate, java.time.LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(pi.totalAmount), 0) FROM PurchaseInvoice pi WHERE pi.company.id = :companyId")
+    java.math.BigDecimal getTotalExpense(@org.springframework.data.repository.query.Param("companyId") UUID companyId);
 }

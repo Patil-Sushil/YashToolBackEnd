@@ -23,4 +23,5 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     @Query("SELECT COALESCE(SUM(a.earnedAmount), 0) FROM Attendance a WHERE a.workDate BETWEEN :from AND :to")
     BigDecimal getTotalLaborCost(@Param("from") LocalDate from, @Param("to") LocalDate to);
+    long countByWorkDate(LocalDate workDate);
 }

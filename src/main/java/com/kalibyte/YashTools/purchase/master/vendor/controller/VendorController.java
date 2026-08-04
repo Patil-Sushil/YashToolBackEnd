@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/purchase/vendors")
 @RequiredArgsConstructor
 @Tag(name = "Vendor Master", description = "APIs for managing vendors")
+@PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
 public class VendorController {
 
     private final VendorService service;

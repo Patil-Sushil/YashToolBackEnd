@@ -34,6 +34,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/masters/rate-charts/coolant-hole-prices")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class HyperionCoolantHoleRodPriceController {
 
     private final HyperionCoolantHoleRodPriceService service;

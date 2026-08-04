@@ -1,9 +1,13 @@
 package com.kalibyte.YashTools.production.planning.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.common.response.PageResponse;
 import com.kalibyte.YashTools.production.planning.dto.ScheduleRequest;
 import com.kalibyte.YashTools.production.planning.dto.ScheduleResponse;
+import com.kalibyte.YashTools.production.planning.dto.UpdatePlanningPrioritiesRequest;
+import java.util.List;
 import com.kalibyte.YashTools.production.planning.service.ProductionScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/production-schedules")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
 public class ProductionScheduleController {
 
     private final ProductionScheduleService scheduleService;
@@ -54,5 +59,16 @@ public class ProductionScheduleController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
         Page<ScheduleResponse> result = scheduleService.list(pageable);
         return ResponseEntity.ok(ApiResponse.success(PageResponse.from(result)));
+    }
+
+    @GetMapping("/machine/{machineId}")
+    public ResponseEntity<ApiResponse<List<ScheduleResponse>>> getSchedulesByMachine(@PathVariable UUID machineId) {
+        return ResponseEntity.ok(ApiResponse.success(scheduleService.getSchedulesByMachine(machineId)));
+    }
+
+    @PutMapping("/priorities")
+    public ResponseEntity<ApiResponse<String>> updatePriorities(@Valid @RequestBody UpdatePlanningPrioritiesRequest request) {
+        scheduleService.updatePriorities(request);
+        return ResponseEntity.ok(ApiResponse.success("Planning priorities updated successfully"));
     }
 }

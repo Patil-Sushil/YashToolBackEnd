@@ -61,11 +61,13 @@ public class WorkOrder extends BaseCompanyEntity {
     @Column(name = "planned_end_date")
     private LocalDate plannedEndDate;
 
-    @Column(name = "actual_start_date")
-    private LocalDateTime actualStartDate;
+    @Column(name = "expected_delivery_date")
+    private LocalDate expectedDeliveryDate;
 
-    @Column(name = "actual_end_date")
-    private LocalDateTime actualEndDate;
+    @Column(name = "po_number", length = 100)
+    private String poNumber;
+
+
 
     @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default

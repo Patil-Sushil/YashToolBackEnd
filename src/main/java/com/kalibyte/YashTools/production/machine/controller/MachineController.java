@@ -1,4 +1,6 @@
 package com.kalibyte.YashTools.production.machine.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.common.response.PageResponse;
@@ -19,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/machines")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
 public class MachineController {
 
     private final MachineService machineService;

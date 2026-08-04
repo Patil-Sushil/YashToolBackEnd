@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/purchase/purchase-invoices")
 @RequiredArgsConstructor
 @Tag(name = "Purchase Invoice", description = "APIs for managing Purchase Invoices")
+@PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
 public class PurchaseInvoiceController {
 
     private final PurchaseInvoiceService service;

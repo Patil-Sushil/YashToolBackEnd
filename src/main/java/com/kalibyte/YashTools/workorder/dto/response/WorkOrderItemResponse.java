@@ -17,6 +17,8 @@ public class WorkOrderItemResponse {
     private String itemName;
     private Integer quantity;
     private Boolean trial;
+    private String trialStatus;
+    private String trialFeedback;
     private String itemRemarks;
     private String drawingReference;
     private String materialType;

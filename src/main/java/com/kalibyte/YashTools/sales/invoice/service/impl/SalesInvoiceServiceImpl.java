@@ -71,6 +71,17 @@ public class SalesInvoiceServiceImpl implements SalesInvoiceService {
                 throw new BusinessException("Item " + woi.getId() + " does not belong to Work Order " + wo.getId());
             }
 
+            if (Boolean.TRUE.equals(woi.getTrial())) {
+                if (woi.getTrialStatus() == null || woi.getTrialStatus() == com.kalibyte.YashTools.workorder.entity.enums.TrialStatus.PENDING) {
+                    String itemName = (woi.getToolName() != null && !woi.getToolName().isBlank()) ? woi.getToolName() : woi.getItemName();
+                    throw new BusinessException(String.format("Cannot generate bill for trial item '%s' because its trial status is still PENDING. The trial must be marked as SUCCESS first.", itemName));
+                }
+                if (woi.getTrialStatus() == com.kalibyte.YashTools.workorder.entity.enums.TrialStatus.FAILED) {
+                    String itemName = (woi.getToolName() != null && !woi.getToolName().isBlank()) ? woi.getToolName() : woi.getItemName();
+                    throw new BusinessException(String.format("Cannot generate bill for trial item '%s' because the trial has FAILED.", itemName));
+                }
+            }
+
             int alreadyInvoicedQty = salesInvoiceItemRepository.getSumQuantityByWorkOrderItemId(woi.getId());
             int totalItemQty = woi.getQuantity() != null ? woi.getQuantity() : 0;
             int remainingQty = totalItemQty - alreadyInvoicedQty;

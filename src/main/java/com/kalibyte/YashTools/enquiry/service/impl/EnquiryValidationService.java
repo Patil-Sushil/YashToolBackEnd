@@ -74,10 +74,13 @@ public class EnquiryValidationService {
      * Validate individual trial item
      */
     private void validateTrialItem(EnquiryItem item) {
-        if (item.getQuantity() > MAX_TRIAL_QUANTITY) {
+        if (item.getOrderType() != com.kalibyte.YashTools.common.enums.OrderType.NEW_TOOL) {
+            throw new BusinessException("Trial feature is only applicable for NEW_TOOL orders. Order: " + item.getToolName());
+        }
+        if (item.getQuantity() != MAX_TRIAL_QUANTITY) {
             throw new BusinessException(
                     String.format(
-                            "Trial quantity cannot exceed %d for %s order. Current quantity: %d",
+                            "Trial quantity must be exactly %d for %s order. Current quantity: %d",
                             MAX_TRIAL_QUANTITY,
                             item.getOrderType(),
                             item.getQuantity()

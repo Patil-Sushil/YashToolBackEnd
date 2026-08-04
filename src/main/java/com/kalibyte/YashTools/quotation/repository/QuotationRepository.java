@@ -32,4 +32,5 @@ public interface QuotationRepository
     List<Quotation> findRevisionsByParent(@Param("parentId") UUID parentId);
 
     long countByCompanyIdAndStatus(UUID companyId, QuotationStatus status);
+    long countByStatus(QuotationStatus status);
 }

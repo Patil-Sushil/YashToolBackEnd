@@ -23,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Laborer Management", description = "APIs for managing laborers and their profiles")
 @SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("hasRole('ADMIN')")
 public class LaborerController {
 
     private final LaborerService laborerService;

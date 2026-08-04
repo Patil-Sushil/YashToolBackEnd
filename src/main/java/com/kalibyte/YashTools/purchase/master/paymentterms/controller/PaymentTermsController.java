@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/purchase/payment-terms")
 @RequiredArgsConstructor
 @Tag(name = "Payment Terms Master", description = "APIs for managing payment terms")
+@PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
 public class PaymentTermsController {
 
     private final PaymentTermsService service;

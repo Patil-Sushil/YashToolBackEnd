@@ -21,6 +21,7 @@ import java.util.UUID;
 @RequestMapping("/api/purchase/vendor-payments")
 @RequiredArgsConstructor
 @Tag(name = "Vendor Payment", description = "APIs for managing Vendor Payments")
+@PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
 public class VendorPaymentController {
 
     private final VendorPaymentService service;

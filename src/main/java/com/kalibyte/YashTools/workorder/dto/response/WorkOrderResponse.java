@@ -29,11 +29,11 @@ public class WorkOrderResponse {
     private LocalDate plannedStartDate;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate plannedEndDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate expectedDeliveryDate;
+    private String poNumber;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime actualStartDate;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime actualEndDate;
+
 
     private List<WorkOrderItemResponse> items;
 

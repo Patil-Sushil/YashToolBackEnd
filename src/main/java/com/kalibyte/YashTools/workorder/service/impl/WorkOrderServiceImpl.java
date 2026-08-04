@@ -9,14 +9,19 @@ import com.kalibyte.YashTools.quotation.repository.QuotationRepository;
 import com.kalibyte.YashTools.quotation.security.QuotationSecurityService;
 import com.kalibyte.YashTools.workorder.dto.request.CreateWorkOrderRequest;
 import com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderStatusRequest;
+import com.kalibyte.YashTools.workorder.dto.request.UpdateTrialResultRequest;
+import com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderPlanningRequest;
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderItemResponse;
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderResponse;
 import com.kalibyte.YashTools.workorder.entity.WorkOrder;
 import com.kalibyte.YashTools.workorder.entity.WorkOrderItem;
 import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
+import com.kalibyte.YashTools.workorder.entity.enums.TrialStatus;
 import com.kalibyte.YashTools.workorder.exception.WorkOrderException;
+import com.kalibyte.YashTools.workorder.repository.WorkOrderItemRepository;
 import com.kalibyte.YashTools.workorder.repository.WorkOrderRepository;
 import com.kalibyte.YashTools.workorder.service.WorkOrderService;
+import com.kalibyte.YashTools.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,6 +43,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     private final WorkOrderRepository workOrderRepository;
     private final QuotationRepository quotationRepository;
     private final QuotationSecurityService quotationSecurityService;
+    private final WorkOrderItemRepository workOrderItemRepository;
 
     @Override
     @Transactional
@@ -75,8 +81,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .customerEmail(quotation.getCustomerEmail())
                 .customerMobile(quotation.getCustomerMobile())
                 .remarks(request.getRemarks())
-                .plannedStartDate(request.getPlannedStartDate())
-                .plannedEndDate(request.getPlannedEndDate())
+                .expectedDeliveryDate(request.getExpectedDeliveryDate())
+                .poNumber(request.getPoNumber())
                 .build();
         wo.setCompany(company);
 
@@ -90,6 +96,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                     .itemName(src.getItemName())
                     .quantity(src.getQuantity())
                     .trial(src.getTrial())
+                    .trialStatus(Boolean.TRUE.equals(src.getTrial()) ? TrialStatus.PENDING : null)
                     .itemRemarks(src.getItemRemarks())
                     .drawingReference(src.getDrawingReference())
                     .materialType(src.getMaterialType())
@@ -176,18 +183,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             throw new WorkOrderException("Cannot change status of a terminal Work Order in status: " + currentStatus);
         }
 
-        if (newStatus == WorkOrderStatus.IN_PROGRESS) {
-            if (wo.getActualStartDate() == null) {
-                wo.setActualStartDate(LocalDateTime.now());
-            }
-        } else if (newStatus == WorkOrderStatus.COMPLETED || newStatus == WorkOrderStatus.PRODUCTION_COMPLETED || newStatus == WorkOrderStatus.CANCELLED) {
-            if (wo.getActualEndDate() == null) {
-                wo.setActualEndDate(LocalDateTime.now());
-            }
-            if (newStatus == WorkOrderStatus.COMPLETED && wo.getActualStartDate() == null) {
-                wo.setActualStartDate(LocalDateTime.now());
-            }
-        }
+
 
         wo.setStatus(newStatus);
         if (request.getRemarks() != null && !request.getRemarks().isBlank()) {
@@ -211,6 +207,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                         .itemName(i.getItemName())
                         .quantity(i.getQuantity())
                         .trial(i.getTrial())
+                        .trialStatus(i.getTrialStatus() != null ? i.getTrialStatus().name() : null)
+                        .trialFeedback(i.getTrialFeedback())
                         .itemRemarks(i.getItemRemarks())
                         .drawingReference(i.getDrawingReference())
                         .materialType(i.getMaterialType())
@@ -233,8 +231,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         return WorkOrderResponse.builder()
                 .id(wo.getId())
                 .workOrderNo(wo.getWorkOrderNo())
-                .quotationId(wo.getQuotation().getId())
-                .quotationNo(wo.getQuotation().getQuotationNo())
+                .quotationId(wo.getQuotation() != null ? wo.getQuotation().getId() : null)
+                .quotationNo(wo.getQuotation() != null ? wo.getQuotation().getQuotationNo() : null)
                 .status(wo.getStatus().name())
                 .customerId(wo.getCustomer().getId())
                 .customerCompanyName(wo.getCustomerCompanyName())
@@ -244,8 +242,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .remarks(wo.getRemarks())
                 .plannedStartDate(wo.getPlannedStartDate())
                 .plannedEndDate(wo.getPlannedEndDate())
-                .actualStartDate(wo.getActualStartDate())
-                .actualEndDate(wo.getActualEndDate())
+                .expectedDeliveryDate(wo.getExpectedDeliveryDate())
+                .poNumber(wo.getPoNumber())
                 .items(itemResponses)
                 .createdAt(wo.getCreatedAt())
                 .createdBy(wo.getCreatedBy())
@@ -254,5 +252,44 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .companyId(wo.getCompany().getId())
                 .companyCode(wo.getCompany().getCode())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public WorkOrderResponse updateTrialResult(UUID itemId, UpdateTrialResultRequest request) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        WorkOrderItem item = workOrderItemRepository.findById(itemId)
+                .orElseThrow(() -> new BusinessException("Work Order Item not found with ID: " + itemId));
+
+        if (!item.getWorkOrder().getCompany().getId().equals(companyId)) {
+            throw new BusinessException("Work Order Item does not belong to the active company context");
+        }
+
+        if (!Boolean.TRUE.equals(item.getTrial())) {
+            throw new BusinessException("Item " + item.getToolName() + " is not a trial item");
+        }
+
+        item.setTrialStatus(request.getStatus());
+        item.setTrialFeedback(request.getFeedback());
+        workOrderItemRepository.save(item);
+        
+        log.info("Trial status for item {} updated to {}", itemId, request.getStatus());
+        return toResponse(item.getWorkOrder());
+    }
+
+    @Override
+    @Transactional
+    public WorkOrderResponse updatePlanning(UUID id, UpdateWorkOrderPlanningRequest request) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        WorkOrder wo = workOrderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new WorkOrderException("Work Order not found with ID: " + id));
+
+        wo.setPlannedStartDate(request.getPlannedStartDate());
+        wo.setPlannedEndDate(request.getPlannedEndDate());
+        WorkOrder saved = workOrderRepository.save(wo);
+
+        log.info("Work Order {} planning dates updated by production planner: Start={}, End={}",
+                saved.getWorkOrderNo(), request.getPlannedStartDate(), request.getPlannedEndDate());
+        return toResponse(saved);
     }
 }

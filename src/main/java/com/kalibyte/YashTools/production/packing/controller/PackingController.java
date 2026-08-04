@@ -17,6 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/packing", "/api/production/packing"})
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
 public class PackingController {
 
     private final PackingService service;

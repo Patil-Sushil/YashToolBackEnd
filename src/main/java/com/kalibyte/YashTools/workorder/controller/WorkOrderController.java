@@ -1,9 +1,13 @@
 package com.kalibyte.YashTools.workorder.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.common.response.PageResponse;
 import com.kalibyte.YashTools.workorder.dto.request.CreateWorkOrderRequest;
 import com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderStatusRequest;
+import com.kalibyte.YashTools.workorder.dto.request.UpdateTrialResultRequest;
+import com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderPlanningRequest;
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderResponse;
 import com.kalibyte.YashTools.workorder.service.WorkOrderService;
 import jakarta.validation.Valid;
@@ -22,11 +26,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/work-orders")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
 public class WorkOrderController {
 
     private final WorkOrderService workOrderService;
 
-    @PostMapping
+    @PostMapping({"", "/from-quotation"})
     public ResponseEntity<ApiResponse<WorkOrderResponse>> createFromQuotation(
             @Valid @RequestBody CreateWorkOrderRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -63,5 +68,25 @@ public class WorkOrderController {
         return ResponseEntity.ok(ApiResponse.success(
                 "Work Order status updated successfully",
                 workOrderService.updateStatus(id, request)));
+    }
+
+    @PostMapping("/items/{itemId}/trial-result")
+    public ResponseEntity<ApiResponse<WorkOrderResponse>> updateTrialResult(
+            @PathVariable UUID itemId,
+            @Valid @RequestBody UpdateTrialResultRequest request) {
+        log.info("Updating trial result for Work Order Item: {} with status: {}", itemId, request.getStatus());
+        return ResponseEntity.ok(ApiResponse.success(
+                "Trial result updated successfully",
+                workOrderService.updateTrialResult(itemId, request)));
+    }
+
+    @PutMapping("/{id}/planning")
+    public ResponseEntity<ApiResponse<WorkOrderResponse>> updatePlanning(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateWorkOrderPlanningRequest request) {
+        log.info("Updating planning dates for Work Order: {} by production planner", id);
+        return ResponseEntity.ok(ApiResponse.success(
+                "Work Order planning dates updated successfully",
+                workOrderService.updatePlanning(id, request)));
     }
 }

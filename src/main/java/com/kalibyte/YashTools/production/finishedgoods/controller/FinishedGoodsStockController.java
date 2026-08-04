@@ -14,6 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/finished-goods", "/api/production/finished-goods"})
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'STORE')")
 public class FinishedGoodsStockController {
 
     private final FinishedGoodsStockService service;

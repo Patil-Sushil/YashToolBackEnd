@@ -1,9 +1,11 @@
+
 package com.kalibyte.YashTools.workorder.entity;
 
 import com.kalibyte.YashTools.common.base.AuditableEntity;
 import com.kalibyte.YashTools.common.enums.OrderType;
 import com.kalibyte.YashTools.enquiry.entity.enums.MaterialGrade;
 import com.kalibyte.YashTools.quotation.entity.QuotationItem;
+import com.kalibyte.YashTools.workorder.entity.enums.TrialStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,6 +44,13 @@ public class WorkOrderItem extends AuditableEntity {
     @Column(nullable = false)
     @Builder.Default
     private Boolean trial = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trial_status", length = 30)
+    private TrialStatus trialStatus;
+
+    @Column(name = "trial_feedback", columnDefinition = "TEXT")
+    private String trialFeedback;
 
     @Column(name = "item_remarks", columnDefinition = "TEXT")
     private String itemRemarks;

@@ -24,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/delivery-challans")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
 public class DeliveryChallanController {
 
     private final DeliveryChallanService service;
