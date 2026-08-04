@@ -31,4 +31,9 @@ public interface PurchaseInvoiceRepository extends JpaRepository<PurchaseInvoice
 
     @Query("SELECT pi FROM PurchaseInvoice pi ORDER BY pi.createdAt DESC LIMIT 1")
     Optional<PurchaseInvoice> findTopByOrderByCreatedAtDesc();
+
+    List<PurchaseInvoice> findByCompanyIdAndInvoiceDateBetween(UUID companyId, java.time.LocalDate startDate, java.time.LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(pi.totalAmount), 0) FROM PurchaseInvoice pi WHERE pi.company.id = :companyId")
+    java.math.BigDecimal getTotalExpense(@org.springframework.data.repository.query.Param("companyId") UUID companyId);
 }

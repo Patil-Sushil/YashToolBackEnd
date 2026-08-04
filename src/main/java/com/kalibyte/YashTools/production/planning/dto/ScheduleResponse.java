@@ -26,4 +26,10 @@ public class ScheduleResponse {
     private LocalDateTime createdAt;
     private String createdBy;
     private UUID companyId;
+
+    private Integer priority;
+    private UUID workOrderId;
+    private String workOrderNo;
+    private String toolName;
+    private String itemName;
 }

@@ -1,4 +1,6 @@
 package com.kalibyte.YashTools.quotation.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.common.response.PageResponse;
@@ -27,6 +29,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/quotations")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
 public class QuotationController {
 
     private final QuotationService quotationService;

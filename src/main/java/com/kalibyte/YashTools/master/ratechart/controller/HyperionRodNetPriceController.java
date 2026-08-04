@@ -35,6 +35,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/masters/rate-charts/rod-net-prices")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class HyperionRodNetPriceController {
 
     private final HyperionRodNetPriceService service;

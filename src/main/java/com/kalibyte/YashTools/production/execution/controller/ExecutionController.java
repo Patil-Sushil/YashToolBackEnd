@@ -1,4 +1,6 @@
 package com.kalibyte.YashTools.production.execution.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.production.execution.dto.ExecutionResponse;
@@ -16,7 +18,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/production-executions")
 @RequiredArgsConstructor
-public class ExecutionController {
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
+public class
+ExecutionController {
 
     private final ExecutionService executionService;
 

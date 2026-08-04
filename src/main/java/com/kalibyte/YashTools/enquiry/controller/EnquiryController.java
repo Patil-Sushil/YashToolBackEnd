@@ -26,6 +26,7 @@ import java.util.UUID;
 @RequestMapping("/api/enquiries")
 @RequiredArgsConstructor
 @Tag(name = "Enquiry Management", description = "APIs for managing customer enquiries")
+@PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
 public class EnquiryController {
 
     private final EnquiryService enquiryService;

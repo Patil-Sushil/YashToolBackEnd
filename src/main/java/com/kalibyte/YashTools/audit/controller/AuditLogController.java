@@ -28,6 +28,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/audit-logs", "/api/admin/audit-logs"})
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AuditLogController {
 
     private final AuditLogService auditLogService;

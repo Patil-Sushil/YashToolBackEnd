@@ -19,6 +19,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class UserManagementController {
 
     private final AuthService authService;

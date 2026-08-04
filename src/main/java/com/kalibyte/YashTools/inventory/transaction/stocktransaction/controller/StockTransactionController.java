@@ -13,6 +13,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/inventory/stock-transactions")
+@PreAuthorize("hasAnyRole('ADMIN', 'STORE')")
 public class StockTransactionController {
 
     private final StockTransactionService service;

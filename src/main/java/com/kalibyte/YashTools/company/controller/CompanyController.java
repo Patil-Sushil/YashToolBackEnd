@@ -1,4 +1,6 @@
 package com.kalibyte.YashTools.company.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.kalibyte.YashTools.common.annotation.LoggableAction;
 import com.kalibyte.YashTools.audit.entity.enums.AuditAction;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/companies")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class CompanyController {
 
     private final CompanyRepository companyRepository;

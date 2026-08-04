@@ -19,6 +19,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/masters/raw-materials")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class RawMaterialController {
 
     private final RawMaterialService service;

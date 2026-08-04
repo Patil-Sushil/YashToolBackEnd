@@ -15,6 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/inventory/material-issues")
+@PreAuthorize("hasAnyRole('ADMIN', 'STORE')")
 public class MaterialIssueController {
 
     private final MaterialIssueService service;

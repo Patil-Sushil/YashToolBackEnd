@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/masters/coatings")
+@PreAuthorize("hasRole('ADMIN')")
 public class CoatingController {
     private final CoatingService service;
 

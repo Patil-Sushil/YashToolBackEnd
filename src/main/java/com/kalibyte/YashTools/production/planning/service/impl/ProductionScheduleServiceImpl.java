@@ -190,6 +190,38 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
                 .createdAt(ps.getCreatedAt())
                 .createdBy(ps.getCreatedBy())
                 .companyId(ps.getCompany().getId())
+                .priority(ps.getJobCard().getPriority())
+                .workOrderId(ps.getJobCard().getWorkOrder().getId())
+                .workOrderNo(ps.getJobCard().getWorkOrder().getWorkOrderNo())
+                .toolName(ps.getJobCard().getWorkOrderItem().getToolName())
+                .itemName(ps.getJobCard().getWorkOrderItem().getItemName())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<ScheduleResponse> getSchedulesByMachine(UUID machineId) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        return scheduleRepository.findByMachineIdAndCompanyId(machineId, companyId).stream()
+                .sorted((s1, s2) -> {
+                    int pComp = s2.getJobCard().getPriority().compareTo(s1.getJobCard().getPriority());
+                    if (pComp != 0) return pComp;
+                    return s1.getPlannedStartDate().compareTo(s2.getPlannedStartDate());
+                })
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void updatePriorities(com.kalibyte.YashTools.production.planning.dto.UpdatePlanningPrioritiesRequest request) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        for (com.kalibyte.YashTools.production.planning.dto.UpdatePlanningPrioritiesRequest.Item item : request.getItems()) {
+            JobCard jc = jobCardRepository.findByIdAndCompanyId(item.getJobCardId(), companyId)
+                    .orElseThrow(() -> new BusinessException("Job Card not found with ID: " + item.getJobCardId()));
+            jc.setPriority(item.getPriority());
+            jobCardRepository.save(jc);
+            log.info("Updated Job Card {} priority to {}", jc.getJobCardNo(), item.getPriority());
+        }
     }
 }

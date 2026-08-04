@@ -21,6 +21,7 @@ import java.util.UUID;
 @RequestMapping("/api/purchase/purchase-orders")
 @RequiredArgsConstructor
 @Tag(name = "Purchase Order", description = "APIs for managing purchase orders")
+@PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
 public class PurchaseOrderController {
 
     private final PurchaseOrderService service;

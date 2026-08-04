@@ -14,4 +14,5 @@ public interface ProductionScheduleRepository
     Optional<ProductionSchedule> findByIdAndCompanyId(UUID id, UUID companyId);
     Optional<ProductionSchedule> findByJobCardIdAndCompanyId(UUID jobCardId, UUID companyId);
     boolean existsByJobCardId(UUID jobCardId);
+    java.util.List<ProductionSchedule> findByMachineIdAndCompanyId(UUID machineId, UUID companyId);
 }

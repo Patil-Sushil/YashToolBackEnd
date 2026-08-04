@@ -14,6 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/inventory/cut-pieces")
+@PreAuthorize("hasAnyRole('ADMIN', 'STORE')")
 public class CutPieceController {
 
     private final CutPieceService cutPieceService;

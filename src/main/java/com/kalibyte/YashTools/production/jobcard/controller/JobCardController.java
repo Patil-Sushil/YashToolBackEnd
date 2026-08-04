@@ -1,4 +1,6 @@
 package com.kalibyte.YashTools.production.jobcard.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.common.response.PageResponse;
@@ -21,6 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/job-cards")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
 public class JobCardController {
 
     private final JobCardService jobCardService;

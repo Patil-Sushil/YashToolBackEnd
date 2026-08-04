@@ -22,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Labor Attendance", description = "APIs for tracking daily labor attendance")
 @SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("hasRole('ADMIN')")
 public class AttendanceController {
 
     private final AttendanceService attendanceService;

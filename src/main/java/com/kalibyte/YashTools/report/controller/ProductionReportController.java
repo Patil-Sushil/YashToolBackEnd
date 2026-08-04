@@ -291,6 +291,7 @@ public class ProductionReportController {
     // --- Profit & Loss Reports ---
 
     @GetMapping("/profit-loss")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
     @Operation(summary = "Get profit and loss (P&L) report")
     @LoggableAction(value = "Retrieve Profit and Loss Report", action = AuditAction.GET_REPORT, entityType = "REPORT")
     public ResponseEntity<ApiResponse<ProfitLossReportDTO>> getProfitLossReport(
@@ -305,6 +306,7 @@ public class ProductionReportController {
     }
 
     @GetMapping("/profit-loss/export-excel")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
     @Operation(summary = "Export profit and loss report to Excel")
     @LoggableAction(value = "Export Profit and Loss Report to Excel", action = AuditAction.DATA_EXPORTED, entityType = "REPORT")
     public ResponseEntity<byte[]> exportProfitLossExcel(
@@ -327,6 +329,7 @@ public class ProductionReportController {
     }
 
     @GetMapping("/profit-loss/export-pdf")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
     @Operation(summary = "Export profit and loss report to PDF")
     @LoggableAction(value = "Export Profit and Loss Report to PDF", action = AuditAction.DATA_EXPORTED, entityType = "REPORT")
     public ResponseEntity<byte[]> exportProfitLossPdf(

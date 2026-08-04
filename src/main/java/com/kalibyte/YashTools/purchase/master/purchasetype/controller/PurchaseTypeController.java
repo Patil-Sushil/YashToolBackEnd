@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/purchase/purchase-types")
 @RequiredArgsConstructor
 @Tag(name = "Purchase Type Master", description = "APIs for managing purchase types")
+@PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
 public class PurchaseTypeController {
 
     private final PurchaseTypeService service;

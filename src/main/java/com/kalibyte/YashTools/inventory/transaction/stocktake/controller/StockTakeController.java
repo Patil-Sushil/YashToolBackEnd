@@ -15,6 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/inventory/stock-takes")
+@PreAuthorize("hasAnyRole('ADMIN', 'STORE')")
 public class StockTakeController {
 
     private final StockTakeService service;

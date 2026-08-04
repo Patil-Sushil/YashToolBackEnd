@@ -23,6 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/sales-invoices")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
 public class SalesInvoiceController {
 
     private final SalesInvoiceService service;

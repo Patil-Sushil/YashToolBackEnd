@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/purchase/purchase-returns")
 @RequiredArgsConstructor
 @Tag(name = "Purchase Return", description = "APIs for managing Purchase Returns")
+@PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
 public class PurchaseReturnController {
 
     private final PurchaseReturnService service;
