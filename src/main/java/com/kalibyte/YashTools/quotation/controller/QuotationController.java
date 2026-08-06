@@ -58,9 +58,24 @@ public class QuotationController {
     }
 
     // ============================================
+    // APPROVALS
+    // ============================================
+    @GetMapping("/approvals/pending")
+    public ResponseEntity<ApiResponse<List<QuotationApprovalResponse>>> pendingApprovals() {
+        return ResponseEntity.ok(ApiResponse.success(approvalService.getPendingApprovals()));
+    }
+
+    @PostMapping("/approvals/process")
+    public ResponseEntity<ApiResponse<QuotationResponse>> processApproval(
+            @Valid @RequestBody ApproveRejectDiscountRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Approval processed",
+                approvalService.processApproval(request)));
+    }
+
+    // ============================================
     // READ
     // ============================================
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}")
     public ResponseEntity<ApiResponse<QuotationResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(quotationService.getById(id)));
     }
@@ -87,7 +102,7 @@ public class QuotationController {
     // ============================================
     // UPDATE
     // ============================================
-    @PutMapping("/{id}")
+    @PutMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}")
     public ResponseEntity<ApiResponse<QuotationResponse>> updateDraft(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateQuotationRequest request) {
@@ -105,25 +120,10 @@ public class QuotationController {
                 quotationService.revise(request)));
     }
 
-    @GetMapping("/{id}/revisions")
+    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/revisions")
     public ResponseEntity<ApiResponse<List<QuotationRevisionResponse>>> revisions(
             @PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(revisionService.getRevisionHistory(id)));
-    }
-
-    // ============================================
-    // APPROVALS
-    // ============================================
-    @GetMapping("/approvals/pending")
-    public ResponseEntity<ApiResponse<List<QuotationApprovalResponse>>> pendingApprovals() {
-        return ResponseEntity.ok(ApiResponse.success(approvalService.getPendingApprovals()));
-    }
-
-    @PostMapping("/approvals/process")
-    public ResponseEntity<ApiResponse<QuotationResponse>> processApproval(
-            @Valid @RequestBody ApproveRejectDiscountRequest request) {
-        return ResponseEntity.ok(ApiResponse.success("Approval processed",
-                approvalService.processApproval(request)));
     }
 
     // ============================================

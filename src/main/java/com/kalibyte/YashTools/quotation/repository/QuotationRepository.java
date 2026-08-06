@@ -44,4 +44,22 @@ public interface QuotationRepository
             @Param("search") String search,
             Pageable pageable);
 
+    @Query("SELECT q FROM Quotation q WHERE q.company.id = :companyId " +
+            "AND q.status = com.kalibyte.YashTools.quotation.entity.enums.QuotationStatus.LOCKED " +
+            "AND q.isLocked = true " +
+            "AND q.customer.id = :customerId " +
+            "AND q.id NOT IN (SELECT w.quotation.id FROM com.kalibyte.YashTools.workorder.entity.WorkOrder w) " +
+            "ORDER BY q.lockedAt DESC")
+    List<Quotation> findLockedQuotationsForCustomer(
+            @Param("companyId") UUID companyId,
+            @Param("customerId") UUID customerId);
+
+    @Query("SELECT q FROM Quotation q WHERE q.company.id = :companyId " +
+            "AND q.status = com.kalibyte.YashTools.quotation.entity.enums.QuotationStatus.LOCKED " +
+            "AND q.isLocked = true " +
+            "AND q.id NOT IN (SELECT w.quotation.id FROM com.kalibyte.YashTools.workorder.entity.WorkOrder w) " +
+            "ORDER BY q.customer.companyName ASC, q.lockedAt DESC")
+    List<Quotation> findAllLockedQuotationsAvailable(
+            @Param("companyId") UUID companyId);
+
 }

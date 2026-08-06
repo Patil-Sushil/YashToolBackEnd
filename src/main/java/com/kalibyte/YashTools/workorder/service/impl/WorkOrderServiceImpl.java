@@ -13,6 +13,7 @@ import com.kalibyte.YashTools.workorder.dto.request.UpdateTrialResultRequest;
 import com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderPlanningRequest;
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderItemResponse;
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderResponse;
+import com.kalibyte.YashTools.workorder.dto.response.LockedQuotationSummaryResponse;
 import com.kalibyte.YashTools.workorder.entity.WorkOrder;
 import com.kalibyte.YashTools.workorder.entity.WorkOrderItem;
 import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
@@ -376,6 +377,40 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .customerCompanyName(wo.getCustomerCompanyName())
                 .expectedDeliveryDate(wo.getExpectedDeliveryDate())
                 .items(itemProgresses)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LockedQuotationSummaryResponse> getLockedQuotationsForCustomer(UUID customerId) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        List<Quotation> quotations = quotationRepository.findLockedQuotationsForCustomer(companyId, customerId);
+        return quotations.stream().map(this::toLockedSummary).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LockedQuotationSummaryResponse> getAllLockedQuotationsAvailable() {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        List<Quotation> quotations = quotationRepository.findAllLockedQuotationsAvailable(companyId);
+        return quotations.stream().map(this::toLockedSummary).collect(Collectors.toList());
+    }
+
+    private LockedQuotationSummaryResponse toLockedSummary(Quotation q) {
+        return LockedQuotationSummaryResponse.builder()
+                .quotationId(q.getId())
+                .quotationNo(q.getQuotationNo())
+                .version(q.getVersion())
+                .status(q.getStatus().name())
+                .customerId(q.getCustomer().getId())
+                .customerCompanyName(q.getCustomerCompanyName())
+                .customerContactPerson(q.getCustomerContactPerson())
+                .grandTotal(q.getGrandTotal())
+                .currency(q.getCurrency())
+                .itemCount(q.getItems() != null ? q.getItems().size() : 0)
+                .lockedAt(q.getLockedAt())
+                .lockedBy(q.getLockedBy())
+                .createdAt(q.getCreatedAt())
                 .build();
     }
 }
