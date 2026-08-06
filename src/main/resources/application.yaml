@@ -111,7 +111,7 @@ app:
   company-state: ${COMPANY_STATE:Maharashtra}
 
   cors:
-    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173}
 
   # ==============================
   # QUOTATION MODULE

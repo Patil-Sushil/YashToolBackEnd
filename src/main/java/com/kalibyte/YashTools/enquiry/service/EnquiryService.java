@@ -28,4 +28,8 @@ public interface EnquiryService {
      */
     @Transactional
     EnquiryResponse updateEnquiryStatus(UUID enquiryId, UpdateEnquiryStatusRequest request);
+
+
+    List<EnquiryResponse> searchEnquiries(String query);
+
 }

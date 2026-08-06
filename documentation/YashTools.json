@@ -775,6 +775,51 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Search Customers",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "YT",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/customers/search?query=Tech",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "Tech"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -947,6 +992,41 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Search Enquiries",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "YT",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/enquiries/search?query=ENQ",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "enquiries",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "ENQ"
+                                }
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -1143,6 +1223,35 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Get Operators",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "YT",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/labors/operators",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "labors",
+                                "operators"
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -1424,6 +1533,41 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Search Quotations",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "YT",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/quotations/search?query=QT",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "quotations",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "QT"
+                                }
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -2101,6 +2245,71 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Search Work Orders",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "YT",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/work-orders/search?query=WO",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-orders",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "WO"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Work Order Progress Dashboard",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "YT",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/work-orders/{{workOrderIdYT}}/progress",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-orders",
+                                "{{workOrderIdYT}}",
+                                "progress"
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -3068,6 +3277,41 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Search Sales Invoices",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "X-Company-Code",
+                                "value": "YT",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/sales-invoices/search?query=INV",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales-invoices",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "INV"
+                                }
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -3329,6 +3573,68 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Search Purchase Orders",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/purchase/purchase-orders/search?query=PO",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "purchase",
+                                "purchase-orders",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "PO"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Search Vendors",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/purchase/vendors/search?query=Carbide",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "purchase",
+                                "vendors",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "Carbide"
+                                }
+                            ]
+                        }
+                    }
                 }
             ]
         },

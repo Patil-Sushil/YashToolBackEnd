@@ -12,6 +12,7 @@ import java.util.UUID;
 public interface ProductionScheduleRepository 
         extends JpaRepository<ProductionSchedule, UUID>, JpaSpecificationExecutor<ProductionSchedule> {
     Optional<ProductionSchedule> findByIdAndCompanyId(UUID id, UUID companyId);
+    Optional<ProductionSchedule> findByJobCardId(UUID jobCardId);
     Optional<ProductionSchedule> findByJobCardIdAndCompanyId(UUID jobCardId, UUID companyId);
     boolean existsByJobCardId(UUID jobCardId);
     java.util.List<ProductionSchedule> findByMachineIdAndCompanyId(UUID machineId, UUID companyId);

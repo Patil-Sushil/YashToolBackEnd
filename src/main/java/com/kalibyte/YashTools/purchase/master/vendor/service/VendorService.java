@@ -13,4 +13,8 @@ public interface VendorService {
     VendorResponse update(UUID id, VendorRequest request);
     void delete(UUID id);
     java.math.BigDecimal getOutstandingBalance(UUID id);
+
+
+    List<VendorResponse> searchVendors(String query);
+
 }

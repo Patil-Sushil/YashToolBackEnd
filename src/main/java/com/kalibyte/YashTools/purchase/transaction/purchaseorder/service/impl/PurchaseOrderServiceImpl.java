@@ -263,4 +263,12 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         String companyPrefix = companyCode != null && !companyCode.trim().isEmpty() ? companyCode.trim() : "YT";
         return String.format("%s-PO-%d-%05d", companyPrefix, year, nextNumber);
     }
+
+
+    @Override
+    public List<PurchaseOrderResponse> searchPurchaseOrders(String query) {
+        List<PurchaseOrder> result = repository.searchPurchaseOrders(query);
+        return result.stream().map(mapper::toResponse).collect(java.util.stream.Collectors.toList());
+    }
+
 }

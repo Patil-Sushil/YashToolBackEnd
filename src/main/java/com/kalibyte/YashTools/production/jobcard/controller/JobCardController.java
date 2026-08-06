@@ -23,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/job-cards")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION', 'QUALITY')")
 public class JobCardController {
 
     private final JobCardService jobCardService;

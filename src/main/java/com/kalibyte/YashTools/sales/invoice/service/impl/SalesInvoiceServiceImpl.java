@@ -228,4 +228,15 @@ public class SalesInvoiceServiceImpl implements SalesInvoiceService {
                         .collect(Collectors.toList()))
                 .build();
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<SalesInvoiceResponse> searchInvoices(String query, int page, int size) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        Page<SalesInvoice> result = repository.searchInvoices(companyId, query, pageable);
+        return PageResponse.from(result, this::toResponse);
+    }
+
 }

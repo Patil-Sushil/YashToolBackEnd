@@ -110,4 +110,15 @@ public class EnquiryController {
                 )
         );
     }
+
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
+    @io.swagger.v3.oas.annotations.Operation(summary = "Search enquiries")
+    @LoggableAction(value = "Search Enquiries", action = AuditAction.ENQUIRY_VIEWED, entityType = "ENQUIRY")
+    public ResponseEntity<ApiResponse<List<EnquiryResponse>>> searchEnquiries(@RequestParam String query) {
+        List<EnquiryResponse> result = enquiryService.searchEnquiries(query);
+        return ResponseEntity.ok(ApiResponse.success("Enquiries retrieved successfully", result));
+    }
+
 }

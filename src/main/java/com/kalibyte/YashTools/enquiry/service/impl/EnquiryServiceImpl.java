@@ -196,4 +196,12 @@ public class EnquiryServiceImpl implements EnquiryService {
 
         return String.format("%s-ENQ-%d-%04d", companyPrefix, year, nextNumber);
     }
+
+
+    @Override
+    public List<EnquiryResponse> searchEnquiries(String query) {
+        List<Enquiry> result = enquiryRepository.searchEnquiries(query);
+        return result.stream().map(enquiryMapper::toResponse).collect(java.util.stream.Collectors.toList());
+    }
+
 }

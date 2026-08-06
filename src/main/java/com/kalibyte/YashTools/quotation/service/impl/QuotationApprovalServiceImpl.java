@@ -105,8 +105,9 @@ public class QuotationApprovalServiceImpl implements QuotationApprovalService {
     @Override
     @Transactional(readOnly = true)
     public List<QuotationApprovalResponse> getPendingApprovals() {
-        if (!security.isAdmin())
-            throw new QuotationStateException("Only ADMIN can view pending approvals");
+        if (!security.isAdmin()) {
+            return List.of();
+        }
         return approvalRepository.findByApprovalStatus(ApprovalStatus.PENDING)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }

@@ -11,4 +11,8 @@ public interface SalesInvoiceService {
     SalesInvoiceResponse getInvoiceById(UUID id);
     SalesInvoiceResponse recordPayment(UUID id);
     PageResponse<SalesInvoiceResponse> getAllInvoices(int page, int size);
+
+
+    PageResponse<SalesInvoiceResponse> searchInvoices(String query, int page, int size);
+
 }

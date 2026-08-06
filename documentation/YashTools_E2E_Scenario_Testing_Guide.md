@@ -403,6 +403,9 @@ This guide documents the complete business flows within **YashTools ERP**, detai
   * `Authorization: Bearer {{accessToken}}`
   * `Content-Type: application/json`
 * **Request Body:**
+* **Note on Rejected/Failed Quantity:** If `rejectedQuantity` > 0 in this request, the system will:
+  1. Auto-create a high-priority Reproduction/Replacement Job Card with prefix `-JC-RP-` for the rejected quantity.
+  2. Set the parent Work Order status back to `IN_PROGRESS` to allow the reproduction run to execute.
 ```json
 {
     "jobCardId": "{{jobCardId}}",
@@ -413,6 +416,14 @@ This guide documents the complete business flows within **YashTools ERP**, detai
     "remarks": "Passed micro-accuracy check"
 }
 ```
+
+### Step 2.10.b: View E2E Work Order Progress Dashboard (Production Planner)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/work-orders/{{workOrderId}}/progress`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+  * `X-Company-Code: YT`
+
 
 ### Step 2.11: Record Packing
 * **Method:** `POST`
@@ -723,7 +734,7 @@ This guide documents the complete business flows within **YashTools ERP**, detai
 
 ### Step 5.1: Create Laborer Profile
 * **Method:** `POST`
-* **URL:** `{{baseUrl}}/api/laborers`
+* **URL:** `{{baseUrl}}/api/labors`
 * **Headers:** 
   * `Authorization: Bearer {{accessToken}}`
   * `Content-Type: application/json`
@@ -740,6 +751,14 @@ This guide documents the complete business flows within **YashTools ERP**, detai
     "isActive": true
 }
 ```
+
+### Step 5.1.b: Get Operators List (For planning Machine Allocation)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/labors/operators`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+  * `X-Company-Code: YT`
+
 
 ### Step 5.2: Check-In/Log Daily Attendance
 * **Method:** `POST`
@@ -798,3 +817,58 @@ This guide documents the complete business flows within **YashTools ERP**, detai
 * **URL:** `{{baseUrl}}/api/labor-reports/summary?startDate=2026-08-01&endDate=2026-08-31`
 * **Headers:** 
   * `Authorization: Bearer {{accessToken}}`
+
+---
+
+## Scenario 6: Global Search APIs Reference
+* **Modules Covered:** `Customers`, `Enquiries`, `Quotations`, `Work Orders`, `Sales Invoices`, `Purchase Orders`, `Vendors`
+* **Workflow:**
+  Use the dedicated `/search` endpoint to query resources by keywords, names, numbers, or related values.
+
+### API 6.1: Search Customers (by name, email, contact person, mobile, gstin)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/customers/search?query=Apex`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+  * `X-Company-Code: YT`
+
+### API 6.2: Search Enquiries (by enquiry number, remarks, customer company name)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/enquiries/search?query=ENQ`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+  * `X-Company-Code: YT`
+
+### API 6.3: Search Quotations (by quotation number, remarks, customer company name)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/quotations/search?query=QT`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+  * `X-Company-Code: YT`
+
+### API 6.4: Search Work Orders (by work order number, PO number, remarks, customer company name)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/work-orders/search?query=WO`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+  * `X-Company-Code: YT`
+
+### API 6.5: Search Sales Invoices (by invoice number, remarks, work order number, customer company name)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/sales-invoices/search?query=INV`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+  * `X-Company-Code: YT`
+
+### API 6.6: Search Purchase Orders (by PO number, remarks, vendor name)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/purchase/purchase-orders/search?query=PO`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+
+### API 6.7: Search Vendors (by vendor name, gstin, pan, contact details, address)
+* **Method:** `GET`
+* **URL:** `{{baseUrl}}/api/purchase/vendors/search?query=Carbide`
+* **Headers:** 
+  * `Authorization: Bearer {{accessToken}}`
+

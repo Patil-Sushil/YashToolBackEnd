@@ -18,4 +18,8 @@ public interface QuotationService {
     QuotationResponse cancel(UUID id, String reason);
     Page<QuotationResponse> listForCurrentCompany(String status, Pageable pageable);
     QuotationResponse recordCustomerDecision(UUID id, String decision, String remarks);
+
+
+    Page<QuotationResponse> searchQuotations(String query, Pageable pageable);
+
 }

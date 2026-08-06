@@ -14,19 +14,19 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/finished-goods", "/api/production/finished-goods"})
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'STORE')")
+@PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'QUALITY', 'INVENTORY', 'FINANCE')")
 public class FinishedGoodsStockController {
 
     private final FinishedGoodsStockService service;
 
     @GetMapping({"/by-item/{workOrderItemId}", "/work-order-item/{workOrderItemId}"})
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'QUALITY', 'INVENTORY', 'FINANCE')")
     public ResponseEntity<ApiResponse<FinishedGoodsStockResponse>> getStockByItem(@PathVariable UUID workOrderItemId) {
         return ResponseEntity.ok(ApiResponse.success("Finished goods stock retrieved successfully", service.getStockByWorkOrderItem(workOrderItemId)));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'QUALITY', 'INVENTORY', 'FINANCE')")
     public ResponseEntity<ApiResponse<PageResponse<FinishedGoodsStockResponse>>> listStock(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {

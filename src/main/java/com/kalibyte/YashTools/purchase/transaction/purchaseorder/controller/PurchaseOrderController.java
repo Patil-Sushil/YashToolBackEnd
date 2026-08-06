@@ -80,4 +80,14 @@ public class PurchaseOrderController {
         service.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Purchase order deleted successfully", null));
     }
+
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'FINANCE')")
+    @io.swagger.v3.oas.annotations.Operation(summary = "Search purchase orders")
+    public ResponseEntity<ApiResponse<List<PurchaseOrderResponse>>> search(@RequestParam String query) {
+        List<PurchaseOrderResponse> result = service.searchPurchaseOrders(query);
+        return ResponseEntity.ok(ApiResponse.success("Purchase orders list retrieved successfully", result));
+    }
+
 }

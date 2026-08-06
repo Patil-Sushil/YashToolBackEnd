@@ -17,4 +17,16 @@ public interface WorkOrderRepository
     Optional<WorkOrder> findByIdAndCompanyId(UUID id, UUID companyId);
     boolean existsByQuotationId(UUID quotationId);
     long countByStatus(WorkOrderStatus status);
+
+
+    @org.springframework.data.jpa.repository.Query("SELECT w FROM WorkOrder w WHERE w.company.id = :companyId AND (" +
+            "LOWER(w.workOrderNo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(w.poNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(w.remarks) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(w.customerCompanyName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    org.springframework.data.domain.Page<WorkOrder> searchWorkOrders(
+            @org.springframework.data.repository.query.Param("companyId") UUID companyId,
+            @org.springframework.data.repository.query.Param("search") String search,
+            org.springframework.data.domain.Pageable pageable);
+
 }

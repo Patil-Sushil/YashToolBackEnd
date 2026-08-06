@@ -125,4 +125,12 @@ public class VendorServiceImpl implements VendorService {
                 .map(PurchaseInvoice::getOutstandingAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+
+    @Override
+    public List<VendorResponse> searchVendors(String query) {
+        List<Vendor> result = repository.searchVendors(query);
+        return result.stream().map(mapper::toResponse).collect(java.util.stream.Collectors.toList());
+    }
+
 }

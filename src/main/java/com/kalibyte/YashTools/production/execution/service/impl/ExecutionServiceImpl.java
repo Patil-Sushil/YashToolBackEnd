@@ -16,7 +16,9 @@ import com.kalibyte.YashTools.production.jobcard.repository.JobCardRepository;
 import com.kalibyte.YashTools.production.machine.entity.Machine;
 import com.kalibyte.YashTools.production.machine.entity.enums.MachineStatus;
 import com.kalibyte.YashTools.production.machine.repository.MachineRepository;
+import com.kalibyte.YashTools.production.planning.entity.enums.ScheduleStatus;
 import com.kalibyte.YashTools.production.planning.entity.enums.ShiftType;
+import com.kalibyte.YashTools.production.planning.repository.ProductionScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     private final JobCardRepository jobCardRepository;
     private final MachineRepository machineRepository;
     private final LaborerRepository laborerRepository;
+    private final ProductionScheduleRepository scheduleRepository;
 
     @Override
     @Transactional
@@ -99,6 +102,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         jc.setStatus(JobCardStatus.STARTED);
         jobCardRepository.save(jc);
 
+        scheduleRepository.findByJobCardIdAndCompanyId(jc.getId(), companyId).ifPresent(schedule -> {
+            schedule.setStatus(ScheduleStatus.RUNNING);
+            scheduleRepository.save(schedule);
+        });
+
         ExecutionLog saved = executionLogRepository.save(logEntry);
         log.info("Job started for Job Card {} by operator {}", jc.getJobCardNo(), operator.getName());
         return toResponse(saved);
@@ -147,12 +155,20 @@ public class ExecutionServiceImpl implements ExecutionService {
             List<ExecutionLog> logs = executionLogRepository.findByJobCardId(jc.getId());
             int totalProduced = logs.stream().mapToInt(ExecutionLog::getProducedQuantity).sum();
             
+            ScheduleStatus newScheduleStatus;
             if (totalProduced >= jc.getTotalQuantity()) {
                 jc.setStatus(JobCardStatus.COMPLETED);
+                newScheduleStatus = ScheduleStatus.COMPLETED;
             } else {
                 jc.setStatus(JobCardStatus.PAUSED);
+                newScheduleStatus = ScheduleStatus.PAUSED;
             }
             jobCardRepository.save(jc);
+
+            scheduleRepository.findByJobCardId(jc.getId()).ifPresent(schedule -> {
+                schedule.setStatus(newScheduleStatus);
+                scheduleRepository.save(schedule);
+            });
         }
 
         ExecutionLog saved = executionLogRepository.save(entry);
@@ -163,17 +179,17 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     @Transactional(readOnly = true)
     public ExecutionResponse getActiveLogByJobCard(UUID jobCardId) {
-        ExecutionLog entry = executionLogRepository.findByJobCardIdAndEndTimeIsNull(jobCardId)
-                .orElseThrow(() -> new BusinessException("No active running session found for Job Card ID: " + jobCardId));
-        return toResponse(entry);
+        return executionLogRepository.findByJobCardIdAndEndTimeIsNull(jobCardId)
+                .map(this::toResponse)
+                .orElse(null);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ExecutionResponse getActiveLogByOperator(Long operatorId) {
-        ExecutionLog entry = executionLogRepository.findByOperatorIdAndEndTimeIsNull(operatorId)
-                .orElseThrow(() -> new BusinessException("No active running session found for Operator ID: " + operatorId));
-        return toResponse(entry);
+        return executionLogRepository.findByOperatorIdAndEndTimeIsNull(operatorId)
+                .map(this::toResponse)
+                .orElse(null);
     }
 
     @Override
@@ -209,3 +225,4 @@ public class ExecutionServiceImpl implements ExecutionService {
                 .build();
     }
 }
+

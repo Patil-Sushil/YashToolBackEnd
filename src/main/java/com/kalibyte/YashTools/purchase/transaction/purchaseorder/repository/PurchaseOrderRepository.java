@@ -15,4 +15,13 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, UU
 
     @Query("SELECT po FROM PurchaseOrder po ORDER BY po.createdAt DESC LIMIT 1")
     Optional<PurchaseOrder> findTopByOrderByCreatedAtDesc();
+
+
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM PurchaseOrder p WHERE " +
+            "LOWER(p.poNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(p.remarks) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(p.vendor.vendorName) LIKE LOWER(CONCAT('%', :search, '%'))")
+    java.util.List<PurchaseOrder> searchPurchaseOrders(
+            @org.springframework.data.repository.query.Param("search") String search);
+
 }

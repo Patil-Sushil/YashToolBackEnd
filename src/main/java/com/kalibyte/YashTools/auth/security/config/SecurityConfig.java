@@ -88,7 +88,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // Sales
-                        .requestMatchers("/api/enquiries/**", "/api/quotation/**")
+                        .requestMatchers("/api/enquiries/**", "/api/quotations/**", "/api/quotation/**")
                         .hasAnyRole("ADMIN", "SALES")
 
                         // Customers: only ADMIN and SALES can create/update, read allowed to authenticated users
@@ -137,8 +137,8 @@ public class SecurityConfig {
                         .hasAnyRole("ADMIN", "QUALITY", "PRODUCTION")
 
                         // Labor Management
+                        .requestMatchers("/api/labors/**").hasAnyRole("ADMIN", "PRODUCTION")
                         .requestMatchers(
-                                "/api/labors/**",
                                 "/api/attendance/**",
                                 "/api/advances/**",
                                 "/api/labor-reports/**",
@@ -166,7 +166,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(allowedOrigins);
+        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+            configuration.setAllowedOrigins(allowedOrigins);
+        }
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "X-Company-Code"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition", "X-Company-Code"));

@@ -89,12 +89,15 @@ public enum MaterialGrade {
         if (value == null || value.trim().isEmpty()) {
             return null;
         }
+        String clean = value.trim();
+        String normalized = clean.replace("/", "_").replace("-", "_").replace(" ", "_").toUpperCase();
         for (MaterialGrade grade : MaterialGrade.values()) {
-            if (grade.name().equalsIgnoreCase(value.trim()) ||
-                grade.getDescription().equalsIgnoreCase(value.trim())) {
+            if (grade.name().equalsIgnoreCase(clean) ||
+                grade.name().equalsIgnoreCase(normalized) ||
+                grade.getDescription().equalsIgnoreCase(clean)) {
                 return grade;
             }
         }
-        throw new IllegalArgumentException("Unknown material grade: " + value);
+        return K40UF_H10F;
     }
 }

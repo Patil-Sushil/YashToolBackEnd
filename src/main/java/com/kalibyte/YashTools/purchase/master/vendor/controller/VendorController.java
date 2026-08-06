@@ -76,4 +76,14 @@ public class VendorController {
         java.math.BigDecimal balance = service.getOutstandingBalance(id);
         return ResponseEntity.ok(ApiResponse.success("Vendor outstanding balance retrieved successfully", balance));
     }
+
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'FINANCE')")
+    @io.swagger.v3.oas.annotations.Operation(summary = "Search vendors")
+    public ResponseEntity<ApiResponse<List<VendorResponse>>> search(@RequestParam String query) {
+        List<VendorResponse> result = service.searchVendors(query);
+        return ResponseEntity.ok(ApiResponse.success("Vendors list retrieved successfully", result));
+    }
+
 }

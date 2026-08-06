@@ -13,6 +13,7 @@ import com.kalibyte.YashTools.workorder.dto.request.UpdateTrialResultRequest;
 import com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderPlanningRequest;
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderItemResponse;
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderResponse;
+import com.kalibyte.YashTools.workorder.dto.response.LockedQuotationSummaryResponse;
 import com.kalibyte.YashTools.workorder.entity.WorkOrder;
 import com.kalibyte.YashTools.workorder.entity.WorkOrderItem;
 import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
@@ -44,6 +45,12 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     private final QuotationRepository quotationRepository;
     private final QuotationSecurityService quotationSecurityService;
     private final WorkOrderItemRepository workOrderItemRepository;
+    private final com.kalibyte.YashTools.production.jobcard.repository.JobCardRepository jobCardRepository;
+    private final com.kalibyte.YashTools.production.execution.repository.ExecutionLogRepository executionLogRepository;
+    private final com.kalibyte.YashTools.production.tracking.repository.QualityInspectionRepository qualityInspectionRepository;
+    private final com.kalibyte.YashTools.production.packing.repository.PackingLogRepository packingLogRepository;
+    private final com.kalibyte.YashTools.production.logistics.repository.DeliveryChallanItemRepository deliveryChallanItemRepository;
+
 
     @Override
     @Transactional
@@ -292,4 +299,119 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 saved.getWorkOrderNo(), request.getPlannedStartDate(), request.getPlannedEndDate());
         return toResponse(saved);
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<WorkOrderResponse> searchWorkOrders(String query, Pageable pageable) {
+        UUID companyId = com.kalibyte.YashTools.common.multi_company.CompanyContextHolder.getCompanyId();
+        Page<WorkOrder> result = workOrderRepository.searchWorkOrders(companyId, query, pageable);
+        return result.map(this::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse getProgress(UUID id) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        WorkOrder wo = workOrderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new BusinessException("Work Order not found with ID: " + id));
+
+        List<com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse.WorkOrderItemProgressResponse> itemProgresses = wo.getItems().stream().map(item -> {
+            List<com.kalibyte.YashTools.production.jobcard.entity.JobCard> jobCards = jobCardRepository.findByWorkOrderItemIdAndCompanyId(item.getId(), companyId);
+
+            int plannedQty = jobCards.stream().mapToInt(com.kalibyte.YashTools.production.jobcard.entity.JobCard::getTotalQuantity).sum();
+
+            List<com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse.JobCardSummaryResponse> jcSummaries = jobCards.stream().map(jc -> 
+                com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse.JobCardSummaryResponse.builder()
+                        .jobCardId(jc.getId())
+                        .jobCardNo(jc.getJobCardNo())
+                        .status(jc.getStatus().name())
+                        .isRework(Boolean.TRUE.equals(jc.getIsRework()))
+                        .quantity(jc.getTotalQuantity())
+                        .build()
+            ).collect(Collectors.toList());
+
+            int producedQty = 0;
+            int acceptedQty = 0;
+            int rejectedQty = 0;
+            int reworkQty = 0;
+
+            for (com.kalibyte.YashTools.production.jobcard.entity.JobCard jc : jobCards) {
+                List<com.kalibyte.YashTools.production.execution.entity.ExecutionLog> logs = executionLogRepository.findByJobCardId(jc.getId());
+                producedQty += logs.stream().mapToInt(com.kalibyte.YashTools.production.execution.entity.ExecutionLog::getProducedQuantity).sum();
+
+                java.util.Optional<com.kalibyte.YashTools.production.tracking.entity.QualityInspection> qi = qualityInspectionRepository.findByJobCardIdAndCompanyId(jc.getId(), companyId);
+                if (qi.isPresent()) {
+                    acceptedQty += qi.get().getAcceptedQuantity();
+                    rejectedQty += qi.get().getRejectedQuantity();
+                    reworkQty += qi.get().getReworkQuantity();
+                }
+            }
+
+            List<com.kalibyte.YashTools.production.packing.entity.PackingLog> packingLogs = packingLogRepository.findByWorkOrderItemIdAndCompanyId(item.getId(), companyId);
+            int packedQty = packingLogs.stream().mapToInt(com.kalibyte.YashTools.production.packing.entity.PackingLog::getQuantity).sum();
+
+            int deliveredQty = deliveryChallanItemRepository.getSumQuantityByWorkOrderItemId(item.getId());
+
+            return com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse.WorkOrderItemProgressResponse.builder()
+                    .itemId(item.getId())
+                    .toolName(item.getToolName())
+                    .orderedQuantity(item.getQuantity())
+                    .trial(item.getTrial())
+                    .trialStatus(item.getTrialStatus() != null ? item.getTrialStatus().name() : null)
+                    .plannedQuantity(plannedQty)
+                    .producedQuantity(producedQty)
+                    .acceptedQuantity(acceptedQty)
+                    .rejectedQuantity(rejectedQty)
+                    .reworkQuantity(reworkQty)
+                    .packedQuantity(packedQty)
+                    .deliveredQuantity(deliveredQty)
+                    .jobCards(jcSummaries)
+                    .build();
+        }).collect(Collectors.toList());
+
+        return com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse.builder()
+                .workOrderId(wo.getId())
+                .workOrderNo(wo.getWorkOrderNo())
+                .status(wo.getStatus().name())
+                .customerCompanyName(wo.getCustomerCompanyName())
+                .expectedDeliveryDate(wo.getExpectedDeliveryDate())
+                .items(itemProgresses)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LockedQuotationSummaryResponse> getLockedQuotationsForCustomer(UUID customerId) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        List<Quotation> quotations = quotationRepository.findLockedQuotationsForCustomer(companyId, customerId);
+        return quotations.stream().map(this::toLockedSummary).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LockedQuotationSummaryResponse> getAllLockedQuotationsAvailable() {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        List<Quotation> quotations = quotationRepository.findAllLockedQuotationsAvailable(companyId);
+        return quotations.stream().map(this::toLockedSummary).collect(Collectors.toList());
+    }
+
+    private LockedQuotationSummaryResponse toLockedSummary(Quotation q) {
+        return LockedQuotationSummaryResponse.builder()
+                .quotationId(q.getId())
+                .quotationNo(q.getQuotationNo())
+                .version(q.getVersion())
+                .status(q.getStatus().name())
+                .customerId(q.getCustomer().getId())
+                .customerCompanyName(q.getCustomerCompanyName())
+                .customerContactPerson(q.getCustomerContactPerson())
+                .grandTotal(q.getGrandTotal())
+                .currency(q.getCurrency())
+                .itemCount(q.getItems() != null ? q.getItems().size() : 0)
+                .lockedAt(q.getLockedAt())
+                .lockedBy(q.getLockedBy())
+                .createdAt(q.getCreatedAt())
+                .build();
+    }
 }
+
