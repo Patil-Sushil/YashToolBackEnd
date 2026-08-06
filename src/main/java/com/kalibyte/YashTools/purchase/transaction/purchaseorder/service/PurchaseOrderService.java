@@ -14,4 +14,8 @@ public interface PurchaseOrderService {
     PurchaseOrderResponse update(UUID id, PurchaseOrderRequest request);
     PurchaseOrderResponse updateStatus(UUID id, UpdatePurchaseOrderStatusRequest request);
     void delete(UUID id);
+
+
+    List<PurchaseOrderResponse> searchPurchaseOrders(String query);
+
 }

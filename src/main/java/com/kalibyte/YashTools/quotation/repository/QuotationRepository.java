@@ -33,4 +33,15 @@ public interface QuotationRepository
 
     long countByCompanyIdAndStatus(UUID companyId, QuotationStatus status);
     long countByStatus(QuotationStatus status);
+
+
+    @Query("SELECT q FROM Quotation q WHERE q.company.id = :companyId AND (" +
+            "LOWER(q.quotationNo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(q.remarks) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(q.customer.companyName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Quotation> searchQuotations(
+            @Param("companyId") UUID companyId,
+            @Param("search") String search,
+            Pageable pageable);
+
 }

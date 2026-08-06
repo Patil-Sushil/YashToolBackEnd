@@ -95,4 +95,15 @@ public class SalesInvoiceController {
     public ResponseEntity<ApiResponse<List<EmailLog>>> emailHistory(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(emailService.getDeliveryHistory(id)));
     }
+
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    public ResponseEntity<ApiResponse<PageResponse<SalesInvoiceResponse>>> searchInvoices(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(ApiResponse.success("Sales Invoices retrieved successfully", service.searchInvoices(query, page, size)));
+    }
+
 }

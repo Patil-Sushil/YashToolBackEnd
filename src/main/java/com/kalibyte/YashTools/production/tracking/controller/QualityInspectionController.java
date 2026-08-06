@@ -1,7 +1,6 @@
 package com.kalibyte.YashTools.production.tracking.controller;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-
 import com.kalibyte.YashTools.common.response.ApiResponse;
 import com.kalibyte.YashTools.production.tracking.dto.PlannerDashboardResponse;
 import com.kalibyte.YashTools.production.tracking.dto.QualityInspectionRequest;
@@ -12,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,6 +26,11 @@ public class QualityInspectionController {
     public ResponseEntity<ApiResponse<QualityInspectionResponse>> inspect(
             @Valid @RequestBody QualityInspectionRequest request) {
         return ResponseEntity.ok(ApiResponse.success("QC Inspection recorded successfully", qualityInspectionService.inspect(request)));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<QualityInspectionResponse>>> getAll() {
+        return ResponseEntity.ok(ApiResponse.success(qualityInspectionService.getAll()));
     }
 
     @GetMapping("/{id}")
@@ -43,3 +48,4 @@ public class QualityInspectionController {
         return ResponseEntity.ok(ApiResponse.success(qualityInspectionService.getDashboard()));
     }
 }
+

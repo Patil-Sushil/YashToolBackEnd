@@ -26,12 +26,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/work-orders")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
+@PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'PRODUCTION')")
 public class WorkOrderController {
 
     private final WorkOrderService workOrderService;
 
     @PostMapping({"", "/from-quotation"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
     public ResponseEntity<ApiResponse<WorkOrderResponse>> createFromQuotation(
             @Valid @RequestBody CreateWorkOrderRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -43,6 +44,12 @@ public class WorkOrderController {
     public ResponseEntity<ApiResponse<WorkOrderResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(workOrderService.getById(id)));
     }
+
+    @GetMapping("/{id}/progress")
+    public ResponseEntity<ApiResponse<com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse>> getProgress(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Work Order progress retrieved successfully", workOrderService.getProgress(id)));
+    }
+
 
     @GetMapping("/by-number/{workOrderNo}")
     public ResponseEntity<ApiResponse<WorkOrderResponse>> getByNumber(@PathVariable String workOrderNo) {
@@ -89,4 +96,18 @@ public class WorkOrderController {
                 "Work Order planning dates updated successfully",
                 workOrderService.updatePlanning(id, request)));
     }
+
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PageResponse<WorkOrderResponse>>> searchWorkOrders(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<WorkOrderResponse> result = workOrderService.searchWorkOrders(query, pageable);
+        return ResponseEntity.ok(ApiResponse.success("Work Orders retrieved successfully", PageResponse.from(result)));
+    }
+
 }

@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Laborer Management", description = "APIs for managing laborers and their profiles")
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
 public class LaborerController {
 
     private final LaborerService laborerService;
@@ -38,7 +38,7 @@ public class LaborerController {
 
     @GetMapping
     @Operation(summary = "Get all laborers", description = "Only accessible by ADMIN")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
     @LoggableAction(value = "Retrieve All Laborers", action = AuditAction.LABORER_VIEWED, entityType = "LABORER")
     public ResponseEntity<ApiResponse<List<LaborerResponseDTO>>> getAllLaborers(@RequestParam(required = false) LaborRole role) {
         if (role != null) {
@@ -47,9 +47,16 @@ public class LaborerController {
         return ResponseEntity.ok(ApiResponse.success(laborerService.getAllLaborers()));
     }
 
+    @GetMapping("/operators")
+    @Operation(summary = "Get all operators", description = "Retrieve laborers whose role is OPERATOR, CNC_OPERATOR, or GRINDING_OPERATOR")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
+    public ResponseEntity<ApiResponse<List<LaborerResponseDTO>>> getOperators() {
+        return ResponseEntity.ok(ApiResponse.success("Operators retrieved successfully", laborerService.getOperators()));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get laborer by ID", description = "Only accessible by ADMIN")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
     @LoggableAction(value = "Retrieve Laborer By ID", action = AuditAction.LABORER_VIEWED, entityType = "LABORER")
     public ResponseEntity<ApiResponse<LaborerResponseDTO>> getLaborerById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(laborerService.getLaborerById(id)));

@@ -195,4 +195,18 @@ public class QuotationController {
         return ResponseEntity.ok(ApiResponse.success(
                 quotationEmailService.getDeliveryHistory(id)));
     }
+
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PageResponse<QuotationResponse>>> searchQuotations(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<QuotationResponse> result = quotationService.searchQuotations(query, pageable);
+        return ResponseEntity.ok(ApiResponse.success("Quotations retrieved successfully", PageResponse.from(result)));
+    }
+
 }

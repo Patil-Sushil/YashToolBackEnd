@@ -18,4 +18,8 @@ public interface CustomerService {
     List<CustomerResponse> getAllCustomers();
 
     PageResponse<CustomerResponse> getAllCustomers(int page, int size);
+
+
+    PageResponse<CustomerResponse> searchCustomers(String query, int page, int size);
+
 }

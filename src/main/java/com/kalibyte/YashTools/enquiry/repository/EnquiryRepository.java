@@ -74,4 +74,12 @@ public interface EnquiryRepository extends JpaRepository<Enquiry, UUID>, JpaSpec
      */
     boolean existsByEnquiryNo(String enquiryNo);
     long countByStatus(EnquiryStatus status);
+
+
+    @org.springframework.data.jpa.repository.Query("SELECT e FROM Enquiry e WHERE " +
+            "LOWER(e.enquiryNo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(e.customer.companyName) LIKE LOWER(CONCAT('%', :search, '%'))")
+    List<Enquiry> searchEnquiries(
+            @org.springframework.data.repository.query.Param("search") String search);
+
 }

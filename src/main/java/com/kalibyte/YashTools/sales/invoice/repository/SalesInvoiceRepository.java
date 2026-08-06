@@ -17,4 +17,16 @@ public interface SalesInvoiceRepository extends JpaRepository<SalesInvoice, UUID
 
     @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(si.totalAmount), 0) FROM SalesInvoice si")
     java.math.BigDecimal getTotalRevenue();
+
+
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM SalesInvoice s WHERE s.company.id = :companyId AND (" +
+            "LOWER(s.invoiceNo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(s.remarks) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(s.workOrder.workOrderNo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(s.workOrder.customerCompanyName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    org.springframework.data.domain.Page<SalesInvoice> searchInvoices(
+            @org.springframework.data.repository.query.Param("companyId") UUID companyId,
+            @org.springframework.data.repository.query.Param("search") String search,
+            org.springframework.data.domain.Pageable pageable);
+
 }

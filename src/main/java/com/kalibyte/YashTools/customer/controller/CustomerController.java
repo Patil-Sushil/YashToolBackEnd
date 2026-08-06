@@ -67,4 +67,17 @@ public class CustomerController {
         PageResponse<CustomerResponse> customers = customerService.getAllCustomers(page, size);
         return ResponseEntity.ok(ApiResponse.success("Customers retrieved successfully", customers));
     }
+
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN','SALES')")
+    @LoggableAction(value = "Search Customers", action = AuditAction.CUSTOMER_VIEWED, entityType = "CUSTOMER")
+    public ResponseEntity<ApiResponse<PageResponse<CustomerResponse>>> searchCustomers(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PageResponse<CustomerResponse> result = customerService.searchCustomers(query, page, size);
+        return ResponseEntity.ok(ApiResponse.success("Customers retrieved successfully", result));
+    }
+
 }

@@ -137,8 +137,8 @@ public class SecurityConfig {
                         .hasAnyRole("ADMIN", "QUALITY", "PRODUCTION")
 
                         // Labor Management
+                        .requestMatchers("/api/labors/**").hasAnyRole("ADMIN", "PRODUCTION")
                         .requestMatchers(
-                                "/api/labors/**",
                                 "/api/attendance/**",
                                 "/api/advances/**",
                                 "/api/labor-reports/**",

@@ -123,4 +123,14 @@ public class CustomerServiceImpl implements CustomerService {
         
         return PageResponse.from(customers, customerMapper::toResponse);
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<CustomerResponse> searchCustomers(String query, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        Page<Customer> result = customerRepository.searchCustomers(query, pageable);
+        return PageResponse.from(result, customerMapper::toResponse);
+    }
+
 }

@@ -62,16 +62,33 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
             throw new BusinessException("Quality inspection is already recorded for Job Card: " + jc.getJobCardNo());
         }
 
-        List<ExecutionLog> logs = executionLogRepository.findByJobCardId(jc.getId());
-        int totalProduced = logs.stream().mapToInt(ExecutionLog::getProducedQuantity).sum();
+        // Use jobCard.totalQuantity as the source of truth for QA inspection.
+        // The ExecutionLog.producedQuantity is a runtime tracking counter that may not
+        // be updated by the operator; the authoritative quantity is what was assigned to this job card.
+        int totalAssigned = jc.getTotalQuantity();
         int requestedTotal = request.getAcceptedQuantity() + request.getRejectedQuantity() + request.getReworkQuantity();
 
-        if (requestedTotal != totalProduced) {
-            throw new BusinessException("Sum of accepted, rejected, and rework quantities (" + requestedTotal 
-                    + ") must match total produced quantity from shop floor execution (" + totalProduced + ")");
+        if (requestedTotal != totalAssigned) {
+            throw new BusinessException(
+                    "Sum of accepted (" + request.getAcceptedQuantity()
+                    + "), rejected (" + request.getRejectedQuantity()
+                    + "), and rework (" + request.getReworkQuantity()
+                    + ") quantities (" + requestedTotal
+                    + ") must equal the Job Card's assigned quantity (" + totalAssigned + ")");
         }
 
-        InspectionResult result = (request.getAcceptedQuantity() == totalProduced) ? InspectionResult.PASS : InspectionResult.REJECT;
+        // Data-integrity warning: surface mismatch between shop-floor tracking and QA totals
+        List<ExecutionLog> logs = executionLogRepository.findByJobCardId(jc.getId());
+        int totalProducedInLogs = logs.stream().mapToInt(ExecutionLog::getProducedQuantity).sum();
+        if (totalProducedInLogs != totalAssigned) {
+            log.warn("Job Card [{}]: ExecutionLog producedQuantity sum ({}) does not match " +
+                     "Job Card totalQuantity ({}). Shop-floor tracking may be incomplete.",
+                     jc.getJobCardNo(), totalProducedInLogs, totalAssigned);
+        }
+
+        // PASS = all assigned units are accepted; any rejection or rework = REJECT
+        InspectionResult result = (request.getRejectedQuantity() == 0 && request.getReworkQuantity() == 0)
+                ? InspectionResult.PASS : InspectionResult.REJECT;
 
         QualityInspection qi = QualityInspection.builder()
                 .jobCard(jc)
@@ -112,6 +129,29 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
             log.info("Auto-created Rework Job Card {} for quantity {}", reworkNo, request.getReworkQuantity());
         }
 
+        // Auto-create Reproduction/Replacement Job Card if rejectedQuantity > 0
+        if (request.getRejectedQuantity() > 0) {
+            long seq = jobCardRepository.count() + 1;
+            String reproNo = String.format("%s-JC-RP-%d-%06d", companyCode, LocalDate.now().getYear(), seq);
+
+            JobCard reproCard = JobCard.builder()
+                    .jobCardNo(reproNo)
+                    .workOrder(jc.getWorkOrder())
+                    .workOrderItem(jc.getWorkOrderItem())
+                    .status(JobCardStatus.CREATED)
+                    .priority(jc.getPriority() + 1) // Higher priority for reproduction
+                    .totalQuantity(request.getRejectedQuantity())
+                    .remarks("Auto-generated Reproduction/Replacement Job Card from parent: " + jc.getJobCardNo() + ". QC Remarks: " + request.getRemarks())
+                    .isRework(false) // Reproduction, not rework
+                    .build();
+            reproCard.setCompany(jc.getCompany());
+            jobCardRepository.save(reproCard);
+            log.info("Auto-created Reproduction Job Card {} for quantity {}", reproNo, request.getRejectedQuantity());
+
+            // Re-open Work Order by setting status back to IN_PROGRESS since reproduction is required
+            jc.getWorkOrder().setStatus(com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus.IN_PROGRESS);
+        }
+
         log.info("QC Inspection recorded for Job Card {}. Result: {}", jc.getJobCardNo(), result);
         return toResponse(saved);
     }
@@ -133,6 +173,18 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
                 .orElseThrow(() -> new BusinessException("QC Inspection not found for Job Card: " + jobCardId));
         return toResponse(qi);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QualityInspectionResponse> getAll() {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        return qualityInspectionRepository.findAll((root, query, cb) -> 
+                cb.equal(root.get("company").get("id"), companyId))
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     @Transactional(readOnly = true)

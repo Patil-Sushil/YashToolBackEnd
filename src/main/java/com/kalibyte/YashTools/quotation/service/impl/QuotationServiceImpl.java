@@ -402,4 +402,14 @@ public class QuotationServiceImpl implements QuotationService {
         q.setCustomerEmail(c.getEmail());
         q.setCustomerMobile(c.getMobileNumber());
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<QuotationResponse> searchQuotations(String query, Pageable pageable) {
+        UUID companyId = com.kalibyte.YashTools.common.multi_company.CompanyContextHolder.getCompanyId();
+        Page<Quotation> result = quotationRepository.searchQuotations(companyId, query, pageable);
+        return result.map(quotationMapper::toResponse);
+    }
+
 }

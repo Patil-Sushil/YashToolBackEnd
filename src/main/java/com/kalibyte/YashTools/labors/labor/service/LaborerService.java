@@ -42,6 +42,12 @@ public class LaborerService {
         return laborerMapper.toResponseDTOList(laborerRepository.findByRoleAndIsActiveTrue(role));
     }
 
+    public List<LaborerResponseDTO> getOperators() {
+        return laborerMapper.toResponseDTOList(laborerRepository.findByRoleInAndIsActiveTrue(
+                List.of(LaborRole.OPERATOR, LaborRole.CNC_OPERATOR, LaborRole.GRINDING_OPERATOR)
+        ));
+    }
+
     public LaborerResponseDTO getLaborerById(Long id) {
         Laborer laborer = laborerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Laborer not found with id: " + id));

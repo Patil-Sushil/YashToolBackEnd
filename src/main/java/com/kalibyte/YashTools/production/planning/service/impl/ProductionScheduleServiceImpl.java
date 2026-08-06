@@ -4,6 +4,7 @@ import com.kalibyte.YashTools.common.exception.BusinessException;
 import com.kalibyte.YashTools.common.multi_company.CompanyContextHolder;
 import com.kalibyte.YashTools.labors.labor.entity.Laborer;
 import com.kalibyte.YashTools.labors.labor.repository.LaborerRepository;
+import com.kalibyte.YashTools.production.execution.repository.ExecutionLogRepository;
 import com.kalibyte.YashTools.production.jobcard.entity.JobCard;
 import com.kalibyte.YashTools.production.jobcard.entity.enums.JobCardStatus;
 import com.kalibyte.YashTools.production.jobcard.repository.JobCardRepository;
@@ -35,6 +36,7 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
     private final JobCardRepository jobCardRepository;
     private final MachineRepository machineRepository;
     private final LaborerRepository laborerRepository;
+    private final ExecutionLogRepository executionLogRepository;
 
     @Override
     @Transactional
@@ -173,6 +175,20 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
     }
 
     private ScheduleResponse toResponse(ProductionSchedule ps) {
+        ScheduleStatus effectiveStatus = ps.getStatus();
+        if (ps.getJobCard() != null) {
+            JobCardStatus jcStatus = ps.getJobCard().getStatus();
+            if (jcStatus == JobCardStatus.COMPLETED) {
+                effectiveStatus = ScheduleStatus.COMPLETED;
+            } else if (jcStatus == JobCardStatus.PAUSED) {
+                effectiveStatus = ScheduleStatus.PAUSED;
+            } else if (jcStatus == JobCardStatus.STARTED) {
+                effectiveStatus = ScheduleStatus.RUNNING;
+            } else if (executionLogRepository.findByJobCardIdAndEndTimeIsNull(ps.getJobCard().getId()).isPresent()) {
+                effectiveStatus = ScheduleStatus.RUNNING;
+            }
+        }
+
         return ScheduleResponse.builder()
                 .id(ps.getId())
                 .jobCardId(ps.getJobCard().getId())
@@ -186,7 +202,7 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
                 .shift(ps.getShift().name())
                 .plannedStartDate(ps.getPlannedStartDate())
                 .plannedEndDate(ps.getPlannedEndDate())
-                .status(ps.getStatus().name())
+                .status(effectiveStatus.name())
                 .createdAt(ps.getCreatedAt())
                 .createdBy(ps.getCreatedBy())
                 .companyId(ps.getCompany().getId())
@@ -225,3 +241,4 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
         }
     }
 }
+

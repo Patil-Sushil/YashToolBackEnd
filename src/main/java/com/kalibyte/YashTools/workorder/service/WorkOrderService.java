@@ -16,4 +16,8 @@ public interface WorkOrderService {
     WorkOrderResponse updateStatus(UUID id, UpdateWorkOrderStatusRequest request);
     WorkOrderResponse updateTrialResult(UUID itemId, com.kalibyte.YashTools.workorder.dto.request.UpdateTrialResultRequest request);
     WorkOrderResponse updatePlanning(UUID id, com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderPlanningRequest request);
+
+
+    Page<WorkOrderResponse> searchWorkOrders(String query, Pageable pageable);
+    com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse getProgress(UUID id);
 }
