@@ -14,6 +14,7 @@ public interface SalesInvoiceRepository extends JpaRepository<SalesInvoice, UUID
     Optional<SalesInvoice> findByIdAndCompanyId(UUID id, UUID companyId);
     Optional<SalesInvoice> findByInvoiceNoAndCompanyId(String invoiceNo, UUID companyId);
     List<SalesInvoice> findByCompanyIdAndInvoiceDateBetween(UUID companyId, java.time.LocalDate startDate, java.time.LocalDate endDate);
+    List<SalesInvoice> findByCompanyId(UUID companyId);
 
     @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(si.totalAmount), 0) FROM SalesInvoice si")
     java.math.BigDecimal getTotalRevenue();

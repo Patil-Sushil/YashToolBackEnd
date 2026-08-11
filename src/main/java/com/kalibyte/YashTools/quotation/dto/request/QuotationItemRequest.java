@@ -41,6 +41,10 @@ public class QuotationItemRequest {
     @Positive(message = "Overall length must be > 0")
     private Double overallLength;
 
+    private Double diameter;
+    private Double fluteLength;
+    private Double shankDiameter;
+
     private String coatingType;
 
     @NotNull(message = "Multiplier is required (use 1.0 if no multiplier needed)")

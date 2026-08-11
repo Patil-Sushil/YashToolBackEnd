@@ -20,21 +20,21 @@ public class QuotationEmailHandlerImpl implements QuotationEmailHandler {
     private final EmailService emailService;
 
     @Override
-    public UUID sendQuotationEmail(QuotationResponse q) {
+    public EmailResult sendQuotationEmail(QuotationResponse q) {
         return sendQuotationEmail(q, null, List.of());
     }
 
     @Override
-    public UUID sendQuotationEmail(QuotationResponse q, byte[] pdf) {
+    public EmailResult sendQuotationEmail(QuotationResponse q, byte[] pdf) {
         return sendQuotationEmail(q, pdf, List.of());
     }
 
     @Override
-    public UUID sendQuotationEmail(QuotationResponse q, byte[] pdf, List<String> cc) {
+    public EmailResult sendQuotationEmail(QuotationResponse q, byte[] pdf, List<String> cc) {
         EmailMessage message = composer.compose(q, pdf, cc);
         EmailResult result = emailService.send(message);
         log.info("Quotation email dispatched: success={} logId={} subject='{}'",
                 result.isSuccess(), result.getEmailLogId(), q.getQuotationNo());
-        return result.getEmailLogId();
+        return result;
     }
 }

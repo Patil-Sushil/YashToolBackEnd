@@ -27,4 +27,30 @@ public final class QuotationNumberGenerator {
     public static String build(long yearSequence) {
         return buildPrefix() + formatSequence(yearSequence);
     }
+
+    /**
+     * Extracts the base quotation number without revision suffix e.g., "YT-QT-2026-000001"
+     */
+    public static String getBaseQuotationNo(String quotationNo) {
+        if (quotationNo == null) return null;
+        int rIndex = quotationNo.lastIndexOf("-R");
+        if (rIndex > 0) {
+            String suffix = quotationNo.substring(rIndex + 2);
+            if (suffix.matches("\\d+")) {
+                return quotationNo.substring(0, rIndex);
+            }
+        }
+        return quotationNo;
+    }
+
+    /**
+     * Builds revision quotation number with suffix e.g., "YT-QT-2026-000001-R1"
+     */
+    public static String buildRevisionNumber(String baseQuotationNo, int revisionNumber) {
+        String cleanBase = getBaseQuotationNo(baseQuotationNo);
+        if (revisionNumber <= 0) {
+            return cleanBase;
+        }
+        return cleanBase + "-R" + revisionNumber;
+    }
 }

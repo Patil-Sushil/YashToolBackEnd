@@ -195,9 +195,9 @@ public class QuotationServiceImpl implements QuotationService {
     @Transactional
     public QuotationResponse lockFinal(UUID id) {
         Quotation q = securityService.loadForCurrentCompany(id);
-        if (q.getStatus() != QuotationStatus.CUSTOMER_APPROVED)
+        if (q.getStatus() != QuotationStatus.CUSTOMER_APPROVED && q.getStatus() != QuotationStatus.APPROVED && q.getStatus() != QuotationStatus.SENT_TO_CUSTOMER)
             throw new QuotationStateException(
-                    "Only CUSTOMER_APPROVED can lock. Current: " + q.getStatus());
+                    "Only active or customer-approved quotations can be locked. Current: " + q.getStatus());
 
         q.setIsLocked(true);
         q.setLockedAt(LocalDateTime.now());
@@ -232,15 +232,18 @@ public class QuotationServiceImpl implements QuotationService {
         log.info("Recording customer decision for quotation {}: {}", id, decision);
         Quotation q = securityService.loadForCurrentCompany(id);
 
-        if (q.getStatus() != QuotationStatus.SENT_TO_CUSTOMER) {
+        if (q.getStatus() == QuotationStatus.LOCKED || 
+            q.getStatus() == QuotationStatus.CANCELLED || 
+            q.getStatus() == QuotationStatus.EXPIRED) {
             throw new QuotationStateException(
-                    "Can only record customer decision for quotations in SENT_TO_CUSTOMER status. Current status: " + q.getStatus());
+                    "Cannot record customer decision for quotation in final status: " + q.getStatus());
         }
 
-        if ("APPROVED".equalsIgnoreCase(decision)) {
+        String cleanDecision = decision != null ? decision.trim().toUpperCase() : "";
+        if ("APPROVED".equals(cleanDecision) || "ACCEPT".equals(cleanDecision) || "ACCEPTED".equals(cleanDecision)) {
             q.setStatus(QuotationStatus.CUSTOMER_APPROVED);
             q.setCustomerDecision("APPROVED");
-        } else if ("REJECTED".equalsIgnoreCase(decision)) {
+        } else if ("REJECTED".equals(cleanDecision) || "REJECT".equals(cleanDecision)) {
             q.setStatus(QuotationStatus.CUSTOMER_REJECTED);
             q.setCustomerDecision("REJECTED");
         } else {
@@ -273,8 +276,16 @@ public class QuotationServiceImpl implements QuotationService {
         String companyCode = CompanyContextHolder.getCompanyCode();
         Company company = Company.builder().id(companyId).code(companyCode).build();
 
-        long seq = quotationRepository.count() + 1;
+        long rootCount = companyId != null
+                ? quotationRepository.countByCompanyIdAndParentQuotationIsNull(companyId)
+                : quotationRepository.countByParentQuotationIsNull();
+        long seq = rootCount + 1;
         String quotationNo = QuotationNumberGenerator.build(seq);
+
+        while (quotationRepository.findByQuotationNo(quotationNo).isPresent()) {
+            seq++;
+            quotationNo = QuotationNumberGenerator.build(seq);
+        }
 
         Quotation q = Quotation.builder()
                 .quotationNo(quotationNo)
@@ -332,17 +343,25 @@ public class QuotationServiceImpl implements QuotationService {
                     .rateFetchedAt(LocalDateTime.now())
                     .build();
 
+            Double dia = req.getSpecs() != null && req.getSpecs().getDiameter() != null ? req.getSpecs().getDiameter() : req.getDiameter();
+            Double flute = req.getSpecs() != null && req.getSpecs().getFluteLength() != null ? req.getSpecs().getFluteLength() : req.getFluteLength();
+            Double shank = req.getSpecs() != null && req.getSpecs().getShankDiameter() != null ? req.getSpecs().getShankDiameter() : req.getShankDiameter();
+            Double oal = req.getSpecs() != null && req.getSpecs().getOverallLength() != null ? req.getSpecs().getOverallLength() : req.getOverallLength();
+
+            item.setDiameter(dia);
+            item.setFluteLength(flute);
+            item.setShankDiameter(shank);
+            item.setOverallLength(oal);
+
             if (req.getSpecs() != null) {
                 item.setMaterialType(req.getSpecs().getMaterialType() != null
                         ? req.getSpecs().getMaterialType().name() : null);
                 item.setCoatingRequired(Boolean.TRUE.equals(req.getSpecs().getCoatingRequired()));
-                item.setCoatingType(req.getSpecs().getCoatingType() != null
-                        ? req.getSpecs().getCoatingType().name() : null);
+                if (req.getSpecs().getCoatingType() != null) {
+                    item.setCoatingType(req.getSpecs().getCoatingType().name());
+                }
                 item.setResharpeningType(req.getSpecs().getResharpeningType() != null
                         ? req.getSpecs().getResharpeningType().name() : null);
-                item.setDiameter(req.getSpecs().getDiameter());
-                item.setFluteLength(req.getSpecs().getFluteLength());
-                item.setShankDiameter(req.getSpecs().getShankDiameter());
                 item.setTechnicalNotes(req.getSpecs().getTechnicalNotes());
                 item.setDamageLevel(req.getSpecs().getDamageLevel());
                 item.setSpecialGeometry(Boolean.TRUE.equals(req.getSpecs().getSpecialGeometry()));

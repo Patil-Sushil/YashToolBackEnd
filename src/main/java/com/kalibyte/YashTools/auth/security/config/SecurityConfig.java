@@ -101,28 +101,36 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/masters/**").hasAnyRole("ADMIN", "STORE")
                         .requestMatchers(HttpMethod.GET, "/api/masters/**").authenticated()
 
+                        // Work Orders
+                        .requestMatchers("/api/work-orders", "/api/work-orders/**")
+                        .hasAnyRole("ADMIN", "SALES", "PRODUCTION", "DELIVERY", "STORE", "QUALITY", "FINANCE")
+
                         // Production
-                        .requestMatchers("/api/production/**")
+                        .requestMatchers("/api/production", "/api/production/**")
                         .hasAnyRole("ADMIN", "PRODUCTION")
 
-                        .requestMatchers("/api/finished-goods/**")
+                        .requestMatchers("/api/finished-goods", "/api/finished-goods/**")
                         .hasAnyRole("ADMIN", "STORE", "PRODUCTION", "FINANCE")
 
-                        .requestMatchers("/api/packing/**")
-                        .hasAnyRole("ADMIN", "STORE", "PRODUCTION")
+                        .requestMatchers("/api/packing", "/api/packing/**")
+                        .hasAnyRole("ADMIN", "STORE", "PRODUCTION", "DELIVERY")
 
-                        .requestMatchers("/api/delivery-challans/**")
-                        .hasAnyRole("ADMIN", "STORE", "PRODUCTION")
+                        .requestMatchers("/api/delivery-challans", "/api/delivery-challans/**")
+                        .hasAnyRole("ADMIN", "STORE", "PRODUCTION", "DELIVERY")
 
-                        .requestMatchers("/api/sales-invoices/**")
-                        .hasAnyRole("ADMIN", "FINANCE")
+                        .requestMatchers("/api/transit-damages", "/api/transit-damages/**")
+                        .hasAnyRole("ADMIN", "STORE", "PRODUCTION", "QUALITY", "DELIVERY", "SALES")
+
+                        .requestMatchers("/api/sales-invoices", "/api/sales-invoices/**")
+                        .hasAnyRole("ADMIN", "FINANCE", "ACCOUNTING", "SALES", "DELIVERY", "STORE")
 
                         // Finance
-                        .requestMatchers("/api/finance/**")
+                        .requestMatchers("/api/finance", "/api/finance/**")
                         .hasAnyRole("ADMIN", "FINANCE")
 
-                        // Inventory
+                        // Inventory / Store
                         .requestMatchers(
+                                "/api/inventory/**",
                                 "/api/items/**",
                                 "/api/vendors/**",
                                 "/api/departments/**",
@@ -130,7 +138,7 @@ public class SecurityConfig {
                                 "/api/inwards/**",
                                 "/api/material-issues/**",
                                 "/api/inventory/reports/**"
-                        ).hasAnyRole("ADMIN", "STORE", "FINANCE")
+                        ).hasAnyRole("ADMIN", "STORE", "FINANCE", "PRODUCTION")
 
                         // QA
                         .requestMatchers("/api/qa/**")

@@ -192,6 +192,15 @@ public class TransitDamageServiceImpl implements TransitDamageService {
         return toResponse(report);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<TransitDamageResponse> getAllReports() {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        return transitDamageReportRepository.findByCompanyId(companyId).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
     private TransitDamageResponse toResponse(TransitDamageReport report) {
         return TransitDamageResponse.builder()
                 .id(report.getId())

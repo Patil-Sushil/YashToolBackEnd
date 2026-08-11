@@ -7,8 +7,35 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class YashToolBackEndApplication {
 
 	public static void main(String[] args) {
+		loadDotEnv();
 		runFlywayMigrations();
 		SpringApplication.run(YashToolBackEndApplication.class, args);
+	}
+
+	private static void loadDotEnv() {
+		java.io.File file = new java.io.File(".env");
+		if (file.exists()) {
+			try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					line = line.trim();
+					if (line.isEmpty() || line.startsWith("#")) continue;
+					int eq = line.indexOf('=');
+					if (eq > 0) {
+						String key = line.substring(0, eq).trim();
+						String val = line.substring(eq + 1).trim();
+						if (key.startsWith("SPRING_DATASOURCE")) continue;
+						String existingProp = System.getProperty(key);
+						if (existingProp == null || existingProp.isBlank()) {
+							System.setProperty(key, val);
+						}
+					}
+				}
+				System.out.println("====== Loaded environment variables from .env ======");
+			} catch (Exception e) {
+				System.err.println("Failed to load .env file: " + e.getMessage());
+			}
+		}
 	}
 
 	private static void runFlywayMigrations() {

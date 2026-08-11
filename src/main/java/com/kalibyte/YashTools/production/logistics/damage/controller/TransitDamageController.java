@@ -19,13 +19,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/transit-damages")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
+@PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'QUALITY', 'PRODUCTION', 'DELIVERY', 'SALES')")
 public class TransitDamageController {
 
     private final TransitDamageService transitDamageService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'QUALITY', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'QUALITY', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<TransitDamageResponse>> reportTransitDamage(
             @Valid @RequestBody CreateTransitDamageRequest request) {
         String username = SecurityUtils.getCurrentUsername();
@@ -35,8 +35,8 @@ public class TransitDamageController {
         return ResponseEntity.ok(ApiResponse.success("Transit damage reported successfully", response));
     }
 
-    @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('ADMIN', 'QUALITY', 'PRODUCTION')")
+    @PostMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/approve")
+    @PreAuthorize("hasAnyRole('ADMIN', 'QUALITY', 'PRODUCTION', 'DELIVERY', 'STORE')")
     public ResponseEntity<ApiResponse<TransitDamageResponse>> approveReport(@PathVariable UUID id) {
         String username = SecurityUtils.getCurrentUsername();
         log.info("Approving transit damage report: {} by {}", id, username);
@@ -44,8 +44,8 @@ public class TransitDamageController {
         return ResponseEntity.ok(ApiResponse.success("Transit damage report approved and processed successfully", response));
     }
 
-    @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAnyRole('ADMIN', 'QUALITY', 'PRODUCTION')")
+    @PostMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/reject")
+    @PreAuthorize("hasAnyRole('ADMIN', 'QUALITY', 'PRODUCTION', 'DELIVERY', 'STORE')")
     public ResponseEntity<ApiResponse<TransitDamageResponse>> rejectReport(@PathVariable UUID id) {
         String username = SecurityUtils.getCurrentUsername();
         log.info("Rejecting transit damage report: {} by {}", id, username);
@@ -53,8 +53,14 @@ public class TransitDamageController {
         return ResponseEntity.ok(ApiResponse.success("Transit damage report rejected successfully", response));
     }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'QUALITY', 'PRODUCTION', 'SALES')")
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'QUALITY', 'PRODUCTION', 'DELIVERY', 'SALES')")
+    public ResponseEntity<ApiResponse<List<TransitDamageResponse>>> getAllReports() {
+        return ResponseEntity.ok(ApiResponse.success("Transit damage reports retrieved successfully", transitDamageService.getAllReports()));
+    }
+
+    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'QUALITY', 'PRODUCTION', 'DELIVERY', 'SALES')")
     public ResponseEntity<ApiResponse<TransitDamageResponse>> getReportById(@PathVariable UUID id) {
         TransitDamageResponse response = transitDamageService.getReportById(id);
         return ResponseEntity.ok(ApiResponse.success(response));

@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customers")
-@PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
+@PreAuthorize("isAuthenticated()")
 public class CustomerController {
 
     private final CustomerService customerService;

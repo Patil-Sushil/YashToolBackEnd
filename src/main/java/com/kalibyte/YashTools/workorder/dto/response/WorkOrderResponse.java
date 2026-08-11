@@ -32,6 +32,7 @@ public class WorkOrderResponse {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expectedDeliveryDate;
     private String poNumber;
+    private String shippingAddress;
 
 
 

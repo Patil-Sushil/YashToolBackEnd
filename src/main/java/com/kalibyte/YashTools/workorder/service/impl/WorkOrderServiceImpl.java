@@ -14,6 +14,7 @@ import com.kalibyte.YashTools.workorder.dto.request.UpdateWorkOrderPlanningReque
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderItemResponse;
 import com.kalibyte.YashTools.workorder.dto.response.WorkOrderResponse;
 import com.kalibyte.YashTools.workorder.dto.response.LockedQuotationSummaryResponse;
+import com.kalibyte.YashTools.workorder.dto.response.PendingDispatchWorkOrderResponse;
 import com.kalibyte.YashTools.workorder.entity.WorkOrder;
 import com.kalibyte.YashTools.workorder.entity.WorkOrderItem;
 import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
@@ -50,6 +51,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     private final com.kalibyte.YashTools.production.tracking.repository.QualityInspectionRepository qualityInspectionRepository;
     private final com.kalibyte.YashTools.production.packing.repository.PackingLogRepository packingLogRepository;
     private final com.kalibyte.YashTools.production.logistics.repository.DeliveryChallanItemRepository deliveryChallanItemRepository;
+    private final com.kalibyte.YashTools.sales.invoice.repository.SalesInvoiceItemRepository salesInvoiceItemRepository;
 
 
     @Override
@@ -78,6 +80,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
         Company company = Company.builder().id(companyId).code(companyCode).build();
 
+        String shippingAddr = quotation.getCustomer() != null ? quotation.getCustomer().getDeliveryAddress() : null;
+
         WorkOrder wo = WorkOrder.builder()
                 .workOrderNo(workOrderNo)
                 .quotation(quotation)
@@ -87,6 +91,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .customerContactPerson(quotation.getCustomerContactPerson())
                 .customerEmail(quotation.getCustomerEmail())
                 .customerMobile(quotation.getCustomerMobile())
+                .shippingAddress(shippingAddr)
                 .remarks(request.getRemarks())
                 .expectedDeliveryDate(request.getExpectedDeliveryDate())
                 .poNumber(request.getPoNumber())
@@ -190,8 +195,6 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             throw new WorkOrderException("Cannot change status of a terminal Work Order in status: " + currentStatus);
         }
 
-
-
         wo.setStatus(newStatus);
         if (request.getRemarks() != null && !request.getRemarks().isBlank()) {
             wo.setRemarks((wo.getRemarks() == null ? "" : wo.getRemarks() + "\n") 
@@ -205,34 +208,43 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     private WorkOrderResponse toResponse(WorkOrder wo) {
         List<WorkOrderItemResponse> itemResponses = wo.getItems().stream()
-                .map(i -> WorkOrderItemResponse.builder()
-                        .id(i.getId())
-                        .lineNumber(i.getLineNumber())
-                        .quotationItemId(i.getQuotationItem() != null ? i.getQuotationItem().getId() : null)
-                        .orderType(i.getOrderType().name())
-                        .toolName(i.getToolName())
-                        .itemName(i.getItemName())
-                        .quantity(i.getQuantity())
-                        .trial(i.getTrial())
-                        .trialStatus(i.getTrialStatus() != null ? i.getTrialStatus().name() : null)
-                        .trialFeedback(i.getTrialFeedback())
-                        .itemRemarks(i.getItemRemarks())
-                        .drawingReference(i.getDrawingReference())
-                        .materialType(i.getMaterialType())
-                        .materialGrade(i.getMaterialGrade() != null ? i.getMaterialGrade().name() : null)
-                        .coatingRequired(i.getCoatingRequired())
-                        .coatingType(i.getCoatingType())
-                        .resharpeningType(i.getResharpeningType())
-                        .diameter(i.getDiameter())
-                        .fluteLength(i.getFluteLength())
-                        .shankDiameter(i.getShankDiameter())
-                        .overallLength(i.getOverallLength())
-                        .technicalNotes(i.getTechnicalNotes())
-                        .damageLevel(i.getDamageLevel())
-                        .specialGeometry(i.getSpecialGeometry())
-                        .specialProfile(i.getSpecialProfile())
-                        .expressDelivery(i.getExpressDelivery())
-                        .build())
+                .map(i -> {
+                    int totalQty = i.getQuantity() != null ? i.getQuantity() : 0;
+                    int alreadyInvoiced = salesInvoiceItemRepository.getSumQuantityByWorkOrderItemId(i.getId());
+                    int remaining = Math.max(0, totalQty - alreadyInvoiced);
+
+                    return WorkOrderItemResponse.builder()
+                            .id(i.getId())
+                            .lineNumber(i.getLineNumber())
+                            .quotationItemId(i.getQuotationItem() != null ? i.getQuotationItem().getId() : null)
+                            .orderType(i.getOrderType().name())
+                            .toolName(i.getToolName())
+                            .itemName(i.getItemName())
+                            .quantity(totalQty)
+                            .alreadyInvoicedQuantity(alreadyInvoiced)
+                            .remainingUninvoicedQuantity(remaining)
+                            .unitPrice(i.getQuotationItem() != null ? i.getQuotationItem().getUnitPrice() : null)
+                            .trial(i.getTrial())
+                            .trialStatus(i.getTrialStatus() != null ? i.getTrialStatus().name() : null)
+                            .trialFeedback(i.getTrialFeedback())
+                            .itemRemarks(i.getItemRemarks())
+                            .drawingReference(i.getDrawingReference())
+                            .materialType(i.getMaterialType())
+                            .materialGrade(i.getMaterialGrade() != null ? i.getMaterialGrade().name() : null)
+                            .coatingRequired(i.getCoatingRequired())
+                            .coatingType(i.getCoatingType())
+                            .resharpeningType(i.getResharpeningType())
+                            .diameter(i.getDiameter())
+                            .fluteLength(i.getFluteLength())
+                            .shankDiameter(i.getShankDiameter())
+                            .overallLength(i.getOverallLength())
+                            .technicalNotes(i.getTechnicalNotes())
+                            .damageLevel(i.getDamageLevel())
+                            .specialGeometry(i.getSpecialGeometry())
+                            .specialProfile(i.getSpecialProfile())
+                            .expressDelivery(i.getExpressDelivery())
+                            .build();
+                })
                 .collect(Collectors.toList());
 
         return WorkOrderResponse.builder()
@@ -251,6 +263,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .plannedEndDate(wo.getPlannedEndDate())
                 .expectedDeliveryDate(wo.getExpectedDeliveryDate())
                 .poNumber(wo.getPoNumber())
+                .shippingAddress(wo.getShippingAddress() != null ? wo.getShippingAddress() : (wo.getCustomer() != null ? wo.getCustomer().getDeliveryAddress() : null))
                 .items(itemResponses)
                 .createdAt(wo.getCreatedAt())
                 .createdBy(wo.getCreatedBy())
@@ -356,7 +369,17 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             return com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse.WorkOrderItemProgressResponse.builder()
                     .itemId(item.getId())
                     .toolName(item.getToolName())
+                    .itemName(item.getItemName())
                     .orderedQuantity(item.getQuantity())
+                    .diameter(item.getDiameter())
+                    .shankDiameter(item.getShankDiameter())
+                    .overallLength(item.getOverallLength())
+                    .fluteLength(item.getFluteLength())
+                    .drawingReference(item.getDrawingReference())
+                    .materialGrade(item.getMaterialGrade() != null ? item.getMaterialGrade().name() : null)
+                    .materialType(item.getMaterialType())
+                    .coatingType(item.getCoatingType())
+                    .technicalNotes(item.getTechnicalNotes())
                     .trial(item.getTrial())
                     .trialStatus(item.getTrialStatus() != null ? item.getTrialStatus().name() : null)
                     .plannedQuantity(plannedQty)
@@ -413,5 +436,72 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .createdAt(q.getCreatedAt())
                 .build();
     }
-}
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PendingDispatchWorkOrderResponse> getPendingDispatchWorkOrders(UUID customerId) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+
+        List<WorkOrderStatus> activeStatuses = List.of(
+                WorkOrderStatus.CREATED,
+                WorkOrderStatus.IN_PROGRESS,
+                WorkOrderStatus.PRODUCTION_COMPLETED,
+                WorkOrderStatus.COMPLETED
+        );
+
+        List<WorkOrder> workOrders;
+        if (customerId != null) {
+            workOrders = workOrderRepository.findByCompanyIdAndStatusInAndCustomerId(
+                    companyId, activeStatuses, customerId);
+        } else {
+            workOrders = workOrderRepository.findByCompanyIdAndStatusIn(
+                    companyId, activeStatuses);
+        }
+
+        return workOrders.stream()
+                .map(this::toPendingDispatchResponse)
+                .filter(r -> r != null && r.getItems() != null && !r.getItems().isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    private PendingDispatchWorkOrderResponse toPendingDispatchResponse(WorkOrder wo) {
+        List<PendingDispatchWorkOrderResponse.PendingDispatchItemResponse> pendingItems = wo.getItems().stream()
+                .map(item -> {
+                    int orderedQty = item.getQuantity();
+                    int dispatchedQty = deliveryChallanItemRepository.getSumQuantityByWorkOrderItemId(item.getId());
+                    int remainingQty = Math.max(0, orderedQty - dispatchedQty);
+
+                    if (remainingQty <= 0) {
+                        return null;
+                    }
+
+                    return PendingDispatchWorkOrderResponse.PendingDispatchItemResponse.builder()
+                            .workOrderItemId(item.getId())
+                            .toolName(item.getToolName())
+                            .orderedQuantity(orderedQty)
+                            .dispatchedQuantity(dispatchedQty)
+                            .remainingQuantity(remainingQty)
+                            .unitPrice(item.getQuotationItem() != null ? item.getQuotationItem().getUnitPrice() : null)
+                            .diameter(item.getDiameter())
+                            .fluteLength(item.getFluteLength())
+                            .shankDiameter(item.getShankDiameter())
+                            .overallLength(item.getOverallLength())
+                            .build();
+                })
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (pendingItems.isEmpty()) {
+            return null;
+        }
+
+        return PendingDispatchWorkOrderResponse.builder()
+                .workOrderId(wo.getId())
+                .workOrderNumber(wo.getWorkOrderNo())
+                .customerId(wo.getCustomer().getId())
+                .customerName(wo.getCustomerContactPerson())
+                .companyName(wo.getCustomerCompanyName())
+                .items(pendingItems)
+                .build();
+    }
+}

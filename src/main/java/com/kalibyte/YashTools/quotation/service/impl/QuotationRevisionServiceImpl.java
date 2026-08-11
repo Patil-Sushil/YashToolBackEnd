@@ -20,6 +20,7 @@ import com.kalibyte.YashTools.quotation.service.PricingEngineService;
 import com.kalibyte.YashTools.quotation.service.QuotationRevisionService;
 import com.kalibyte.YashTools.quotation.service.QuotationApprovalService;
 import com.kalibyte.YashTools.quotation.util.PricingFormula;
+import com.kalibyte.YashTools.quotation.util.QuotationNumberGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,9 +60,11 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
             rootParent = rootParent.getParentQuotation();
         }
 
+        String baseQuotationNo = QuotationNumberGenerator.getBaseQuotationNo(rootParent.getQuotationNo());
+
         // Dynamically find the next available revision suffix number by checking database presence
         int nextRevisionNumber = rootParent.getRevisionCount() + 1;
-        while (quotationRepository.findByQuotationNo(rootParent.getQuotationNo() + "-R" + nextRevisionNumber).isPresent()) {
+        while (quotationRepository.findByQuotationNo(QuotationNumberGenerator.buildRevisionNumber(baseQuotationNo, nextRevisionNumber)).isPresent()) {
             nextRevisionNumber++;
         }
 
@@ -75,7 +78,7 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
                 .code(parent.getCompany().getCode())
                 .build();
         Quotation revised = Quotation.builder()
-                .quotationNo(rootParent.getQuotationNo() + "-R" + nextRevisionNumber)
+                .quotationNo(QuotationNumberGenerator.buildRevisionNumber(baseQuotationNo, nextRevisionNumber))
                 .version(parent.getVersion() + 1)
                 .parentQuotation(parent)
                 .sourceType(parent.getSourceType())

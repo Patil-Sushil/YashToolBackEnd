@@ -8,5 +8,6 @@ public enum RoleName {
     FINANCE,
     PRODUCTION,
     CA,
-    QUALITY
+    QUALITY,
+    DELIVERY
 }

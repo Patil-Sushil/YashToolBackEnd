@@ -51,10 +51,7 @@ public class DeliveryChallanEmailServiceImpl implements DeliveryChallanEmailServ
         UUID logId = handler.sendChallanEmail(challan, pdf, cc);
 
         EmailLog row = emailService.getLog(logId);
-        return EmailResult.ok(row.getId(), row.getMailStatus(),
-                row.getSmtpMessageId(),
-                row.getSmtpResponseCode(),
-                row.getSmtpResponseMessage());
+        return EmailResult.fromLog(row);
     }
 
     @Override

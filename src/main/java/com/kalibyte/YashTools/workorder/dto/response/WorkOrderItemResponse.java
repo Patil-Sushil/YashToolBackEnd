@@ -2,6 +2,7 @@ package com.kalibyte.YashTools.workorder.dto.response;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -16,6 +17,9 @@ public class WorkOrderItemResponse {
     private String toolName;
     private String itemName;
     private Integer quantity;
+    private Integer alreadyInvoicedQuantity;
+    private Integer remainingUninvoicedQuantity;
+    private BigDecimal unitPrice;
     private Boolean trial;
     private String trialStatus;
     private String trialFeedback;

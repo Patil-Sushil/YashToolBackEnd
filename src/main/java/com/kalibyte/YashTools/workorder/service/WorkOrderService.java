@@ -24,4 +24,5 @@ public interface WorkOrderService {
     com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse getProgress(UUID id);
     List<LockedQuotationSummaryResponse> getLockedQuotationsForCustomer(UUID customerId);
     List<LockedQuotationSummaryResponse> getAllLockedQuotationsAvailable();
+    List<com.kalibyte.YashTools.workorder.dto.response.PendingDispatchWorkOrderResponse> getPendingDispatchWorkOrders(UUID customerId);
 }

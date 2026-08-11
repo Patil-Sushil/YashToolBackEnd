@@ -53,6 +53,17 @@ public class SalesInvoiceServiceImpl implements SalesInvoiceService {
             throw new BusinessException("Work Order does not belong to the active company context");
         }
 
+        if (!wo.getItems().isEmpty()) {
+            boolean allFullyInvoiced = wo.getItems().stream().allMatch(item -> {
+                int totalQty = item.getQuantity() != null ? item.getQuantity() : 0;
+                int alreadyInvoiced = salesInvoiceItemRepository.getSumQuantityByWorkOrderItemId(item.getId());
+                return alreadyInvoiced >= totalQty;
+            });
+            if (allFullyInvoiced) {
+                throw new BusinessException(String.format("Work Order '%s' is already fully invoiced (100%% billed). No further invoices can be created.", wo.getWorkOrderNo()));
+            }
+        }
+
         long count = repository.count() + 1;
         String invoiceNo = String.format("%s-INV-%d-%06d", companyCode, LocalDate.now().getYear(), count);
 
@@ -84,7 +95,12 @@ public class SalesInvoiceServiceImpl implements SalesInvoiceService {
 
             int alreadyInvoicedQty = salesInvoiceItemRepository.getSumQuantityByWorkOrderItemId(woi.getId());
             int totalItemQty = woi.getQuantity() != null ? woi.getQuantity() : 0;
-            int remainingQty = totalItemQty - alreadyInvoicedQty;
+            int remainingQty = Math.max(0, totalItemQty - alreadyInvoicedQty);
+
+            if (remainingQty <= 0) {
+                String itemName = (woi.getToolName() != null && !woi.getToolName().isBlank()) ? woi.getToolName() : woi.getItemName();
+                throw new BusinessException(String.format("Item '%s' in Work Order '%s' is already 100%% invoiced (Total ordered: %d, Already invoiced: %d). No further quantity can be billed for this item.", itemName, wo.getWorkOrderNo(), totalItemQty, alreadyInvoicedQty));
+            }
 
             if (itemReq.getQuantity() > remainingQty) {
                 String itemName = (woi.getToolName() != null && !woi.getToolName().isBlank()) ? woi.getToolName() : woi.getItemName();
@@ -92,17 +108,14 @@ public class SalesInvoiceServiceImpl implements SalesInvoiceService {
                         itemReq.getQuantity(), itemName, remainingQty, totalItemQty, alreadyInvoicedQty));
             }
 
-            BigDecimal unitPrice = itemReq.getUnitPrice();
-            if (unitPrice == null) {
-                if (woi.getQuotationItem() != null && woi.getQuotationItem().getUnitPrice() != null) {
-                    unitPrice = woi.getQuotationItem().getUnitPrice();
-                } else {
-                    unitPrice = BigDecimal.ZERO;
-                }
+            if (woi.getQuotationItem() == null || woi.getQuotationItem().getUnitPrice() == null) {
+                String itemName = (woi.getToolName() != null && !woi.getToolName().isBlank()) ? woi.getToolName() : woi.getItemName();
+                throw new BusinessException(String.format("Cannot create invoice item for '%s': Unit price is not available on the associated quotation item.", itemName));
             }
 
+            BigDecimal unitPrice = woi.getQuotationItem().getUnitPrice();
             BigDecimal qtyBD = BigDecimal.valueOf(itemReq.getQuantity());
-            BigDecimal totalPrice = unitPrice.multiply(qtyBD);
+            BigDecimal totalPrice = unitPrice.multiply(qtyBD).setScale(2, RoundingMode.HALF_UP);
             subTotal = subTotal.add(totalPrice);
 
             SalesInvoiceItem sii = SalesInvoiceItem.builder()
@@ -123,15 +136,15 @@ public class SalesInvoiceServiceImpl implements SalesInvoiceService {
 
         if (request.getIsInterstate()) {
             igstRate = BigDecimal.valueOf(18.00);
-            igstAmount = subTotal.multiply(BigDecimal.valueOf(0.18)).setScale(4, RoundingMode.HALF_UP);
+            igstAmount = subTotal.multiply(BigDecimal.valueOf(0.18)).setScale(2, RoundingMode.HALF_UP);
         } else {
             cgstRate = BigDecimal.valueOf(9.00);
-            cgstAmount = subTotal.multiply(BigDecimal.valueOf(0.09)).setScale(4, RoundingMode.HALF_UP);
+            cgstAmount = subTotal.multiply(BigDecimal.valueOf(0.09)).setScale(2, RoundingMode.HALF_UP);
             sgstRate = BigDecimal.valueOf(9.00);
-            sgstAmount = subTotal.multiply(BigDecimal.valueOf(0.09)).setScale(4, RoundingMode.HALF_UP);
+            sgstAmount = subTotal.multiply(BigDecimal.valueOf(0.09)).setScale(2, RoundingMode.HALF_UP);
         }
 
-        BigDecimal totalAmount = subTotal.add(cgstAmount).add(sgstAmount).add(igstAmount);
+        BigDecimal totalAmount = subTotal.add(cgstAmount).add(sgstAmount).add(igstAmount).setScale(2, RoundingMode.HALF_UP);
 
         SalesInvoice invoice = SalesInvoice.builder()
                 .invoiceNo(invoiceNo)
@@ -195,36 +208,61 @@ public class SalesInvoiceServiceImpl implements SalesInvoiceService {
     }
 
     private SalesInvoiceResponse toResponse(SalesInvoice inv) {
+        WorkOrder wo = inv.getWorkOrder();
         return SalesInvoiceResponse.builder()
                 .id(inv.getId())
                 .invoiceNo(inv.getInvoiceNo())
-                .workOrderId(inv.getWorkOrder().getId())
-                .workOrderNo(inv.getWorkOrder().getWorkOrderNo())
-                .customerName(inv.getWorkOrder().getCustomerCompanyName())
+                .workOrderId(wo != null ? wo.getId() : null)
+                .workOrderNo(wo != null ? wo.getWorkOrderNo() : null)
+                .customerName(wo != null ? wo.getCustomerCompanyName() : null)
+                .customerContactPerson(wo != null ? wo.getCustomerContactPerson() : null)
+                .customerEmail(wo != null ? wo.getCustomerEmail() : null)
+                .customerMobile(wo != null ? wo.getCustomerMobile() : null)
+                .shippingAddress(wo != null ? (wo.getShippingAddress() != null ? wo.getShippingAddress() : (wo.getCustomer() != null ? wo.getCustomer().getDeliveryAddress() : null)) : null)
+                .poNumber(wo != null ? wo.getPoNumber() : null)
+                .quotationId(wo != null && wo.getQuotation() != null ? wo.getQuotation().getId() : null)
+                .quotationNo(wo != null && wo.getQuotation() != null ? wo.getQuotation().getQuotationNo() : null)
                 .invoiceDate(inv.getInvoiceDate())
-                .subTotal(inv.getSubTotal())
+                .subTotal(inv.getSubTotal() != null ? inv.getSubTotal().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO)
                 .cgstRate(inv.getCgstRate())
-                .cgstAmount(inv.getCgstAmount())
+                .cgstAmount(inv.getCgstAmount() != null ? inv.getCgstAmount().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO)
                 .sgstRate(inv.getSgstRate())
-                .sgstAmount(inv.getSgstAmount())
+                .sgstAmount(inv.getSgstAmount() != null ? inv.getSgstAmount().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO)
                 .igstRate(inv.getIgstRate())
-                .igstAmount(inv.getIgstAmount())
-                .totalAmount(inv.getTotalAmount())
+                .igstAmount(inv.getIgstAmount() != null ? inv.getIgstAmount().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO)
+                .totalAmount(inv.getTotalAmount() != null ? inv.getTotalAmount().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO)
                 .status(inv.getStatus())
                 .remarks(inv.getRemarks())
                 .companyId(inv.getCompany() != null ? inv.getCompany().getId() : null)
                 .companyCode(inv.getCompany() != null ? inv.getCompany().getCode() : null)
-                .customerEmail(inv.getWorkOrder() != null ? inv.getWorkOrder().getCustomerEmail() : null)
                 .items(inv.getItems().stream()
-                        .map(i -> SalesInvoiceResponse.ItemResponse.builder()
-                                .id(i.getId())
-                                .workOrderItemId(i.getWorkOrderItem().getId())
-                                .toolName(i.getWorkOrderItem().getToolName())
-                                .itemName(i.getWorkOrderItem().getItemName())
-                                .quantity(i.getQuantity())
-                                .unitPrice(i.getUnitPrice())
-                                .totalPrice(i.getTotalPrice())
-                                .build())
+                        .map(i -> {
+                            WorkOrderItem woi = i.getWorkOrderItem();
+                            int totalItemQty = woi.getQuantity() != null ? woi.getQuantity() : 0;
+                            int alreadyInvoiced = salesInvoiceItemRepository.getSumQuantityByWorkOrderItemId(woi.getId());
+                            int remaining = Math.max(0, totalItemQty - alreadyInvoiced);
+
+                            return SalesInvoiceResponse.ItemResponse.builder()
+                                    .id(i.getId())
+                                    .workOrderItemId(woi.getId())
+                                    .toolName(woi.getToolName())
+                                    .itemName(woi.getItemName())
+                                    .quantity(i.getQuantity())
+                                    .orderedQuantity(totalItemQty)
+                                    .alreadyInvoicedQuantity(alreadyInvoiced)
+                                    .remainingUninvoicedQuantity(remaining)
+                                    .unitPrice(i.getUnitPrice() != null ? i.getUnitPrice().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO)
+                                    .totalPrice(i.getTotalPrice() != null ? i.getTotalPrice().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO)
+                                    .diameter(woi.getDiameter())
+                                    .shankDiameter(woi.getShankDiameter())
+                                    .overallLength(woi.getOverallLength())
+                                    .fluteLength(woi.getFluteLength())
+                                    .drawingReference(woi.getDrawingReference())
+                                    .materialGrade(woi.getMaterialGrade() != null ? woi.getMaterialGrade().name() : null)
+                                    .materialType(woi.getMaterialType())
+                                    .coatingType(woi.getCoatingType())
+                                    .build();
+                        })
                         .collect(Collectors.toList()))
                 .build();
     }
@@ -239,4 +277,37 @@ public class SalesInvoiceServiceImpl implements SalesInvoiceService {
         return PageResponse.from(result, this::toResponse);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public com.kalibyte.YashTools.sales.invoice.dto.SalesInvoiceDashboardSummaryResponse getDashboardSummary() {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        List<SalesInvoice> invoices = repository.findByCompanyId(companyId);
+
+        BigDecimal grossInvoiced = BigDecimal.ZERO;
+        BigDecimal collectionsSettled = BigDecimal.ZERO;
+        long paidCount = 0;
+        long pendingCount = 0;
+
+        for (SalesInvoice inv : invoices) {
+            BigDecimal amt = inv.getTotalAmount() != null ? inv.getTotalAmount() : BigDecimal.ZERO;
+            grossInvoiced = grossInvoiced.add(amt);
+            if ("PAID".equalsIgnoreCase(inv.getStatus())) {
+                collectionsSettled = collectionsSettled.add(amt);
+                paidCount++;
+            } else if (!"CANCELLED".equalsIgnoreCase(inv.getStatus())) {
+                pendingCount++;
+            }
+        }
+
+        BigDecimal outstanding = grossInvoiced.subtract(collectionsSettled).max(BigDecimal.ZERO);
+
+        return com.kalibyte.YashTools.sales.invoice.dto.SalesInvoiceDashboardSummaryResponse.builder()
+                .grossSalesInvoiced(grossInvoiced.setScale(2, RoundingMode.HALF_UP))
+                .totalInvoicesCount(invoices.size())
+                .collectionsSettled(collectionsSettled.setScale(2, RoundingMode.HALF_UP))
+                .paidInvoicesCount(paidCount)
+                .outstandingReceivables(outstanding.setScale(2, RoundingMode.HALF_UP))
+                .pendingInvoicesCount(pendingCount)
+                .build();
+    }
 }

@@ -12,5 +12,14 @@ public class FinishedGoodsStockResponse {
     private String toolName;
     private String itemName;
     private Integer quantity;
+    private Double diameter;
+    private Double shankDiameter;
+    private Double overallLength;
+    private Double fluteLength;
+    private String drawingReference;
+    private String materialGrade;
+    private String materialType;
+    private String coatingType;
+    private String technicalNotes;
     private UUID companyId;
 }
