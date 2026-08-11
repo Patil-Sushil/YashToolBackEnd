@@ -116,14 +116,9 @@ public class WorkOrderController {
                 workOrderService.updateStatus(id, request)));
     }
 
-    @PostMapping("/items/{itemId}/trial-result")
-    public ResponseEntity<ApiResponse<WorkOrderResponse>> updateTrialResult(
-            @PathVariable UUID itemId,
-            @Valid @RequestBody UpdateTrialResultRequest request) {
-        log.info("Updating trial result for Work Order Item: {} with status: {}", itemId, request.getStatus());
-        return ResponseEntity.ok(ApiResponse.success(
-                "Trial result updated successfully",
-                workOrderService.updateTrialResult(itemId, request)));
+    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/progress")
+    public ResponseEntity<ApiResponse<com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse>> getProgress(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Work Order progress retrieved successfully", workOrderService.getProgress(id)));
     }
 
     @PutMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/planning")
