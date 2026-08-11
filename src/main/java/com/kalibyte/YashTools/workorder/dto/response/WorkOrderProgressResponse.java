@@ -27,7 +27,17 @@ public class WorkOrderProgressResponse {
     public static class WorkOrderItemProgressResponse {
         private UUID itemId;
         private String toolName;
+        private String itemName;
         private Integer orderedQuantity;
+        private Double diameter;
+        private Double shankDiameter;
+        private Double overallLength;
+        private Double fluteLength;
+        private String drawingReference;
+        private String materialGrade;
+        private String materialType;
+        private String coatingType;
+        private String technicalNotes;
         private Boolean trial;
         private String trialStatus;
         private Integer plannedQuantity;

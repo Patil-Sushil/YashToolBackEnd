@@ -15,4 +15,5 @@ public interface TransitDamageReportRepository extends
     
     Optional<TransitDamageReport> findByIdAndCompanyId(UUID id, UUID companyId);
     List<TransitDamageReport> findByDeliveryChallanIdAndCompanyId(UUID challanId, UUID companyId);
+    List<TransitDamageReport> findByCompanyId(UUID companyId);
 }

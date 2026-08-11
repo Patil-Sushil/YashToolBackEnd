@@ -23,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/sales-invoices")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'SALES')")
+@PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
 public class SalesInvoiceController {
 
     private final SalesInvoiceService service;
@@ -31,27 +31,27 @@ public class SalesInvoiceController {
     private final SalesInvoiceEmailService emailService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<ApiResponse<SalesInvoiceResponse>> createInvoice(@Valid @RequestBody SalesInvoiceRequest request) {
         SalesInvoiceResponse response = service.createInvoice(request);
         return ResponseEntity.ok(ApiResponse.success("Sales Invoice created successfully", response));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<ApiResponse<SalesInvoiceResponse>> getInvoiceById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(service.getInvoiceById(id)));
     }
 
     @PostMapping("/{id}/payment")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<ApiResponse<SalesInvoiceResponse>> recordPayment(@PathVariable UUID id) {
         SalesInvoiceResponse response = service.recordPayment(id);
         return ResponseEntity.ok(ApiResponse.success("Payment recorded successfully", response));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<ApiResponse<PageResponse<SalesInvoiceResponse>>> listInvoices(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -59,7 +59,7 @@ public class SalesInvoiceController {
     }
 
     @GetMapping("/{id}/pdf")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<byte[]> downloadPdf(@PathVariable UUID id) {
         SalesInvoiceResponse invoice = service.getInvoiceById(id);
         byte[] pdf = pdfService.generatePdf(invoice);
@@ -73,7 +73,7 @@ public class SalesInvoiceController {
     }
 
     @PostMapping("/{id}/send")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<ApiResponse<EmailResult>> sendToCustomer(
             @PathVariable UUID id,
             @RequestParam(required = false) List<String> cc) {
@@ -84,26 +84,30 @@ public class SalesInvoiceController {
     }
 
     @PostMapping("/{id}/resend")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<ApiResponse<EmailResult>> resend(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("Sales Invoice email resent",
                 emailService.resend(id)));
     }
 
     @GetMapping("/{id}/email-history")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<ApiResponse<List<EmailLog>>> emailHistory(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(emailService.getDeliveryHistory(id)));
     }
 
+    @GetMapping("/dashboard-summary")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
+    public ResponseEntity<ApiResponse<com.kalibyte.YashTools.sales.invoice.dto.SalesInvoiceDashboardSummaryResponse>> getDashboardSummary() {
+        return ResponseEntity.ok(ApiResponse.success("Sales Invoice dashboard summary retrieved", service.getDashboardSummary()));
+    }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'FINANCE', 'ACCOUNTING', 'STORE', 'DELIVERY')")
     public ResponseEntity<ApiResponse<PageResponse<SalesInvoiceResponse>>> searchInvoices(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(ApiResponse.success("Sales Invoices retrieved successfully", service.searchInvoices(query, page, size)));
     }
-
 }

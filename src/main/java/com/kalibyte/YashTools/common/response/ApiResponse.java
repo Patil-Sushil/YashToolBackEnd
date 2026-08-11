@@ -44,4 +44,13 @@ public class ApiResponse<T> {
         response.message = message;
         return response;
     }
+
+    /** Failure with message and data payload */
+    public static <T> ApiResponse<T> failure(String message, T data) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.success = false;
+        response.message = message;
+        response.data = data;
+        return response;
+    }
 }

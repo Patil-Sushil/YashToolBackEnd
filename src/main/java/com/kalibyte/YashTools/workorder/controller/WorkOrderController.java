@@ -28,7 +28,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/work-orders")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'PRODUCTION')")
+@PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'PRODUCTION', 'DELIVERY', 'STORE', 'QUALITY', 'FINANCE')")
 public class WorkOrderController {
 
     private final WorkOrderService workOrderService;
@@ -40,6 +40,18 @@ public class WorkOrderController {
         return ResponseEntity.ok(ApiResponse.success(
                 "Work Order created successfully",
                 workOrderService.createFromQuotation(request)));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<WorkOrderResponse>>> list(
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<WorkOrderResponse> result = workOrderService.list(status, pageable);
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.from(result)));
     }
 
     @GetMapping("/locked-quotations/all")
@@ -64,6 +76,15 @@ public class WorkOrderController {
         return ResponseEntity.ok(ApiResponse.success(workOrderService.getByNumber(workOrderNo)));
     }
 
+    @GetMapping("/pending-dispatch")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES', 'PRODUCTION', 'DELIVERY', 'STORE', 'QUALITY', 'FINANCE')")
+    public ResponseEntity<ApiResponse<List<com.kalibyte.YashTools.workorder.dto.response.PendingDispatchWorkOrderResponse>>> getPendingDispatchWorkOrders(
+            @RequestParam(required = false) UUID customerId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Pending dispatch work orders retrieved successfully",
+                workOrderService.getPendingDispatchWorkOrders(customerId)));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponse<WorkOrderResponse>>> searchWorkOrders(
             @RequestParam String query,
@@ -84,6 +105,30 @@ public class WorkOrderController {
     @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/progress")
     public ResponseEntity<ApiResponse<com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse>> getProgress(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("Work Order progress retrieved successfully", workOrderService.getProgress(id)));
+    }
+
+    @PutMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/status")
+    public ResponseEntity<ApiResponse<WorkOrderResponse>> updateStatus(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateWorkOrderStatusRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Work Order status updated successfully",
+                workOrderService.updateStatus(id, request)));
+    }
+
+    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/progress")
+    public ResponseEntity<ApiResponse<com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse>> getProgress(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Work Order progress retrieved successfully", workOrderService.getProgress(id)));
+    }
+
+    @PutMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/planning")
+    public ResponseEntity<ApiResponse<WorkOrderResponse>> updatePlanning(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateWorkOrderPlanningRequest request) {
+        log.info("Updating planning dates for Work Order: {} by production planner", id);
+        return ResponseEntity.ok(ApiResponse.success(
+                "Work Order planning dates updated successfully",
+                workOrderService.updatePlanning(id, request)));
     }
 
 }

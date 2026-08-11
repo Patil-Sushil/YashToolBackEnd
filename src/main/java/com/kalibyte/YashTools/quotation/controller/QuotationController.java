@@ -133,16 +133,26 @@ public class QuotationController {
     public ResponseEntity<ApiResponse<EmailResult>> sendToCustomer(
             @PathVariable UUID id,
             @RequestParam(required = false) List<String> cc) {
-        return ResponseEntity.ok(ApiResponse.success("Quotation email dispatched",
-                (cc == null || cc.isEmpty())
-                        ? quotationEmailService.sendQuotation(id)
-                        : quotationEmailService.sendQuotation(id, cc)));
+        EmailResult result = (cc == null || cc.isEmpty())
+                ? quotationEmailService.sendQuotation(id)
+                : quotationEmailService.sendQuotation(id, cc);
+        if (!result.isSuccess()) {
+            String msg = result.getProviderResponseMessage() != null ? result.getProviderResponseMessage() : "Email delivery failed";
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.failure("Quotation email dispatch failed: " + msg, result));
+        }
+        return ResponseEntity.ok(ApiResponse.success("Quotation email dispatched successfully", result));
     }
 
     @PostMapping("/{id}/resend")
     public ResponseEntity<ApiResponse<EmailResult>> resend(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.success("Quotation email resent",
-                quotationEmailService.resend(id)));
+        EmailResult result = quotationEmailService.resend(id);
+        if (!result.isSuccess()) {
+            String msg = result.getProviderResponseMessage() != null ? result.getProviderResponseMessage() : "Email delivery failed";
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.failure("Quotation email resend failed: " + msg, result));
+        }
+        return ResponseEntity.ok(ApiResponse.success("Quotation email resent successfully", result));
     }
 
     // ============================================

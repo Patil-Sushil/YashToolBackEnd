@@ -139,8 +139,8 @@ app:
     smtp:
       host: ${SMTP_HOST:smtp.gmail.com}
       port: ${SMTP_PORT:587}
-      username: ${SPRING_MAIL_USERNAME:kalibyte.official@gmail.com}
-      password: ${SPRING_MAIL_PASSWORD:}
+      username: ${SPRING_MAIL_USERNAME:${SMTP_USERNAME:kalibyte.official@gmail.com}}
+      password: ${SPRING_MAIL_PASSWORD:${SMTP_PASSWORD:}}
       protocol: smtp
       auth: true
       starttls: true

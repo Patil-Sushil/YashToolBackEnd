@@ -63,14 +63,13 @@ public class QuotationEmailServiceImpl implements QuotationEmailService {
             throw new QuotationStateException("Customer has no email address on file");
 
         byte[] pdf = pdfService.generatePdf(q);
-        UUID logId = handler.sendQuotationEmail(q, pdf, cc);
-        markAsSent(id);
-
-        EmailLog row = emailService.getLog(logId);
-        return EmailResult.ok(row.getId(), row.getMailStatus(),
-                row.getSmtpMessageId(),
-                row.getSmtpResponseCode(),
-                row.getSmtpResponseMessage());
+        EmailResult result = handler.sendQuotationEmail(q, pdf, cc);
+        if (result.isSuccess()) {
+            markAsSent(id);
+        } else {
+            log.warn("Quotation email dispatch failed for {}: {}", id, result.getProviderResponseMessage());
+        }
+        return result;
     }
 
     @Override
@@ -79,7 +78,11 @@ public class QuotationEmailServiceImpl implements QuotationEmailService {
         var latest = emailService.findFirstByEntity(EmailConstants.OWNER_TYPE_QUOTATION, id)
                 .orElse(null);
         if (latest == null) return sendQuotation(id);
-        return emailRetryService.retry(latest.getId());
+        EmailResult result = emailRetryService.retry(latest.getId());
+        if (result.isSuccess()) {
+            markAsSent(id);
+        }
+        return result;
     }
 
     @Override

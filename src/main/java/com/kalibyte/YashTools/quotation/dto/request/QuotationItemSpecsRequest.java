@@ -27,6 +27,7 @@ public class QuotationItemSpecsRequest {
     private Double diameter;
     private Double fluteLength;
     private Double shankDiameter;
+    private Double overallLength;
 
     private String technicalNotes;
 

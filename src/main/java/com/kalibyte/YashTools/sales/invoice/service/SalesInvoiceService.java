@@ -14,5 +14,6 @@ public interface SalesInvoiceService {
 
 
     PageResponse<SalesInvoiceResponse> searchInvoices(String query, int page, int size);
+    com.kalibyte.YashTools.sales.invoice.dto.SalesInvoiceDashboardSummaryResponse getDashboardSummary();
 
 }

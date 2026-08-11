@@ -6,6 +6,7 @@ import com.kalibyte.YashTools.inventory.master.materialgrade.entity.MaterialGrad
 import com.kalibyte.YashTools.inventory.shared.enums.MaterialIssueStatus;
 import com.kalibyte.YashTools.inventory.shared.enums.MaterialIssueType;
 import com.kalibyte.YashTools.inventory.transaction.cutpiece.entity.CutPiece;
+import com.kalibyte.YashTools.production.jobcard.entity.JobCard;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -57,7 +58,7 @@ public class MaterialIssue extends AuditableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_card_id")
-    private com.kalibyte.YashTools.production.jobcard.entity.JobCard jobCard;
+    private JobCard jobCard;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

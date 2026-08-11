@@ -189,6 +189,7 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
             }
         }
 
+        com.kalibyte.YashTools.workorder.entity.WorkOrderItem item = ps.getJobCard().getWorkOrderItem();
         return ScheduleResponse.builder()
                 .id(ps.getId())
                 .jobCardId(ps.getJobCard().getId())
@@ -209,8 +210,18 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
                 .priority(ps.getJobCard().getPriority())
                 .workOrderId(ps.getJobCard().getWorkOrder().getId())
                 .workOrderNo(ps.getJobCard().getWorkOrder().getWorkOrderNo())
-                .toolName(ps.getJobCard().getWorkOrderItem().getToolName())
-                .itemName(ps.getJobCard().getWorkOrderItem().getItemName())
+                .toolName(item.getToolName())
+                .itemName(item.getItemName())
+                .itemQuantity(item.getQuantity())
+                .diameter(item.getDiameter())
+                .shankDiameter(item.getShankDiameter())
+                .overallLength(item.getOverallLength())
+                .fluteLength(item.getFluteLength())
+                .drawingReference(item.getDrawingReference())
+                .materialGrade(item.getMaterialGrade() != null ? item.getMaterialGrade().name() : null)
+                .materialType(item.getMaterialType())
+                .coatingType(item.getCoatingType())
+                .technicalNotes(item.getTechnicalNotes())
                 .build();
     }
 

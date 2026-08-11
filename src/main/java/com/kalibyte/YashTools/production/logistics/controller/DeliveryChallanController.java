@@ -24,7 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/delivery-challans")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION')")
+@PreAuthorize("hasAnyRole('ADMIN', 'PRODUCTION', 'DELIVERY')")
 public class DeliveryChallanController {
 
     private final DeliveryChallanService service;
@@ -32,34 +32,34 @@ public class DeliveryChallanController {
     private final DeliveryChallanEmailService emailService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<DeliveryChallanResponse>> createChallan(@Valid @RequestBody DeliveryChallanRequest request) {
         DeliveryChallanResponse response = service.createChallan(request);
         return ResponseEntity.ok(ApiResponse.success("Delivery Challan created successfully", response));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<DeliveryChallanResponse>> getChallanById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(service.getChallanById(id)));
     }
 
     @PostMapping("/{id}/dispatch")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<DeliveryChallanResponse>> dispatchChallan(@PathVariable UUID id) {
         DeliveryChallanResponse response = service.dispatchChallan(id);
         return ResponseEntity.ok(ApiResponse.success("Delivery Challan dispatched successfully", response));
     }
 
     @PostMapping("/{id}/receipt")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<DeliveryChallanResponse>> recordReceipt(@PathVariable UUID id, @Valid @RequestBody DeliveryReceiptRequest request) {
         DeliveryChallanResponse response = service.recordDeliveryReceipt(id, request);
         return ResponseEntity.ok(ApiResponse.success("Delivery Receipt recorded successfully", response));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<PageResponse<DeliveryChallanResponse>>> listChallans(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -67,7 +67,7 @@ public class DeliveryChallanController {
     }
 
     @GetMapping("/{id}/pdf")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<byte[]> downloadPdf(@PathVariable UUID id) {
         DeliveryChallanResponse challan = service.getChallanById(id);
         byte[] pdf = pdfService.generatePdf(challan);
@@ -81,7 +81,7 @@ public class DeliveryChallanController {
     }
 
     @PostMapping("/{id}/send")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<EmailResult>> sendToCustomer(
             @PathVariable UUID id,
             @RequestParam(required = false) List<String> cc) {
@@ -92,14 +92,14 @@ public class DeliveryChallanController {
     }
 
     @PostMapping("/{id}/resend")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<EmailResult>> resend(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("Delivery Challan email resent",
                 emailService.resend(id)));
     }
 
     @GetMapping("/{id}/email-history")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE', 'PRODUCTION', 'DELIVERY')")
     public ResponseEntity<ApiResponse<List<EmailLog>>> emailHistory(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(emailService.getDeliveryHistory(id)));
     }

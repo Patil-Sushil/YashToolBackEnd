@@ -33,6 +33,8 @@ public interface QuotationRepository
 
     long countByCompanyIdAndStatus(UUID companyId, QuotationStatus status);
     long countByStatus(QuotationStatus status);
+    long countByCompanyIdAndParentQuotationIsNull(UUID companyId);
+    long countByParentQuotationIsNull();
 
 
     @Query("SELECT q FROM Quotation q WHERE q.company.id = :companyId AND (" +

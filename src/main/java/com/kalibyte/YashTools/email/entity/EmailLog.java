@@ -53,7 +53,7 @@ public class EmailLog extends AuditableEntity {
     @Column(nullable = false, length = 10) @Builder.Default private EmailPriority priority = EmailPriority.NORMAL;
 
     @Column(name = "smtp_message_id") private String smtpMessageId;
-    @Column(name = "smtp_response_code", length = 10) private String smtpResponseCode;
+    @Column(name = "smtp_response_code", length = 50) private String smtpResponseCode;
     @Column(name = "smtp_response_message", columnDefinition = "TEXT") private String smtpResponseMessage;
 
     @Column(name = "queued_at", nullable = false) @Builder.Default private LocalDateTime queuedAt = LocalDateTime.now();
@@ -86,7 +86,7 @@ public class EmailLog extends AuditableEntity {
         this.mailStatus = EmailStatus.SENT;
         this.sentAt = LocalDateTime.now();
         this.smtpMessageId = messageId;
-        this.smtpResponseCode = code;
+        this.smtpResponseCode = code != null && code.length() > 50 ? code.substring(0, 50) : code;
         this.smtpResponseMessage = message;
     }
 

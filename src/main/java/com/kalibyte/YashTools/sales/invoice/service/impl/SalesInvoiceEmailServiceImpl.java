@@ -51,10 +51,7 @@ public class SalesInvoiceEmailServiceImpl implements SalesInvoiceEmailService {
         UUID logId = handler.sendInvoiceEmail(invoice, pdf, cc);
 
         EmailLog row = emailService.getLog(logId);
-        return EmailResult.ok(row.getId(), row.getMailStatus(),
-                row.getSmtpMessageId(),
-                row.getSmtpResponseCode(),
-                row.getSmtpResponseMessage());
+        return EmailResult.fromLog(row);
     }
 
     @Override

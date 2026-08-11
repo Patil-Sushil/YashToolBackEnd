@@ -20,6 +20,16 @@ public class JobCardResponse {
     private String status;
     private Integer priority;
     private Integer totalQuantity;
+    private Integer itemQuantity;
+    private Double diameter;
+    private Double shankDiameter;
+    private Double overallLength;
+    private Double fluteLength;
+    private String drawingReference;
+    private String materialGrade;
+    private String materialType;
+    private String coatingType;
+    private String technicalNotes;
     private String remarks;
     private Boolean isRework;
     private UUID reworkParentJobCardId;

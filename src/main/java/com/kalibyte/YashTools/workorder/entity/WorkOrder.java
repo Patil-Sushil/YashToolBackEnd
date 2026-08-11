@@ -67,6 +67,9 @@ public class WorkOrder extends BaseCompanyEntity {
     @Column(name = "po_number", length = 100)
     private String poNumber;
 
+    @Column(name = "shipping_address", columnDefinition = "TEXT")
+    private String shippingAddress;
+
 
 
     @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

@@ -78,13 +78,23 @@ public class FinishedGoodsStockServiceImpl implements FinishedGoodsStockService 
     }
 
     private FinishedGoodsStockResponse toResponse(FinishedGoodsStock stock) {
+        WorkOrderItem item = stock.getWorkOrderItem();
         return FinishedGoodsStockResponse.builder()
                 .id(stock.getId())
-                .workOrderItemId(stock.getWorkOrderItem().getId())
-                .workOrderNo(stock.getWorkOrderItem().getWorkOrder().getWorkOrderNo())
-                .toolName(stock.getWorkOrderItem().getToolName())
-                .itemName(stock.getWorkOrderItem().getItemName())
+                .workOrderItemId(item.getId())
+                .workOrderNo(item.getWorkOrder().getWorkOrderNo())
+                .toolName(item.getToolName())
+                .itemName(item.getItemName())
                 .quantity(stock.getQuantity())
+                .diameter(item.getDiameter())
+                .shankDiameter(item.getShankDiameter())
+                .overallLength(item.getOverallLength())
+                .fluteLength(item.getFluteLength())
+                .drawingReference(item.getDrawingReference())
+                .materialGrade(item.getMaterialGrade() != null ? item.getMaterialGrade().name() : null)
+                .materialType(item.getMaterialType())
+                .coatingType(item.getCoatingType())
+                .technicalNotes(item.getTechnicalNotes())
                 .companyId(stock.getCompany().getId())
                 .build();
     }

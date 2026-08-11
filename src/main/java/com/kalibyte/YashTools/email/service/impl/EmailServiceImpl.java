@@ -188,6 +188,7 @@ public class EmailServiceImpl implements EmailService {
             return EmailResult.failed(emailLog.getId(), "Email module disabled");
         }
         emailLog.markProcessing();
+
         try {
             MimeMessage mime = mailSender.createMimeMessage();
             populateMime(mime, emailLog);
@@ -197,13 +198,12 @@ public class EmailServiceImpl implements EmailService {
             emailLogRepository.save(emailLog);
             log.info("SMTP send OK logId={} subject='{}'", emailLog.getId(), emailLog.getSubject());
 
-            return EmailResult.ok(emailLog.getId(), EmailStatus.SENT, mime.getMessageID(), "250",
-                    "Message accepted for delivery");
+            return EmailResult.fromLog(emailLog);
         } catch (Exception e) {
             emailLog.markFailed(e.getMessage(), e);
             emailLogRepository.save(emailLog);
             log.warn("SMTP send FAILED logId={} reason={}", emailLog.getId(), e.getMessage());
-            return EmailResult.failed(emailLog.getId(), e.getMessage());
+            return EmailResult.fromLog(emailLog);
         }
     }
 

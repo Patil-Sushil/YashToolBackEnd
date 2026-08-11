@@ -12,4 +12,5 @@ public interface TransitDamageService {
     TransitDamageResponse rejectReport(UUID reportId, String username);
     List<TransitDamageResponse> getDamageReportsForChallan(UUID challanId);
     TransitDamageResponse getReportById(UUID id);
+    List<TransitDamageResponse> getAllReports();
 }
