@@ -116,10 +116,6 @@ public class WorkOrderController {
                 workOrderService.updateStatus(id, request)));
     }
 
-    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/progress")
-    public ResponseEntity<ApiResponse<com.kalibyte.YashTools.workorder.dto.response.WorkOrderProgressResponse>> getProgress(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.success("Work Order progress retrieved successfully", workOrderService.getProgress(id)));
-    }
 
     @PutMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/planning")
     public ResponseEntity<ApiResponse<WorkOrderResponse>> updatePlanning(
