@@ -87,13 +87,13 @@ public class QuotationApprovalServiceImpl implements QuotationApprovalService {
             a.setApproverComments(req.getComments());
             q.setDiscountPercentage(a.getRequestedDiscountPercentage());
             q.setDiscountAmount(a.getRequestedDiscountAmount());
-            q.setStatus(QuotationStatus.APPROVED);
+            q.setStatus(QuotationStatus.ADMIN_APPROVED);
         } else if ("REJECTED".equalsIgnoreCase(req.getDecision())) {
             a.setApprovalStatus(ApprovalStatus.REJECTED);
             a.setApprovedBy(security.currentUsername());
             a.setApprovedAt(LocalDateTime.now());
             a.setRejectionReason(req.getComments());
-            q.setStatus(QuotationStatus.REJECTED);
+            q.setStatus(QuotationStatus.ADMIN_REJECTED);
         } else {
             throw new QuotationStateException("Invalid decision: " + req.getDecision());
         }
@@ -114,7 +114,7 @@ public class QuotationApprovalServiceImpl implements QuotationApprovalService {
 
     @Override
     public boolean requiresApproval(BigDecimal pct) {
-        return pct.compareTo(BigDecimal.valueOf(props.getApprovalThresholdPercentage())) > 0;
+        return pct.compareTo(BigDecimal.valueOf(props.getApprovalThresholdPercentage())) >= 0;
     }
 
     private QuotationApprovalResponse toResponse(QuotationApproval a) {

@@ -16,7 +16,10 @@ public class SalesDashboardResponse {
     private long openEnquiries;
     private long closedEnquiries;
     private long totalQuotations;
+    private long rootQuotations;
+    private long revisedQuotations;
     private long approvedQuotations;
+    private long pendingApprovalQuotations;
     private double quotationConversionRate;
     private BigDecimal salesInvoiceRevenue;
     private List<CustomerSalesDto> topCustomers;

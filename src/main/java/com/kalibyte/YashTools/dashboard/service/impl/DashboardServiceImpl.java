@@ -253,8 +253,12 @@ public class DashboardServiceImpl implements DashboardService {
         ));
 
         long totalQuotations = quotationRepository.count();
-        long approvedQuotations = quotationRepository.countByStatus(QuotationStatus.APPROVED)
+        long rootQuotations = quotationRepository.countByParentQuotationIsNull();
+        long revisedQuotations = quotationRepository.countByParentQuotationIsNotNull();
+        long approvedQuotations = quotationRepository.countByStatus(QuotationStatus.ADMIN_APPROVED)
+                + quotationRepository.countByStatus(QuotationStatus.APPROVED)
                 + quotationRepository.countByStatus(QuotationStatus.CUSTOMER_APPROVED);
+        long pendingApprovalQuotations = quotationRepository.countByStatus(QuotationStatus.PENDING_APPROVAL);
 
         double conversionRate = totalQuotations > 0 ? (double) approvedQuotations * 100.0 / totalQuotations : 0.0;
 
@@ -286,7 +290,10 @@ public class DashboardServiceImpl implements DashboardService {
                 .openEnquiries(openEnquiries)
                 .closedEnquiries(closedEnquiries)
                 .totalQuotations(totalQuotations)
+                .rootQuotations(rootQuotations)
+                .revisedQuotations(revisedQuotations)
                 .approvedQuotations(approvedQuotations)
+                .pendingApprovalQuotations(pendingApprovalQuotations)
                 .quotationConversionRate(conversionRate)
                 .salesInvoiceRevenue(salesInvoiceRevenue)
                 .topCustomers(topCustomers)

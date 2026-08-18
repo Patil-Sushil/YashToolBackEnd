@@ -21,6 +21,11 @@ public class QuotationResponse {
     private String quotationNo;
     private Integer version;
     private UUID parentQuotationId;
+    private String parentQuotationNo;
+    private UUID rootQuotationId;
+    private String rootQuotationNo;
+    private Boolean isRevision;
+    private Integer revisionNumber;
     private UUID sourceEnquiryId;
     private String sourceType;
     private String status;

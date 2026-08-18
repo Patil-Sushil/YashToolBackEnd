@@ -18,8 +18,11 @@ public interface QuotationService {
     QuotationResponse cancel(UUID id, String reason);
     Page<QuotationResponse> listForCurrentCompany(String status, Pageable pageable);
     QuotationResponse recordCustomerDecision(UUID id, String decision, String remarks);
-
-
+    QuotationResponse adminApprove(UUID id);
+    QuotationResponse adminReject(UUID id, String reason);
     Page<QuotationResponse> searchQuotations(String query, Pageable pageable);
-
+    java.util.List<QuotationResponse> getRevisedQuotations(UUID id);
+    java.util.List<QuotationResponse> getRevisedQuotationsByNumber(String quotationNo);
+    com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse getRevisionChain(UUID id);
+    com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse getRevisionChainByNumber(String quotationNo);
 }
