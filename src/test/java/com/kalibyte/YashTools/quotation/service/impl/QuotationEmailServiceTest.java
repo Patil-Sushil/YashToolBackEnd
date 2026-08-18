@@ -97,7 +97,7 @@ class QuotationEmailServiceTest {
 
         EmailResult successResult = EmailResult.ok(UUID.randomUUID(), EmailStatus.SENT, "<msg-1>", "250", "Delivered");
         when(handler.sendQuotationEmail(eq(responseDto), any(), anyList())).thenReturn(successResult);
-        when(security.currentUsername()).thenReturn("admin@yashtools.com");
+        when(security.currentUsername()).thenReturn("admin@toolserp.com");
 
         EmailResult result = quotationEmailService.sendQuotation(quotationId);
 

@@ -32,6 +32,9 @@ import com.kalibyte.YashTools.production.jobcard.repository.JobCardRepository;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.kalibyte.YashTools.workorder.repository.WorkOrderRepository;
+import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
+
 @Service
 public class MaterialIssueServiceImpl implements MaterialIssueService {
 
@@ -41,6 +44,7 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
     private final MaterialGradeRepository materialGradeRepository;
     private final CutPieceRepository cutPieceRepository;
     private final JobCardRepository jobCardRepository;
+    private final WorkOrderRepository workOrderRepository;
     
     private final StockService stockService;
     private final CutPieceService cutPieceService;
@@ -49,6 +53,7 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
     public MaterialIssueServiceImpl(MaterialIssueRepository repository, MaterialIssueMapper mapper,
                                    ItemRepository itemRepository, MaterialGradeRepository materialGradeRepository,
                                    CutPieceRepository cutPieceRepository, JobCardRepository jobCardRepository,
+                                   WorkOrderRepository workOrderRepository,
                                    StockService stockService, CutPieceService cutPieceService,
                                    StockTransactionService stockTransactionService) {
         this.repository = repository;
@@ -57,6 +62,7 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
         this.materialGradeRepository = materialGradeRepository;
         this.cutPieceRepository = cutPieceRepository;
         this.jobCardRepository = jobCardRepository;
+        this.workOrderRepository = workOrderRepository;
         this.stockService = stockService;
         this.cutPieceService = cutPieceService;
         this.stockTransactionService = stockTransactionService;
@@ -155,6 +161,11 @@ public class MaterialIssueServiceImpl implements MaterialIssueService {
         if (jobCard != null && (jobCard.getStatus() == JobCardStatus.CREATED || jobCard.getStatus() == JobCardStatus.PLANNED)) {
             jobCard.setStatus(JobCardStatus.ASSIGNED);
             jobCardRepository.save(jobCard);
+        }
+
+        if (jobCard != null && jobCard.getWorkOrder() != null && jobCard.getWorkOrder().getStatus() == WorkOrderStatus.CREATED) {
+            jobCard.getWorkOrder().setStatus(WorkOrderStatus.IN_PROGRESS);
+            workOrderRepository.save(jobCard.getWorkOrder());
         }
 
         return mapper.toResponse(repository.save(issue));

@@ -19,6 +19,8 @@ import com.kalibyte.YashTools.production.machine.repository.MachineRepository;
 import com.kalibyte.YashTools.production.planning.entity.enums.ScheduleStatus;
 import com.kalibyte.YashTools.production.planning.entity.enums.ShiftType;
 import com.kalibyte.YashTools.production.planning.repository.ProductionScheduleRepository;
+import com.kalibyte.YashTools.workorder.repository.WorkOrderRepository;
+import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     private final MachineRepository machineRepository;
     private final LaborerRepository laborerRepository;
     private final ProductionScheduleRepository scheduleRepository;
+    private final WorkOrderRepository workOrderRepository;
 
     @Override
     @Transactional
@@ -101,6 +104,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         jc.setStatus(JobCardStatus.STARTED);
         jobCardRepository.save(jc);
+
+        if (jc.getWorkOrder() != null && jc.getWorkOrder().getStatus() == WorkOrderStatus.CREATED) {
+            jc.getWorkOrder().setStatus(WorkOrderStatus.IN_PROGRESS);
+            workOrderRepository.save(jc.getWorkOrder());
+        }
 
         scheduleRepository.findByJobCardIdAndCompanyId(jc.getId(), companyId).ifPresent(schedule -> {
             schedule.setStatus(ScheduleStatus.RUNNING);

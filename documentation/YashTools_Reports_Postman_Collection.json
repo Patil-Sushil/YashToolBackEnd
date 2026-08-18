@@ -37,7 +37,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"admin@yashtools.com\",\n    \"password\": \"Admin@123\"\n}",
+							"raw": "{\n    \"email\": \"admin@toolserp.com\",\n    \"password\": \"Pass@123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

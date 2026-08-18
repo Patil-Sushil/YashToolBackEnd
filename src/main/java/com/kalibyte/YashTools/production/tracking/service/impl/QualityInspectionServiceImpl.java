@@ -21,6 +21,10 @@ import com.kalibyte.YashTools.production.tracking.entity.QualityInspection;
 import com.kalibyte.YashTools.production.tracking.entity.enums.InspectionResult;
 import com.kalibyte.YashTools.production.tracking.repository.QualityInspectionRepository;
 import com.kalibyte.YashTools.production.tracking.service.QualityInspectionService;
+import com.kalibyte.YashTools.workorder.repository.WorkOrderRepository;
+import com.kalibyte.YashTools.workorder.entity.WorkOrder;
+import com.kalibyte.YashTools.workorder.entity.WorkOrderItem;
+import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +48,7 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
     private final ProductionScheduleRepository scheduleRepository;
     private final MachineRepository machineRepository;
     private final FinishedGoodsStockService finishedGoodsStockService;
+    private final WorkOrderRepository workOrderRepository;
 
     @Override
     @Transactional
@@ -63,8 +68,6 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
         }
 
         // Use jobCard.totalQuantity as the source of truth for QA inspection.
-        // The ExecutionLog.producedQuantity is a runtime tracking counter that may not
-        // be updated by the operator; the authoritative quantity is what was assigned to this job card.
         int totalAssigned = jc.getTotalQuantity();
         int requestedTotal = request.getAcceptedQuantity() + request.getRejectedQuantity() + request.getReworkQuantity();
 
@@ -104,12 +107,20 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
 
         QualityInspection saved = qualityInspectionRepository.save(qi);
 
+        // Mark inspected Job Card as COMPLETED
+        jc.setStatus(JobCardStatus.COMPLETED);
+        jobCardRepository.save(jc);
+
         // Auto-increment finished goods inventory upon a successful PASS or any accepted quantity
         if (request.getAcceptedQuantity() > 0) {
             finishedGoodsStockService.addFinishedGoodsStock(jc.getWorkOrderItem(), request.getAcceptedQuantity());
         }
+
+        boolean hasReworkOrRepro = false;
+
         // Auto-create Rework Job Card if reworkQuantity > 0
         if (request.getReworkQuantity() > 0) {
+            hasReworkOrRepro = true;
             long seq = jobCardRepository.count() + 1;
             String reworkNo = String.format("%s-JC-RW-%d-%06d", companyCode, LocalDate.now().getYear(), seq);
 
@@ -127,10 +138,14 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
             reworkCard.setCompany(jc.getCompany());
             jobCardRepository.save(reworkCard);
             log.info("Auto-created Rework Job Card {} for quantity {}", reworkNo, request.getReworkQuantity());
+
+            jc.getWorkOrder().setStatus(WorkOrderStatus.IN_PROGRESS);
+            workOrderRepository.save(jc.getWorkOrder());
         }
 
         // Auto-create Reproduction/Replacement Job Card if rejectedQuantity > 0
         if (request.getRejectedQuantity() > 0) {
+            hasReworkOrRepro = true;
             long seq = jobCardRepository.count() + 1;
             String reproNo = String.format("%s-JC-RP-%d-%06d", companyCode, LocalDate.now().getYear(), seq);
 
@@ -149,7 +164,31 @@ public class QualityInspectionServiceImpl implements QualityInspectionService {
             log.info("Auto-created Reproduction Job Card {} for quantity {}", reproNo, request.getRejectedQuantity());
 
             // Re-open Work Order by setting status back to IN_PROGRESS since reproduction is required
-            jc.getWorkOrder().setStatus(com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus.IN_PROGRESS);
+            jc.getWorkOrder().setStatus(WorkOrderStatus.IN_PROGRESS);
+            workOrderRepository.save(jc.getWorkOrder());
+        }
+
+        // If no active rework/reproduction, check if the entire Work Order production is completed
+        if (!hasReworkOrRepro && jc.getWorkOrder() != null) {
+            WorkOrder wo = jc.getWorkOrder();
+            List<JobCard> allJobCards = jobCardRepository.findByWorkOrderIdAndCompanyId(wo.getId(), companyId);
+            boolean allCompleted = allJobCards.stream().allMatch(j -> j.getStatus() == JobCardStatus.COMPLETED || j.getStatus() == JobCardStatus.CANCELLED);
+
+            boolean allItemsFulfilled = wo.getItems().stream().allMatch(item -> {
+                List<JobCard> itemJcs = jobCardRepository.findByWorkOrderItemIdAndCompanyId(item.getId(), companyId);
+                int totalAccepted = itemJcs.stream()
+                        .map(j -> qualityInspectionRepository.findByJobCardIdAndCompanyId(j.getId(), companyId))
+                        .filter(java.util.Optional::isPresent)
+                        .mapToInt(opt -> opt.get().getAcceptedQuantity())
+                        .sum();
+                return totalAccepted >= item.getQuantity();
+            });
+
+            if (allCompleted && allItemsFulfilled) {
+                wo.setStatus(WorkOrderStatus.PRODUCTION_COMPLETED);
+                workOrderRepository.save(wo);
+                log.info("Work Order {} production completed successfully", wo.getWorkOrderNo());
+            }
         }
 
         log.info("QC Inspection recorded for Job Card {}. Result: {}", jc.getJobCardNo(), result);

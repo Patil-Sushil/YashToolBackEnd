@@ -7,7 +7,7 @@
 **Issue:** The configuration file contains hardcoded default secrets and credentials, including:
 - **JWT Secret:** `Q0tQeXJmOW9Jb2ZxV2F5cFhUeG5sQzFkQkZpQzZ3c0ZxS0p4cA==`
 - **Database Credentials:** `devuser` / `devpassword`
-- **Default Admin Password:** `Admin@123`
+- **Default Admin Password:** `Pass@123`
 **Impact:** If this file is committed to version control or accessed by an unauthorized individual, the entire application's authentication and data layer are compromised.
 **Remediation:** Remove default secret values from the source code. Use environment variables exclusively without fallback defaults for sensitive information in production configurations.
 
