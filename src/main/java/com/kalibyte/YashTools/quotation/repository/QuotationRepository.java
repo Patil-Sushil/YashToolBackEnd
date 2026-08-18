@@ -35,6 +35,7 @@ public interface QuotationRepository
     long countByStatus(QuotationStatus status);
     long countByCompanyIdAndParentQuotationIsNull(UUID companyId);
     long countByParentQuotationIsNull();
+    long countByParentQuotationIsNotNull();
 
 
     @Query("SELECT q FROM Quotation q WHERE q.company.id = :companyId AND (" +
@@ -64,4 +65,17 @@ public interface QuotationRepository
     List<Quotation> findAllLockedQuotationsAvailable(
             @Param("companyId") UUID companyId);
 
+    @Query("SELECT q FROM Quotation q WHERE q.company.id = :companyId AND (" +
+           "q.quotationNo = :baseQuotationNo OR q.quotationNo LIKE CONCAT(:baseQuotationNo, '-R%')) " +
+           "ORDER BY q.version ASC")
+    List<Quotation> findFamilyByBaseQuotationNo(
+            @Param("companyId") UUID companyId,
+            @Param("baseQuotationNo") String baseQuotationNo);
+
+    @Query("SELECT q FROM Quotation q WHERE q.company.id = :companyId AND (" +
+           "q.quotationNo LIKE CONCAT(:baseQuotationNo, '-R%')) " +
+           "ORDER BY q.version ASC")
+    List<Quotation> findRevisionsByBaseQuotationNo(
+            @Param("companyId") UUID companyId,
+            @Param("baseQuotationNo") String baseQuotationNo);
 }

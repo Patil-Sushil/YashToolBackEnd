@@ -331,7 +331,11 @@ All secure endpoints require the `Authorization: Bearer <JWT_TOKEN>` header and 
 | `POST` | `/api/quotations/{id}/customer-decision` | Record customer decision (`APPROVED`/`REJECTED`) | `ADMIN`, `SALES` |
 | `POST` | `/api/quotations/{id}/lock` | Lock quotation & generate immutable revision | `ADMIN`, `SALES` |
 | `POST` | `/api/quotations/{id}/cancel` | Cancel quotation and close enquiry | `ADMIN`, `SALES` |
-| `GET` | `/api/quotations/{id}/revisions` | View complete revision history | `AUTHENTICATED` |
+| `GET` | `/api/quotations/{id}/revisions` | View audit revision history | `AUTHENTICATED` |
+| `GET` | `/api/quotations/{id}/revised-quotations` | Get all revised sub-quotations (`-R1`, `-R2`...) for a parent | `AUTHENTICATED` |
+| `GET` | `/api/quotations/{id}/revision-chain` | Get full revision tree (root parent + all revised sub-quotations) | `AUTHENTICATED` |
+| `GET` | `/api/quotations/by-number/{quotationNo}/revised-quotations` | Get all revised sub-quotations by quotation number | `AUTHENTICATED` |
+| `GET` | `/api/quotations/by-number/{quotationNo}/revision-chain` | Get full revision tree by quotation number | `AUTHENTICATED` |
 
 ### Work Order Lifecycle
 | Method | Endpoint | Description | Roles Allowed |

@@ -67,7 +67,7 @@ public class QuotationServiceImpl implements QuotationService {
 
         List<QuotationStatus> activeStatuses = List.of(
                 QuotationStatus.DRAFT, QuotationStatus.PRICING_READY,
-                QuotationStatus.PENDING_APPROVAL, QuotationStatus.APPROVED,
+                QuotationStatus.PENDING_APPROVAL, QuotationStatus.ADMIN_APPROVED,
                 QuotationStatus.SENT_TO_CUSTOMER, QuotationStatus.CUSTOMER_NEGOTIATION);
 
         if (quotationRepository.existsBySourceEnquiryIdAndStatusIn(enquiry.getId(), activeStatuses))
@@ -195,7 +195,7 @@ public class QuotationServiceImpl implements QuotationService {
     @Transactional
     public QuotationResponse lockFinal(UUID id) {
         Quotation q = securityService.loadForCurrentCompany(id);
-        if (q.getStatus() != QuotationStatus.CUSTOMER_APPROVED && q.getStatus() != QuotationStatus.APPROVED && q.getStatus() != QuotationStatus.SENT_TO_CUSTOMER)
+        if (q.getStatus() != QuotationStatus.CUSTOMER_APPROVED && q.getStatus() != QuotationStatus.ADMIN_APPROVED && q.getStatus() != QuotationStatus.APPROVED && q.getStatus() != QuotationStatus.SENT_TO_CUSTOMER)
             throw new QuotationStateException(
                     "Only active or customer-approved quotations can be locked. Current: " + q.getStatus());
 
@@ -224,7 +224,7 @@ public class QuotationServiceImpl implements QuotationService {
         if (q.getSourceEnquiry() != null) {
             List<QuotationStatus> activeStatuses = List.of(
                     QuotationStatus.DRAFT, QuotationStatus.PRICING_READY,
-                    QuotationStatus.PENDING_APPROVAL, QuotationStatus.APPROVED,
+                    QuotationStatus.PENDING_APPROVAL, QuotationStatus.ADMIN_APPROVED, QuotationStatus.APPROVED,
                     QuotationStatus.SENT_TO_CUSTOMER, QuotationStatus.CUSTOMER_NEGOTIATION,
                     QuotationStatus.CUSTOMER_APPROVED, QuotationStatus.LOCKED);
             boolean otherActiveExists = quotationRepository.existsBySourceEnquiryIdAndStatusIn(
@@ -279,6 +279,25 @@ public class QuotationServiceImpl implements QuotationService {
         q.setCustomerDecisionAt(LocalDateTime.now());
         q.setCustomerDecisionRemarks(remarks);
 
+        return quotationMapper.toResponse(quotationRepository.saveAndFlush(q));
+    }
+
+    @Override
+    @Transactional
+    public QuotationResponse adminApprove(UUID id) {
+        Quotation q = securityService.loadForCurrentCompany(id);
+        q.setStatus(QuotationStatus.ADMIN_APPROVED);
+        return quotationMapper.toResponse(quotationRepository.saveAndFlush(q));
+    }
+
+    @Override
+    @Transactional
+    public QuotationResponse adminReject(UUID id, String reason) {
+        Quotation q = securityService.loadForCurrentCompany(id);
+        q.setStatus(QuotationStatus.ADMIN_REJECTED);
+        if (reason != null && !reason.isBlank()) {
+            q.setInternalNotes((q.getInternalNotes() == null ? "" : q.getInternalNotes()) + "\n[ADMIN REJECTED] " + reason);
+        }
         return quotationMapper.toResponse(quotationRepository.saveAndFlush(q));
     }
 
@@ -421,6 +440,30 @@ public class QuotationServiceImpl implements QuotationService {
             q.setStatus(QuotationStatus.PRICING_READY);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuotationResponse> getRevisedQuotations(UUID id) {
+        return revisionService.getRevisedQuotations(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuotationResponse> getRevisedQuotationsByNumber(String quotationNo) {
+        return revisionService.getRevisedQuotationsByNumber(quotationNo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse getRevisionChain(UUID id) {
+        return revisionService.getRevisionChain(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse getRevisionChainByNumber(String quotationNo) {
+        return revisionService.getRevisionChainByNumber(quotationNo);
+    }
+
     private void applyDiscountChange(Quotation q, BigDecimal pct) {
         if (pct.compareTo(BigDecimal.ZERO) < 0
                 || pct.compareTo(BigDecimal.valueOf(100)) > 0)
@@ -436,7 +479,7 @@ public class QuotationServiceImpl implements QuotationService {
             q.setStatus(QuotationStatus.PENDING_APPROVAL);
             approvalService.requestApproval(q.getId(), pct);
         } else {
-            q.setStatus(QuotationStatus.APPROVED);
+            q.setStatus(QuotationStatus.ADMIN_APPROVED);
         }
         applyTaxes(q);
     }

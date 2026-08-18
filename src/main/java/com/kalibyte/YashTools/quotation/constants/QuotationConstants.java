@@ -23,7 +23,7 @@ public final class QuotationConstants {
     public static final int DEFAULT_VALIDITY_DAYS = 30;
 
     // Approval
-    public static final double DISCOUNT_APPROVAL_THRESHOLD_PERCENT = 10.0;
+    public static final double DISCOUNT_APPROVAL_THRESHOLD_PERCENT = 20.0;
 
     // Rate chart
     public static final String RATE_CHART_TABLE_HYPERION_ROD = "hyperion_rod_net_price";

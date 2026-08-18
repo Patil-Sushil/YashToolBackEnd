@@ -52,10 +52,11 @@ public class QuotationEmailServiceImpl implements QuotationEmailService {
         Quotation entity = quotationRepository.findById(id)
                 .orElseThrow(() -> new QuotationNotFoundException("Quotation not found: " + id));
         if (entity.getStatus() != QuotationStatus.PRICING_READY 
+                && entity.getStatus() != QuotationStatus.ADMIN_APPROVED
                 && entity.getStatus() != QuotationStatus.APPROVED
                 && entity.getStatus() != QuotationStatus.SENT_TO_CUSTOMER) {
             throw new QuotationStateException("Cannot send quotation in its current status: " + entity.getStatus()
-                    + ". It must be PRICING_READY, APPROVED, or already SENT_TO_CUSTOMER.");
+                    + ". It must be PRICING_READY, ADMIN_APPROVED, or already SENT_TO_CUSTOMER.");
         }
 
         QuotationResponse q = quotationService.getById(id);

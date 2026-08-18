@@ -1,5 +1,6 @@
 package com.kalibyte.YashTools.quotation.service.impl;
 
+import com.kalibyte.YashTools.common.multi_company.CompanyContextHolder;
 import com.kalibyte.YashTools.company.entity.Company;
 import com.kalibyte.YashTools.quotation.dto.request.QuotationItemRequest;
 import com.kalibyte.YashTools.quotation.dto.request.ReviseQuotationRequest;
@@ -49,10 +50,10 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
     @Transactional
     public QuotationResponse createRevision(ReviseQuotationRequest req) {
         Quotation parent = security.loadForCurrentCompany(req.getParentQuotationId());
-        if (parent.getStatus() != QuotationStatus.SENT_TO_CUSTOMER 
-                && parent.getStatus() != QuotationStatus.CUSTOMER_REJECTED) {
-            throw new QuotationStateException("Cannot revise quotation in status: " + parent.getStatus()
-                    + ". Revisions are only allowed for quotations that have been sent to the customer or rejected by the customer.");
+        if (parent.getStatus() == QuotationStatus.LOCKED 
+                || parent.getStatus() == QuotationStatus.CANCELLED 
+                || parent.getStatus() == QuotationStatus.EXPIRED) {
+            throw new QuotationStateException("Cannot revise quotation in final status: " + parent.getStatus());
         }
 
         Quotation rootParent = parent;
@@ -143,6 +144,74 @@ public class QuotationRevisionServiceImpl implements QuotationRevisionService {
         return revisionRepository.findByQuotationIdOrderByVersionNumberDesc(id).stream()
                 .map(this::toRevisionResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuotationResponse> getRevisedQuotations(UUID id) {
+        Quotation q = security.loadForCurrentCompany(id);
+        String baseNo = QuotationNumberGenerator.getBaseQuotationNo(q.getQuotationNo());
+        UUID companyId = q.getCompany().getId();
+        List<Quotation> revisions = quotationRepository.findRevisionsByBaseQuotationNo(companyId, baseNo);
+        return revisions.stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuotationResponse> getRevisedQuotationsByNumber(String quotationNo) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        String baseNo = QuotationNumberGenerator.getBaseQuotationNo(quotationNo);
+        List<Quotation> revisions = quotationRepository.findRevisionsByBaseQuotationNo(companyId, baseNo);
+        return revisions.stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse getRevisionChain(UUID id) {
+        Quotation q = security.loadForCurrentCompany(id);
+        String baseNo = QuotationNumberGenerator.getBaseQuotationNo(q.getQuotationNo());
+        UUID companyId = q.getCompany().getId();
+        return buildFamilyResponse(companyId, baseNo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse getRevisionChainByNumber(String quotationNo) {
+        UUID companyId = CompanyContextHolder.getCompanyId();
+        String baseNo = QuotationNumberGenerator.getBaseQuotationNo(quotationNo);
+        return buildFamilyResponse(companyId, baseNo);
+    }
+
+    private com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse buildFamilyResponse(UUID companyId, String baseNo) {
+        List<Quotation> family = quotationRepository.findFamilyByBaseQuotationNo(companyId, baseNo);
+        if (family.isEmpty()) {
+            throw new com.kalibyte.YashTools.quotation.exception.QuotationNotFoundException("Quotation family not found for: " + baseNo);
+        }
+
+        Quotation root = family.stream()
+                .filter(q -> q.getParentQuotation() == null || q.getQuotationNo().equals(baseNo))
+                .findFirst()
+                .orElse(family.get(0));
+
+        List<QuotationResponse> revisions = family.stream()
+                .filter(q -> !q.getId().equals(root.getId()))
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+
+        Quotation latest = family.get(family.size() - 1);
+
+        return com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse.builder()
+                .rootQuotationId(root.getId())
+                .rootQuotationNo(root.getQuotationNo())
+                .rootQuotation(mapper.toResponse(root))
+                .revisions(revisions)
+                .totalRevisions(revisions.size())
+                .latestRevision(mapper.toResponse(latest))
+                .build();
     }
 
     @Override

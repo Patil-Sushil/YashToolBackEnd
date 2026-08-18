@@ -1,6 +1,7 @@
 package com.kalibyte.YashTools.quotation.service;
 
 import com.kalibyte.YashTools.quotation.dto.request.ReviseQuotationRequest;
+import com.kalibyte.YashTools.quotation.dto.response.QuotationFamilyResponse;
 import com.kalibyte.YashTools.quotation.dto.response.QuotationResponse;
 import com.kalibyte.YashTools.quotation.dto.response.QuotationRevisionResponse;
 import com.kalibyte.YashTools.quotation.entity.Quotation;
@@ -13,4 +14,8 @@ public interface QuotationRevisionService {
     QuotationResponse createRevision(ReviseQuotationRequest request);
     List<QuotationRevisionResponse> getRevisionHistory(UUID quotationId);
     void record(Quotation prev, Quotation revised, RevisionType type, String reason);
+    List<QuotationResponse> getRevisedQuotations(UUID quotationId);
+    List<QuotationResponse> getRevisedQuotationsByNumber(String quotationNo);
+    QuotationFamilyResponse getRevisionChain(UUID quotationId);
+    QuotationFamilyResponse getRevisionChainByNumber(String quotationNo);
 }

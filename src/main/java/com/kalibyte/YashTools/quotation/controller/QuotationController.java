@@ -126,6 +126,34 @@ public class QuotationController {
         return ResponseEntity.ok(ApiResponse.success(revisionService.getRevisionHistory(id)));
     }
 
+    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/revised-quotations")
+    public ResponseEntity<ApiResponse<List<QuotationResponse>>> getRevisedQuotations(
+            @PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Revised quotations fetched",
+                revisionService.getRevisedQuotations(id)));
+    }
+
+    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/revision-chain")
+    public ResponseEntity<ApiResponse<QuotationFamilyResponse>> getRevisionChain(
+            @PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Quotation revision chain fetched",
+                revisionService.getRevisionChain(id)));
+    }
+
+    @GetMapping("/by-number/{quotationNo}/revised-quotations")
+    public ResponseEntity<ApiResponse<List<QuotationResponse>>> getRevisedQuotationsByNumber(
+            @PathVariable String quotationNo) {
+        return ResponseEntity.ok(ApiResponse.success("Revised quotations fetched",
+                revisionService.getRevisedQuotationsByNumber(quotationNo)));
+    }
+
+    @GetMapping("/by-number/{quotationNo}/revision-chain")
+    public ResponseEntity<ApiResponse<QuotationFamilyResponse>> getRevisionChainByNumber(
+            @PathVariable String quotationNo) {
+        return ResponseEntity.ok(ApiResponse.success("Quotation revision chain fetched",
+                revisionService.getRevisionChainByNumber(quotationNo)));
+    }
+
     // ============================================
     // SEND / RESEND
     // ============================================
@@ -178,6 +206,19 @@ public class QuotationController {
             @RequestParam(required = false) String remarks) {
         return ResponseEntity.ok(ApiResponse.success("Customer decision recorded",
                 quotationService.recordCustomerDecision(id, decision, remarks)));
+    }
+
+    @PostMapping("/{id}/admin-approve")
+    public ResponseEntity<ApiResponse<QuotationResponse>> adminApprove(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Quotation approved by admin",
+                quotationService.adminApprove(id)));
+    }
+
+    @PostMapping("/{id}/admin-reject")
+    public ResponseEntity<ApiResponse<QuotationResponse>> adminReject(
+            @PathVariable UUID id, @RequestParam(required = false) String reason) {
+        return ResponseEntity.ok(ApiResponse.success("Quotation rejected by admin",
+                quotationService.adminReject(id, reason)));
     }
 
     // ============================================
