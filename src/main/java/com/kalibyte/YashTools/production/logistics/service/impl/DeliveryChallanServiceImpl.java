@@ -149,8 +149,20 @@ public class DeliveryChallanServiceImpl implements DeliveryChallanService {
 
         // Update Work Order status to COMPLETED if fully delivered
         WorkOrder wo = dc.getWorkOrder();
-        wo.setStatus(WorkOrderStatus.COMPLETED);
-        workOrderRepository.save(wo);
+        boolean allItemsDelivered = wo.getItems().stream().allMatch(item -> {
+            int deliveredQty = deliveryChallanItemRepository.getSumDeliveredQuantityByWorkOrderItemId(item.getId());
+            return deliveredQty >= item.getQuantity();
+        });
+
+        if (allItemsDelivered) {
+            wo.setStatus(WorkOrderStatus.COMPLETED);
+            workOrderRepository.save(wo);
+        } else {
+            if (wo.getStatus() == WorkOrderStatus.CREATED) {
+                wo.setStatus(WorkOrderStatus.IN_PROGRESS);
+                workOrderRepository.save(wo);
+            }
+        }
 
         log.info("Recorded Delivery Receipt for Challan {} by {}", dc.getChallanNo(), request.getReceivedBy());
         return toResponse(saved);

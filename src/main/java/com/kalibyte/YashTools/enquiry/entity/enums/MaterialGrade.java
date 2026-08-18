@@ -98,6 +98,6 @@ public enum MaterialGrade {
                 return grade;
             }
         }
-        return K40UF_H10F;
+        throw new IllegalArgumentException("Unknown material grade: " + value);
     }
 }

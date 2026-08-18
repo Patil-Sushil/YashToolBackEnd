@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import com.kalibyte.YashTools.workorder.repository.WorkOrderRepository;
+import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,7 @@ public class JobCardServiceImpl implements JobCardService {
 
     private final JobCardRepository jobCardRepository;
     private final WorkOrderItemRepository workOrderItemRepository;
+    private final WorkOrderRepository workOrderRepository;
 
     @Override
     @Transactional
@@ -72,6 +75,11 @@ public class JobCardServiceImpl implements JobCardService {
                 .remarks(request.getRemarks())
                 .build();
         jc.setCompany(company);
+
+        if (orderItem.getWorkOrder().getStatus() == WorkOrderStatus.CREATED) {
+            orderItem.getWorkOrder().setStatus(WorkOrderStatus.IN_PROGRESS);
+            workOrderRepository.save(orderItem.getWorkOrder());
+        }
 
         JobCard saved = jobCardRepository.save(jc);
         log.info("Job Card {} created successfully", saved.getJobCardNo());

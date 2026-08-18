@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.kalibyte.YashTools.workorder.repository.WorkOrderRepository;
+import com.kalibyte.YashTools.workorder.entity.enums.WorkOrderStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,7 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
     private final MachineRepository machineRepository;
     private final LaborerRepository laborerRepository;
     private final ExecutionLogRepository executionLogRepository;
+    private final WorkOrderRepository workOrderRepository;
 
     @Override
     @Transactional
@@ -92,6 +95,11 @@ public class ProductionScheduleServiceImpl implements ProductionScheduleService 
 
         jc.setStatus(JobCardStatus.PLANNED);
         jobCardRepository.save(jc);
+
+        if (jc.getWorkOrder() != null && jc.getWorkOrder().getStatus() == WorkOrderStatus.CREATED) {
+            jc.getWorkOrder().setStatus(WorkOrderStatus.IN_PROGRESS);
+            workOrderRepository.save(jc.getWorkOrder());
+        }
 
         ProductionSchedule saved = scheduleRepository.save(ps);
         log.info("Production schedule created for Job Card: {}", jc.getJobCardNo());

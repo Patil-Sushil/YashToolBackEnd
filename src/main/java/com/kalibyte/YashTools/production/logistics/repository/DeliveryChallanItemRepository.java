@@ -15,4 +15,9 @@ public interface DeliveryChallanItemRepository extends JpaRepository<DeliveryCha
            "WHERE dci.workOrderItem.id = :workOrderItemId " +
            "AND dci.deliveryChallan.status != 'CANCELLED'")
     int getSumQuantityByWorkOrderItemId(@Param("workOrderItemId") UUID workOrderItemId);
+
+    @Query("SELECT COALESCE(SUM(dci.quantity), 0) FROM DeliveryChallanItem dci " +
+           "WHERE dci.workOrderItem.id = :workOrderItemId " +
+           "AND dci.deliveryChallan.status = 'DELIVERED'")
+    int getSumDeliveredQuantityByWorkOrderItemId(@Param("workOrderItemId") UUID workOrderItemId);
 }

@@ -220,6 +220,22 @@ public class QuotationServiceImpl implements QuotationService {
         q.setStatus(QuotationStatus.CANCELLED);
         q.setInternalNotes((q.getInternalNotes() == null ? "" : q.getInternalNotes())
                 + "\n[CANCELLED] " + LocalDateTime.now() + " - " + reason);
+
+        if (q.getSourceEnquiry() != null) {
+            List<QuotationStatus> activeStatuses = List.of(
+                    QuotationStatus.DRAFT, QuotationStatus.PRICING_READY,
+                    QuotationStatus.PENDING_APPROVAL, QuotationStatus.APPROVED,
+                    QuotationStatus.SENT_TO_CUSTOMER, QuotationStatus.CUSTOMER_NEGOTIATION,
+                    QuotationStatus.CUSTOMER_APPROVED, QuotationStatus.LOCKED);
+            boolean otherActiveExists = quotationRepository.existsBySourceEnquiryIdAndStatusIn(
+                    q.getSourceEnquiry().getId(), activeStatuses);
+            if (!otherActiveExists) {
+                Enquiry enquiry = q.getSourceEnquiry();
+                enquiry.setStatus(com.kalibyte.YashTools.enquiry.entity.enums.EnquiryStatus.CLOSED);
+                enquiryRepository.save(enquiry);
+            }
+        }
+
         return quotationMapper.toResponse(quotationRepository.saveAndFlush(q));
     }
 
@@ -243,9 +259,19 @@ public class QuotationServiceImpl implements QuotationService {
         if ("APPROVED".equals(cleanDecision) || "ACCEPT".equals(cleanDecision) || "ACCEPTED".equals(cleanDecision)) {
             q.setStatus(QuotationStatus.CUSTOMER_APPROVED);
             q.setCustomerDecision("APPROVED");
+            if (q.getSourceEnquiry() != null) {
+                Enquiry enquiry = q.getSourceEnquiry();
+                enquiry.setStatus(com.kalibyte.YashTools.enquiry.entity.enums.EnquiryStatus.ACCEPTED);
+                enquiryRepository.save(enquiry);
+            }
         } else if ("REJECTED".equals(cleanDecision) || "REJECT".equals(cleanDecision)) {
             q.setStatus(QuotationStatus.CUSTOMER_REJECTED);
             q.setCustomerDecision("REJECTED");
+            if (q.getSourceEnquiry() != null) {
+                Enquiry enquiry = q.getSourceEnquiry();
+                enquiry.setStatus(com.kalibyte.YashTools.enquiry.entity.enums.EnquiryStatus.CLOSED);
+                enquiryRepository.save(enquiry);
+            }
         } else {
             throw new QuotationStateException("Invalid customer decision: " + decision + ". Allowed values are APPROVED or REJECTED.");
         }

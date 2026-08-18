@@ -16,6 +16,7 @@ public interface JobCardRepository extends JpaRepository<JobCard, UUID>, JpaSpec
     Optional<JobCard> findByIdAndCompanyId(UUID id, UUID companyId);
     Optional<JobCard> findByJobCardNoAndCompanyId(String jobCardNo, UUID companyId);
     List<JobCard> findByWorkOrderItemIdAndCompanyId(UUID workOrderItemId, UUID companyId);
+    List<JobCard> findByWorkOrderIdAndCompanyId(UUID workOrderId, UUID companyId);
     
     @Query("SELECT COALESCE(SUM(j.totalQuantity), 0) FROM JobCard j WHERE j.workOrderItem.id = :itemId AND j.company.id = :companyId AND j.status <> 'CANCELLED'")
     int getSumQuantityByWorkOrderItemId(@Param("itemId") UUID itemId, @Param("companyId") UUID companyId);

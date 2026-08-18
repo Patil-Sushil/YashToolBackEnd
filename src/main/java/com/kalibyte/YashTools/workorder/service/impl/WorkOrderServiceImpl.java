@@ -46,6 +46,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     private final QuotationRepository quotationRepository;
     private final QuotationSecurityService quotationSecurityService;
     private final WorkOrderItemRepository workOrderItemRepository;
+    private final com.kalibyte.YashTools.enquiry.repository.EnquiryRepository enquiryRepository;
     private final com.kalibyte.YashTools.production.jobcard.repository.JobCardRepository jobCardRepository;
     private final com.kalibyte.YashTools.production.execution.repository.ExecutionLogRepository executionLogRepository;
     private final com.kalibyte.YashTools.production.tracking.repository.QualityInspectionRepository qualityInspectionRepository;
@@ -127,6 +128,12 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                     .expressDelivery(src.getExpressDelivery())
                     .build();
             wo.addItem(target);
+        }
+
+        if (quotation.getSourceEnquiry() != null) {
+            var enquiry = quotation.getSourceEnquiry();
+            enquiry.setStatus(com.kalibyte.YashTools.enquiry.entity.enums.EnquiryStatus.ACCEPTED);
+            enquiryRepository.save(enquiry);
         }
 
         WorkOrder saved = workOrderRepository.save(wo);
@@ -253,7 +260,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .quotationId(wo.getQuotation() != null ? wo.getQuotation().getId() : null)
                 .quotationNo(wo.getQuotation() != null ? wo.getQuotation().getQuotationNo() : null)
                 .status(wo.getStatus().name())
-                .customerId(wo.getCustomer().getId())
+                .customerId(wo.getCustomer() != null ? wo.getCustomer().getId() : null)
                 .customerCompanyName(wo.getCustomerCompanyName())
                 .customerContactPerson(wo.getCustomerContactPerson())
                 .customerEmail(wo.getCustomerEmail())

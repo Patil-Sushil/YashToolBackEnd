@@ -32,7 +32,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/masters/rate-charts/tool-service-rates")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class ToolServiceRateMasterController {
 
     private final ToolServiceRateMasterService service;

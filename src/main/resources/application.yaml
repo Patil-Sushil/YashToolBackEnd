@@ -153,8 +153,8 @@ app:
   # DEFAULT ADMIN (bootstrap)
   # ==============================
   default-admin:
-    email: admin@yashtools.com
-    password: Admin@123
+    email: admin@toolserp.com
+    password: Pass@123
 
 # ==============================
 # LOGGING
